@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog — Olly Cohen</title>
+  <meta name="description" content="Olly Cohen's blog archive. Writing on tech, running adventures across continents, and personal reflections.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .blog-filter { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: var(--space-lg); }
+    .blog-filter__btn {
+      font-family: var(--f-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.4rem 1rem;
+      border: 1px solid var(--c-border);
+      border-radius: var(--radius);
+      background: transparent;
+      color: var(--c-text-muted);
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .blog-filter__btn:hover, .blog-filter__btn.active {
+      border-color: var(--c-accent);
+      color: var(--c-accent);
+      background: rgba(125,184,125,0.08);
+    }
+    .blog-list__item[data-hidden="true"] { display: none; }
+  </style>
+</head>
+<body>
+  <nav class="nav" id="nav">
+    <a href="/" class="nav__logo">olly cohen</a>
+    <button class="nav__toggle" id="navToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+    <div class="nav__links" id="navLinks">
+      <a href="/pages/adventures.html">Adventures</a>
+      <a href="/pages/andes.html">Andes FKT</a>
+      <a href="/pages/engineering.html">Engineering</a>
+      <a href="/pages/blog.html">Blog</a>
+      <a href="/pages/impact.html">Impact</a>
+      <a href="/pages/sponsors.html">Sponsors</a>
+    </div>
+  </nav>
+
+  <header class="page-header">
+    <div class="container">
+      <p class="page-header__eyebrow">I Run Earth</p>
+      <h1 class="page-header__title">Blog</h1>
+      <p class="page-header__desc">Adventure reports, tech essays, and personal reflections. All posts live on <a href="https://irunearth.substack.com" target="_blank" style="color: var(--c-accent);">Substack</a>.</p>
+    </div>
+  </header>
+
+  <section class="page-content">
+    <div class="container">
+
+      <div class="blog-filter">
+        <button class="blog-filter__btn active" data-filter="all">All</button>
+        <button class="blog-filter__btn" data-filter="tech">Tech</button>
+        <button class="blog-filter__btn" data-filter="north-america">North America Run</button>
+        <button class="blog-filter__btn" data-filter="africa">Africa Run</button>
+        <button class="blog-filter__btn" data-filter="asia">Asia Run</button>
+        <button class="blog-filter__btn" data-filter="personal">Personal</button>
+      </div>
+
+      <div class="blog-list" id="blogList">
+        <!-- TECH -->
+        <a href="https://irunearth.substack.com/p/whats-a-human-for" target="_blank" class="blog-list__item" data-cat="tech">
+          <span class="blog-list__tag">Tech</span>
+          <span class="blog-list__title">What's a Human For</span>
+          <span class="blog-list__date">Feb 2026</span>
+        </a>
+        <a href="https://irunearth.substack.com/p/youre-fired" target="_blank" class="blog-list__item" data-cat="tech">
+          <span class="blog-list__tag">Tech</span>
+          <span class="blog-list__title">You're Fired</span>
+          <span class="blog-list__date">Jan 2026</span>
+        </a>
+
+        <!-- ASIA -->
+        <a href="https://irunearth.substack.com/p/miyako-1000-miles-asia" target="_blank" class="blog-list__item" data-cat="asia">
+          <span class="blog-list__tag">Asia Run</span>
+          <span class="blog-list__title">Miyako (1000 Miles Asia)</span>
+          <span class="blog-list__date">Jul 2025</span>
+        </a>
+        <a href="https://irunearth.substack.com/p/kirikiri" target="_blank" class="blog-list__item" data-cat="asia">
+          <span class="blog-list__tag">Asia Run</span>
+          <span class="blog-list__title">Kirikiri</span>
+          <span class="blog-list__date">Jul 2025</span>
+        </a>
+        <a href="https://irunearth.substack.com/p/asia-launch" target="_blank" class="blog-list__item" data-cat="asia">
+          <span class="blog-list__tag">Asia Run</span>
+          <span class="blog-list__title">Asia Launch</span>
+          <span class="blog-list__date">May 2025</span>
+        </a>
+
+        <!-- PERSONAL -->
+        <a href="https://irunearth.substack.com/p/millbrook-alumni-summit" target="_blank" class="blog-list__item" data-cat="personal">
+          <span class="blog-list__tag">Personal</span>
+          <span class="blog-list__title">Millbrook Alumni Summit</span>
+          <span class="blog-list__date">Apr 2025</span>
+        </a>
+        <a href="https://irunearth.substack.com/p/2025-rainier-ski-descent" target="_blank" class="blog-list__item" data-cat="personal">
+          <span class="blog-list__tag">Personal</span>
+          <span class="blog-list__title">2025 Rainier Ski Descent</span>
+          <span class="blog-list__date">Apr 2025</span>
+        </a>
+
+        <!-- AFRICA -->
+        <a href="https://irunearth.substack.com/p/how-to-run-with-the-kenyans-pt-1" target="_blank" class="blog-list__item" data-cat="africa">
+          <span class="blog-list__tag">Africa Run</span>
+          <span class="blog-list__title">How to Run with the Kenyans Pt. 1</span>
+          <span class="blog-list__date">Sep 2024</span>
+        </a>
+        <a href="https://irunearth.substack.com/p/dar-es-salaam" target="_blank" class="blog-list__item" data-cat="africa">
+          <span class="blog-list__tag">Africa Run</span>
+          <span class="blog-list__title">Dar es Salaam</span>
+          <span class="blog-list__date">Jun 2024</span>
+        </a>
+
+        <!-- NORTH AMERICA -->
+        <a href="https://irunearth.substack.com/p/welcome-to-the-usa" target="_blank" class="blog-list__item" data-cat="north-america">
+          <span class="blog-list__tag">N. America</span>
+          <span class="blog-list__title">Welcome to the USA</span>
+          <span class="blog-list__date">Apr 2024</span>
+        </a>
+        <a href="https://irunearth.substack.com/p/farewell-canada" target="_blank" class="blog-list__item" data-cat="north-america">
+          <span class="blog-list__tag">N. America</span>
+          <span class="blog-list__title">Farewell Canada</span>
+          <span class="blog-list__date">Apr 2024</span>
+        </a>
+        <a href="https://irunearth.substack.com/p/jasper" target="_blank" class="blog-list__item" data-cat="north-america">
+          <span class="blog-list__tag">N. America</span>
+          <span class="blog-list__title">Jasper</span>
+          <span class="blog-list__date">Mar 2024</span>
+        </a>
+        <a href="https://irunearth.substack.com/p/onward" target="_blank" class="blog-list__item" data-cat="north-america">
+          <span class="blog-list__tag">N. America</span>
+          <span class="blog-list__title">Onward</span>
+          <span class="blog-list__date">Mar 2024</span>
+        </a>
+        <a href="https://irunearth.substack.com/p/welcome-to-clearwater" target="_blank" class="blog-list__item" data-cat="north-america">
+          <span class="blog-list__tag">N. America</span>
+          <span class="blog-list__title">Welcome to Clearwater</span>
+          <span class="blog-list__date">Feb 2024</span>
+        </a>
+        <a href="https://irunearth.substack.com/p/gone-skiing-take-2" target="_blank" class="blog-list__item" data-cat="north-america">
+          <span class="blog-list__tag">N. America</span>
+          <span class="blog-list__title">Gone Skiing Take 2</span>
+          <span class="blog-list__date">Jan 2024</span>
+        </a>
+      </div>
+
+      <p style="margin-top: var(--space-lg); text-align: center;">
+        <a href="https://irunearth.substack.com" target="_blank" class="btn btn--primary">Read All Posts on Substack →</a>
+      </p>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container"><div class="footer__bottom"><p>&copy; 2026 Olly Cohen. Built with Claude.</p></div></div>
+  </footer>
+  <script src="/js/main.js"></script>
+  <script>
+    // Blog filter
+    document.querySelectorAll('.blog-filter__btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.blog-filter__btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const filter = btn.dataset.filter;
+        document.querySelectorAll('.blog-list__item').forEach(item => {
+          if (filter === 'all' || item.dataset.cat === filter) {
+            item.setAttribute('data-hidden', 'false');
+            item.style.display = '';
+          } else {
+            item.setAttribute('data-hidden', 'true');
+            item.style.display = 'none';
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

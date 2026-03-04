@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Engineering — Olly Cohen</title>
+  <meta name="description" content="Olly Cohen's software engineering work. Building with AI, delivering integrated systems, and redefining what engineers do.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="nav" id="nav">
+    <a href="/" class="nav__logo">olly cohen</a>
+    <button class="nav__toggle" id="navToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+    <div class="nav__links" id="navLinks">
+      <a href="/pages/adventures.html">Adventures</a>
+      <a href="/pages/andes.html">Andes FKT</a>
+      <a href="/pages/engineering.html">Engineering</a>
+      <a href="/pages/blog.html">Blog</a>
+      <a href="/pages/impact.html">Impact</a>
+      <a href="/pages/sponsors.html">Sponsors</a>
+    </div>
+  </nav>
+
+  <header class="page-header">
+    <div class="container">
+      <p class="page-header__eyebrow">Software</p>
+      <h1 class="page-header__title">Engineering</h1>
+      <p class="page-header__desc">Building software at the speed of ideas. I believe the future belongs to engineers who know what problems are worth solving — then let AI solve them.</p>
+    </div>
+  </header>
+
+  <section class="page-content">
+    <div class="container">
+
+      <h3>Philosophy</h3>
+      <p>The most important skill for software engineers to hone is setting up feedback loops for AI to build and test integrated components of a system. As implementation gets cheaper, the value shifts entirely to problem selection.</p>
+      <p>I work with Claude to build software. The mobile app wasn't receiving tags from the API server — I didn't debug the mobile code and the server code separately. I gave Claude access to both layers, described what I could see on the phone screen, and let it trace the problem across the boundary. Claude's fix touched three files in two repositories. No frontend or backend specialist would have written the same solution alone.</p>
+      <p>This is what I mean by integration being the skill. All software engineers are full stack engineers now.</p>
+
+      <h3>Background</h3>
+      <p>I took my first computer science class second semester freshman year of college. I worked at Amazon for a year in their lowest-ranking engineering role before being let go. I spent the following year running. Then I joined the Sailor's Union of the Pacific as an Ordinary Sailor, at which point I met someone at Alpental Ski Area whom I told I would never go back to tech — and that person hired me to write software.</p>
+      <p>I have 18 total months of full-time software engineering experience. I still can't write code fast on my own. But with Claude, I've delivered systems that principal engineers with 10+ years of experience couldn't finish — not because they lacked skill, but because they didn't test rigorously, refine iteratively, and integrate into live applications. And Claude could write all the code they did in a fraction of the time.</p>
+
+      <h3>What I Believe</h3>
+      <p>Our role is knowing what game is worth playing — then setting up games that Claude will win. My high school friend Tom, who works on a search engine for AI, argued that software engineers can now do what they've always been meant to do: build at the speed of ideas instead of getting bogged down by tedious implementation.</p>
+      <p>I do choose to solve different problems with Claude than I would without. The human's job is to steer toward building new control systems rather than chasing potential bugs. The human facilitates the last-mile delivery of bug-free, well-functioning software.</p>
+
+      <h3>This Website</h3>
+      <p>This website was built entirely with Claude. It's a static site — no frameworks, no build tools, no dependencies. HTML, CSS, JavaScript. It loads fast, it's accessible, and it's deployable anywhere. The source code is on <a href="https://github.com/ollycohen/ollycohen.com" target="_blank">GitHub</a>.</p>
+      <p>If you're interested in working together, email <a href="mailto:olly.k.cohen@gmail.com">olly.k.cohen@gmail.com</a>.</p>
+
+      <h3>Writing on Tech</h3>
+      <div class="blog-list" style="margin-top: 1rem;">
+        <a href="https://irunearth.substack.com/p/whats-a-human-for" target="_blank" class="blog-list__item">
+          <span class="blog-list__tag">Tech</span>
+          <span class="blog-list__title">What's a Human For</span>
+          <span class="blog-list__date">Feb 2026</span>
+        </a>
+        <a href="https://irunearth.substack.com/p/youre-fired" target="_blank" class="blog-list__item">
+          <span class="blog-list__tag">Tech</span>
+          <span class="blog-list__title">You're Fired</span>
+          <span class="blog-list__date">Jan 2026</span>
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container"><div class="footer__bottom"><p>&copy; 2026 Olly Cohen. Built with Claude.</p></div></div>
+  </footer>
+  <script src="/js/main.js"></script>
+</body>
+</html>

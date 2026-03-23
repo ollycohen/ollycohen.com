@@ -57,100 +57,12 @@
   <section class="page-content">
     <div class="container">
 
-      <div class="blog-filter">
+      <div class="blog-filter" id="blogFilter">
         <button class="blog-filter__btn active" data-filter="all">All</button>
-        <button class="blog-filter__btn" data-filter="tech">Tech</button>
-        <button class="blog-filter__btn" data-filter="north-america">North America Run</button>
-        <button class="blog-filter__btn" data-filter="africa">Africa Run</button>
-        <button class="blog-filter__btn" data-filter="asia">Asia Run</button>
-        <button class="blog-filter__btn" data-filter="personal">Personal</button>
       </div>
 
       <div class="blog-list" id="blogList">
-        <!-- TECH -->
-        <a href="https://irunearth.substack.com/p/whats-a-human-for" target="_blank" class="blog-list__item" data-cat="tech">
-          <span class="blog-list__tag">Tech</span>
-          <span class="blog-list__title">What's a Human For</span>
-          <span class="blog-list__date">Feb 2026</span>
-        </a>
-        <a href="https://irunearth.substack.com/p/youre-fired" target="_blank" class="blog-list__item" data-cat="tech">
-          <span class="blog-list__tag">Tech</span>
-          <span class="blog-list__title">You're Fired</span>
-          <span class="blog-list__date">Jan 2026</span>
-        </a>
-
-        <!-- ASIA -->
-        <a href="https://irunearth.substack.com/p/miyako-1000-miles-asia" target="_blank" class="blog-list__item" data-cat="asia">
-          <span class="blog-list__tag">Asia Run</span>
-          <span class="blog-list__title">Miyako (1000 Miles Asia)</span>
-          <span class="blog-list__date">Jul 2025</span>
-        </a>
-        <a href="https://irunearth.substack.com/p/kirikiri" target="_blank" class="blog-list__item" data-cat="asia">
-          <span class="blog-list__tag">Asia Run</span>
-          <span class="blog-list__title">Kirikiri</span>
-          <span class="blog-list__date">Jul 2025</span>
-        </a>
-        <a href="https://irunearth.substack.com/p/asia-launch" target="_blank" class="blog-list__item" data-cat="asia">
-          <span class="blog-list__tag">Asia Run</span>
-          <span class="blog-list__title">Asia Launch</span>
-          <span class="blog-list__date">May 2025</span>
-        </a>
-
-        <!-- PERSONAL -->
-        <a href="https://irunearth.substack.com/p/millbrook-alumni-summit" target="_blank" class="blog-list__item" data-cat="personal">
-          <span class="blog-list__tag">Personal</span>
-          <span class="blog-list__title">Millbrook Alumni Summit</span>
-          <span class="blog-list__date">Apr 2025</span>
-        </a>
-        <a href="https://irunearth.substack.com/p/2025-rainier-ski-descent" target="_blank" class="blog-list__item" data-cat="personal">
-          <span class="blog-list__tag">Personal</span>
-          <span class="blog-list__title">2025 Rainier Ski Descent</span>
-          <span class="blog-list__date">Apr 2025</span>
-        </a>
-
-        <!-- AFRICA -->
-        <a href="https://irunearth.substack.com/p/how-to-run-with-the-kenyans-pt-1" target="_blank" class="blog-list__item" data-cat="africa">
-          <span class="blog-list__tag">Africa Run</span>
-          <span class="blog-list__title">How to Run with the Kenyans Pt. 1</span>
-          <span class="blog-list__date">Sep 2024</span>
-        </a>
-        <a href="https://irunearth.substack.com/p/dar-es-salaam" target="_blank" class="blog-list__item" data-cat="africa">
-          <span class="blog-list__tag">Africa Run</span>
-          <span class="blog-list__title">Dar es Salaam</span>
-          <span class="blog-list__date">Jun 2024</span>
-        </a>
-
-        <!-- NORTH AMERICA -->
-        <a href="https://irunearth.substack.com/p/welcome-to-the-usa" target="_blank" class="blog-list__item" data-cat="north-america">
-          <span class="blog-list__tag">N. America</span>
-          <span class="blog-list__title">Welcome to the USA</span>
-          <span class="blog-list__date">Apr 2024</span>
-        </a>
-        <a href="https://irunearth.substack.com/p/farewell-canada" target="_blank" class="blog-list__item" data-cat="north-america">
-          <span class="blog-list__tag">N. America</span>
-          <span class="blog-list__title">Farewell Canada</span>
-          <span class="blog-list__date">Apr 2024</span>
-        </a>
-        <a href="https://irunearth.substack.com/p/jasper" target="_blank" class="blog-list__item" data-cat="north-america">
-          <span class="blog-list__tag">N. America</span>
-          <span class="blog-list__title">Jasper</span>
-          <span class="blog-list__date">Mar 2024</span>
-        </a>
-        <a href="https://irunearth.substack.com/p/onward" target="_blank" class="blog-list__item" data-cat="north-america">
-          <span class="blog-list__tag">N. America</span>
-          <span class="blog-list__title">Onward</span>
-          <span class="blog-list__date">Mar 2024</span>
-        </a>
-        <a href="https://irunearth.substack.com/p/welcome-to-clearwater" target="_blank" class="blog-list__item" data-cat="north-america">
-          <span class="blog-list__tag">N. America</span>
-          <span class="blog-list__title">Welcome to Clearwater</span>
-          <span class="blog-list__date">Feb 2024</span>
-        </a>
-        <a href="https://irunearth.substack.com/p/gone-skiing-take-2" target="_blank" class="blog-list__item" data-cat="north-america">
-          <span class="blog-list__tag">N. America</span>
-          <span class="blog-list__title">Gone Skiing Take 2</span>
-          <span class="blog-list__date">Jan 2024</span>
-        </a>
+        <p id="blogLoading" style="color: var(--c-text-muted); font-family: var(--f-mono); font-size: 0.85rem;">Loading posts…</p>
       </div>
 
       <p style="margin-top: var(--space-lg); text-align: center;">
@@ -163,24 +75,133 @@
     <div class="container"><div class="footer__bottom"><p>&copy; 2026 Olly Cohen. Built with Claude.</p></div></div>
   </footer>
   <script src="/js/main.js"></script>
+  <script src="/js/config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script>
-    // Blog filter
-    document.querySelectorAll('.blog-filter__btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.blog-filter__btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const filter = btn.dataset.filter;
-        document.querySelectorAll('.blog-list__item').forEach(item => {
-          if (filter === 'all' || item.dataset.cat === filter) {
-            item.setAttribute('data-hidden', 'false');
-            item.style.display = '';
-          } else {
-            item.setAttribute('data-hidden', 'true');
-            item.style.display = 'none';
-          }
+    (async function () {
+      const blogList = document.getElementById('blogList');
+      const blogFilter = document.getElementById('blogFilter');
+      const loading = document.getElementById('blogLoading');
+
+      // Category display labels for filter buttons
+      const CATEGORY_LABELS = {
+        'tech': 'Tech',
+        'north-america': 'North America Run',
+        'africa': 'Africa Run',
+        'asia': 'Asia Run',
+        'personal': 'Personal'
+      };
+
+      // Format date as "Mon YYYY"
+      function formatDate(dateStr) {
+        const d = new Date(dateStr + 'T00:00:00');
+        return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      }
+
+      // Render blog posts into the list
+      function renderPosts(posts) {
+        // Remove loading indicator
+        if (loading) loading.remove();
+
+        // Clear existing posts
+        blogList.querySelectorAll('.blog-list__item').forEach(el => el.remove());
+
+        posts.forEach(post => {
+          const a = document.createElement('a');
+          a.href = post.url;
+          a.target = '_blank';
+          a.className = 'blog-list__item';
+          a.dataset.cat = post.category;
+
+          a.innerHTML =
+            '<span class="blog-list__tag">' + escapeHtml(post.tag) + '</span>' +
+            '<span class="blog-list__title">' + escapeHtml(post.title) + '</span>' +
+            '<span class="blog-list__date">' + formatDate(post.date) + '</span>';
+
+          blogList.appendChild(a);
         });
-      });
-    });
+
+        // Re-init scroll reveal for new items
+        initReveal();
+      }
+
+      function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      }
+
+      // Build filter buttons from categories found in data
+      function buildFilters(posts) {
+        const categories = [...new Set(posts.map(p => p.category))];
+
+        // Sort categories in a logical order
+        const ORDER = ['tech', 'north-america', 'africa', 'asia', 'personal'];
+        categories.sort((a, b) => (ORDER.indexOf(a) === -1 ? 99 : ORDER.indexOf(a)) - (ORDER.indexOf(b) === -1 ? 99 : ORDER.indexOf(b)));
+
+        categories.forEach(cat => {
+          const btn = document.createElement('button');
+          btn.className = 'blog-filter__btn';
+          btn.dataset.filter = cat;
+          btn.textContent = CATEGORY_LABELS[cat] || cat;
+          blogFilter.appendChild(btn);
+        });
+
+        // Wire up all filter buttons (including the "All" button already in HTML)
+        blogFilter.querySelectorAll('.blog-filter__btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            blogFilter.querySelectorAll('.blog-filter__btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const filter = btn.dataset.filter;
+            blogList.querySelectorAll('.blog-list__item').forEach(item => {
+              if (filter === 'all' || item.dataset.cat === filter) {
+                item.setAttribute('data-hidden', 'false');
+                item.style.display = '';
+              } else {
+                item.setAttribute('data-hidden', 'true');
+                item.style.display = 'none';
+              }
+            });
+          });
+        });
+      }
+
+      // Re-initialize scroll reveal for dynamically added items
+      function initReveal() {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.style.opacity = '1';
+              entry.target.style.transform = 'translateY(0)';
+            }
+          });
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+        blogList.querySelectorAll('.blog-list__item').forEach((el, i) => {
+          el.style.opacity = '0';
+          el.style.transform = 'translateY(20px)';
+          el.style.transition = 'opacity 0.6s ease ' + (i * 0.02) + 's, transform 0.6s ease ' + (i * 0.02) + 's';
+          observer.observe(el);
+        });
+      }
+
+      // Fetch from Supabase
+      try {
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const { data: posts, error } = await supabase
+          .from('blog_posts')
+          .select('title, url, category, tag, date')
+          .order('date', { ascending: false });
+
+        if (error) throw error;
+
+        buildFilters(posts);
+        renderPosts(posts);
+      } catch (err) {
+        console.error('Failed to load blog posts:', err);
+        if (loading) loading.textContent = 'Failed to load posts. Please try again later.';
+      }
+    })();
   </script>
 </body>
 </html>

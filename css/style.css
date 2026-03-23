@@ -805,6 +805,12 @@ img { max-width: 100%; display: block; }
   border-color: var(--c-accent);
   transform: translateY(-4px);
 }
+.sponsor-card__logo {
+  max-height: 60px;
+  max-width: 180px;
+  margin: 0 auto var(--space-sm);
+  object-fit: contain;
+}
 .sponsor-card__name {
   font-family: var(--f-display);
   font-size: 1.3rem;

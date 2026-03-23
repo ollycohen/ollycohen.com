@@ -28,42 +28,23 @@
     <div class="container">
       <p class="page-header__eyebrow">Software</p>
       <h1 class="page-header__title">Engineering</h1>
-      <p class="page-header__desc">Building software at the speed of ideas. I believe the future belongs to engineers who know what problems are worth solving — then let AI solve them.</p>
+      <p class="page-header__desc">I build custom software for small businesses to run on, replacing big box solutions.</p>
     </div>
   </header>
 
   <section class="page-content">
     <div class="container">
 
-      <h3>Philosophy</h3>
-      <p>The most important skill for software engineers to hone is setting up feedback loops for AI to build and test integrated components of a system. As implementation gets cheaper, the value shifts entirely to problem selection.</p>
-      <p>I work with Claude to build software. The mobile app wasn't receiving tags from the API server — I didn't debug the mobile code and the server code separately. I gave Claude access to both layers, described what I could see on the phone screen, and let it trace the problem across the boundary. Claude's fix touched three files in two repositories. No frontend or backend specialist would have written the same solution alone.</p>
-      <p>This is what I mean by integration being the skill. All software engineers are full stack engineers now.</p>
+      <h3>Case Studies</h3>
+      <p style="color: var(--c-text-muted);">APM Steam — coming soon.</p>
 
-      <h3>Background</h3>
-      <p>I took my first computer science class second semester freshman year of college. I worked at Amazon for a year in their lowest-ranking engineering role before being let go. I spent the following year running. Then I joined the Sailor's Union of the Pacific as an Ordinary Sailor, at which point I met someone at Alpental Ski Area whom I told I would never go back to tech — and that person hired me to write software.</p>
-      <p>I have 18 total months of full-time software engineering experience. I still can't write code fast on my own. But with Claude, I've delivered systems that principal engineers with 10+ years of experience couldn't finish — not because they lacked skill, but because they didn't test rigorously, refine iteratively, and integrate into live applications. And Claude could write all the code they did in a fraction of the time.</p>
-
-      <h3>What I Believe</h3>
-      <p>Our role is knowing what game is worth playing — then setting up games that Claude will win. My high school friend Tom, who works on a search engine for AI, argued that software engineers can now do what they've always been meant to do: build at the speed of ideas instead of getting bogged down by tedious implementation.</p>
-      <p>I do choose to solve different problems with Claude than I would without. The human's job is to steer toward building new control systems rather than chasing potential bugs. The human facilitates the last-mile delivery of bug-free, well-functioning software.</p>
-
-      <h3>This Website</h3>
+      <h3 style="margin-top: var(--space-lg);">This Website</h3>
       <p>This website was built entirely with Claude. It's a static site — no frameworks, no build tools, no dependencies. HTML, CSS, JavaScript. It loads fast, it's accessible, and it's deployable anywhere. The source code is on <a href="https://github.com/ollycohen/ollycohen.com" target="_blank">GitHub</a>.</p>
       <p>If you're interested in working together, email <a href="mailto:olly.k.cohen@gmail.com">olly.k.cohen@gmail.com</a>.</p>
 
-      <h3>Writing on Tech</h3>
-      <div class="blog-list" style="margin-top: 1rem;">
-        <a href="https://irunearth.substack.com/p/whats-a-human-for" target="_blank" class="blog-list__item">
-          <span class="blog-list__tag">Tech</span>
-          <span class="blog-list__title">What's a Human For</span>
-          <span class="blog-list__date">Feb 2026</span>
-        </a>
-        <a href="https://irunearth.substack.com/p/youre-fired" target="_blank" class="blog-list__item">
-          <span class="blog-list__tag">Tech</span>
-          <span class="blog-list__title">You're Fired</span>
-          <span class="blog-list__date">Jan 2026</span>
-        </a>
+      <h3 style="margin-top: var(--space-lg);">Writing</h3>
+      <div class="blog-list" id="techWriting" style="margin-top: 1rem;">
+        <p id="techLoading" style="color: var(--c-text-muted); font-family: var(--f-mono); font-size: 0.85rem;">Loading posts…</p>
       </div>
 
     </div>
@@ -73,5 +54,51 @@
     <div class="container"><div class="footer__bottom"><p>&copy; 2026 Olly Cohen. Built with Claude.</p></div></div>
   </footer>
   <script src="/js/main.js"></script>
+  <script src="/js/config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+    (async function () {
+      const list = document.getElementById('techWriting');
+      const loading = document.getElementById('techLoading');
+
+      function formatDate(dateStr) {
+        const d = new Date(dateStr + 'T00:00:00');
+        return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      }
+
+      function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      }
+
+      try {
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const { data: posts, error } = await supabase
+          .from('blog_posts')
+          .select('title, url, tag, date')
+          .eq('category', 'tech')
+          .order('date', { ascending: false });
+
+        if (error) throw error;
+        if (loading) loading.remove();
+
+        posts.forEach(post => {
+          const a = document.createElement('a');
+          a.href = post.url;
+          a.target = '_blank';
+          a.className = 'blog-list__item';
+          a.innerHTML =
+            '<span class="blog-list__tag">' + escapeHtml(post.tag) + '</span>' +
+            '<span class="blog-list__title">' + escapeHtml(post.title) + '</span>' +
+            '<span class="blog-list__date">' + formatDate(post.date) + '</span>';
+          list.appendChild(a);
+        });
+      } catch (err) {
+        console.error('Failed to load tech posts:', err);
+        if (loading) loading.textContent = 'Failed to load posts.';
+      }
+    })();
+  </script>
 </body>
 </html>

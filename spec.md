@@ -2,240 +2,427 @@
 
 ## Goal
 
-Replace hardcoded HTML content with a lightweight database that:
-1. **Claude can read/write directly** via API to add, edit, and remove site content
-2. **A human can edit** through a spreadsheet-like UI when needed
-3. **Stays fast** — the site remains static HTML; the DB is a content source, not a runtime dependency
+Replace hardcoded HTML content with a real database so that:
+1. **Claude can read/write directly** via REST API to add, edit, and remove site content
+2. **A human can edit** through a spreadsheet-like table editor UI
+3. **The site stays static** — the DB is a content source at build time, not a runtime dependency
 
-## Approach: Google Sheets as CMS + GitHub Actions Build
+---
 
-Use **Google Sheets** as the database. One spreadsheet, one tab per content type. A build script pulls sheet data, renders HTML from templates, and commits to `main` for GitHub Pages deploy.
+## Approach: Supabase + GitHub Actions Static Build
 
-### Why Google Sheets
-- Free, zero-ops, already has a great UI for human editing
-- Structured tabular data with column headers = schema
-- Google Sheets API is simple (read-only public sheets need no auth; write needs a service account)
-- Claude can call the Sheets API directly to add/edit/remove rows
-- Version history built in
-- Familiar to non-technical collaborators (sponsors, press contacts)
+**Supabase** (hosted Postgres) as the database. A Node build script queries all tables, renders HTML from templates, and commits to `main` for GitHub Pages deploy.
 
-### Why NOT Supabase / Airtable / Notion
-- Supabase: overkill for ~60 data points across 10 tables; adds a runtime dependency
-- Airtable: good fit but paid beyond 1,000 records and API rate-limited
-- Notion: API is slow and the data model is document-oriented, not tabular
+### Why Supabase
+- **Real Postgres** — proper schemas, constraints, foreign keys, indexes
+- **Built-in Table Editor** — spreadsheet-style UI for human editing at `app.supabase.com`
+- **Auto-generated REST API** (PostgREST) — every table is instantly queryable via HTTP
+- **Row Level Security** — fine-grained access control, not just "public or private"
+- **Free tier** — 500 MB database, 50K monthly API requests, 2 projects — more than enough for a personal site with ~100 rows total
+- **Claude integration** — simple REST calls with an API key, or the `@supabase/supabase-js` client
+- **Realtime subscriptions** — could enable live preview of edits in the future
+- **SQL migrations** — schema changes are versioned and repeatable
+
+### Comparison
+
+| | Supabase | Google Sheets | Airtable | Notion |
+|---|---|---|---|---|
+| Real database | Postgres | No | No | No |
+| Proper schema/types | Yes | No | Partial | No |
+| Foreign keys | Yes | No | Link fields | Relations |
+| Free tier | Generous | Generous | Limited | Limited API |
+| Human-editable UI | Table Editor | Spreadsheet | Spreadsheet | Pages |
+| REST API | Auto-generated | Requires setup | Yes | Slow |
+| Auth/RLS | Built-in | Service account | API key | API key |
+| Migrations | SQL files | N/A | N/A | N/A |
 
 ---
 
 ## Architecture
 
 ```
-Google Sheets (source of truth)
+Supabase (Postgres — source of truth)
        │
        ▼
-  Build Script (Node or Python)
-   ├── Pulls all tabs via Sheets API
-   ├── Renders HTML from templates (Mustache/Jinja-style, minimal)
-   └── Writes final .html files
+  Build Script (Node.js)
+   ├── Queries all tables via Supabase REST API
+   ├── Renders HTML from EJS templates
+   └── Writes final .html files to repo root
        │
        ▼
   git commit + push → GitHub Pages deploy
 ```
 
-### Build Trigger Options
-- **GitHub Action on schedule** (e.g. every 15 min, or on-demand via `workflow_dispatch`)
-- **Claude triggers build** after making sheet edits (calls GitHub Actions API)
-- **Manual:** run `npm run build` / `python build.py` locally
+### Build Triggers
+- **GitHub Action: `workflow_dispatch`** — Claude triggers after DB edits
+- **GitHub Action: `schedule`** — optional cron (e.g. daily) as a safety net
+- **Local:** `npm run build` for development
+
+### Data Flow for a Typical Edit
+
+```
+Claude (or human via Table Editor)
+  → INSERT/UPDATE/DELETE row in Supabase
+  → Trigger GitHub Actions workflow_dispatch
+  → Build script queries Supabase, renders HTML
+  → git commit + push
+  → GitHub Pages serves updated static site
+```
 
 ---
 
-## Spreadsheet Schema
+## Database Schema
 
-One Google Sheet workbook. Each tab is a table.
+All tables use `id` as primary key (UUID, auto-generated). All tables include `created_at` and `updated_at` timestamps. Ordering uses `sort_order` (integer) where display sequence matters.
 
-### Tab: `blog_posts`
+### `blog_posts`
 
-| Column | Type | Example | Notes |
-|--------|------|---------|-------|
-| `id` | string | `blog-001` | Unique identifier |
-| `title` | string | `What's a Human For` | |
-| `url` | url | `https://irunearth.substack.com/p/...` | Substack link |
-| `category` | enum | `tech` | `tech`, `north-america`, `africa`, `asia`, `personal` |
-| `display_tag` | string | `Tech` | Shown as badge in UI |
-| `date` | string | `Feb 2026` | Display format, not ISO |
-| `sort_date` | date | `2026-02-15` | ISO date for ordering |
-| `featured_on_homepage` | boolean | `TRUE` | Show in 4-card homepage preview |
-| `homepage_excerpt` | string | `AI and ultrarunning...` | Short blurb for homepage card (blank = use title) |
+| Column | Type | Constraints | Example |
+|--------|------|-------------|---------|
+| `id` | uuid | PK, default `gen_random_uuid()` | |
+| `slug` | text | UNIQUE, NOT NULL | `whats-a-human-for` |
+| `title` | text | NOT NULL | `What's a Human For` |
+| `url` | text | NOT NULL | `https://irunearth.substack.com/p/...` |
+| `category` | text | NOT NULL, CHECK | `tech` |
+| `display_tag` | text | NOT NULL | `Tech` |
+| `display_date` | text | NOT NULL | `Feb 2026` |
+| `published_at` | date | NOT NULL | `2026-02-15` |
+| `featured_on_homepage` | boolean | DEFAULT false | `true` |
+| `homepage_excerpt` | text | | `AI is changing what it means to be an engineer...` |
+| `sort_order` | int | | `1` |
+| `created_at` | timestamptz | DEFAULT now() | |
+| `updated_at` | timestamptz | DEFAULT now() | |
 
-### Tab: `adventures`
+**CHECK constraint on `category`:** `category IN ('tech', 'north-america', 'africa', 'asia', 'personal')`
 
-| Column | Type | Example | Notes |
-|--------|------|---------|-------|
-| `id` | string | `andes` | Slug, used for anchors |
-| `title` | string | `Andes FKT` | |
-| `continent` | string | `South America` | |
-| `start_date` | string | `May 2026` | Display format |
-| `end_date` | string | ` ` | Blank if single-month |
-| `distance_miles` | number | `8000` | |
-| `duration_text` | string | `12 months` | |
-| `description` | text | `Running the spine...` | Full paragraph for adventures page |
-| `route_details` | text | `Colombia → Argentina` | Geographic summary |
-| `charity` | string | `Kilimanjaro Aid Project` | |
-| `status` | enum | `upcoming` | `upcoming`, `in-progress`, `completed` |
-| `featured` | boolean | `TRUE` | Large card on homepage |
-| `homepage_excerpt` | string | `8,000 miles...` | Card blurb |
-| `badge` | string | `Next` | Optional badge text |
-| `bg_gradient` | string | `135deg, #2d5016, #1a3a0a` | CSS gradient (until real photos) |
-| `image_url` | url | ` ` | When available, replaces gradient |
-| `order` | number | `1` | Display sequence |
+### `adventures`
 
-### Tab: `sponsors`
+| Column | Type | Constraints | Example |
+|--------|------|-------------|---------|
+| `id` | uuid | PK | |
+| `slug` | text | UNIQUE, NOT NULL | `andes` |
+| `title` | text | NOT NULL | `Andes FKT` |
+| `continent` | text | NOT NULL | `South America` |
+| `start_date` | text | NOT NULL | `May 2026` |
+| `end_date` | text | | |
+| `distance_miles` | int | NOT NULL | `8000` |
+| `duration_text` | text | | `12 months` |
+| `description` | text | NOT NULL | Full paragraph |
+| `route_details` | text | | `Colombia → Argentina` |
+| `status` | text | NOT NULL, CHECK | `upcoming` |
+| `featured` | boolean | DEFAULT false | `true` |
+| `homepage_excerpt` | text | | Card blurb |
+| `badge` | text | | `Next` |
+| `bg_gradient` | text | | `135deg, #2d5016, #1a3a0a` |
+| `image_url` | text | | |
+| `sort_order` | int | NOT NULL | `1` |
+| `created_at` | timestamptz | DEFAULT now() | |
+| `updated_at` | timestamptz | DEFAULT now() | |
 
-| Column | Type | Example | Notes |
-|--------|------|---------|-------|
-| `id` | string | `norda` | |
-| `name` | string | `Norda` | |
-| `website_url` | url | `https://nordarun.com/` | |
-| `description` | text | `Canadian trail running...` | |
-| `logo_url` | url | ` ` | Optional |
-| `order` | number | `1` | |
+**CHECK:** `status IN ('upcoming', 'in-progress', 'completed')`
 
-### Tab: `press`
+### `charities`
 
-| Column | Type | Example | Notes |
-|--------|------|---------|-------|
-| `id` | string | `press-001` | |
-| `title` | string | `A Human-Powered Adventure...` | |
-| `publication` | string | `Clearwater Times` | |
-| `url` | url | `https://...` | |
-| `date` | string | `Mar 2024` | |
-| `type` | enum | `press` | `press`, `speaking`, `feature` |
-| `order` | number | `1` | |
+| Column | Type | Constraints | Example |
+|--------|------|-------------|---------|
+| `id` | uuid | PK | |
+| `slug` | text | UNIQUE, NOT NULL | `kilimanjaro-aid` |
+| `title` | text | NOT NULL | `Kilimanjaro Aid Project` |
+| `adventure_id` | uuid | FK → adventures.id | |
+| `year` | int | NOT NULL | `2026` |
+| `description` | text | NOT NULL | |
+| `website_url` | text | | |
+| `amount_raised` | text | | `$20K+` |
+| `sort_order` | int | NOT NULL | `1` |
+| `created_at` | timestamptz | DEFAULT now() | |
+| `updated_at` | timestamptz | DEFAULT now() | |
 
-### Tab: `charities`
+### `sponsors`
 
-| Column | Type | Example | Notes |
-|--------|------|---------|-------|
-| `id` | string | `kilimanjaro-aid` | |
-| `title` | string | `Kilimanjaro Aid Project` | |
-| `adventure_id` | string | `andes` | FK to adventures tab |
-| `year` | number | `2026` | |
-| `description` | text | `Supporting local...` | |
-| `website_url` | url | ` ` | |
-| `amount_raised` | string | `$20K+` | Display format |
-| `order` | number | `1` | |
+| Column | Type | Constraints | Example |
+|--------|------|-------------|---------|
+| `id` | uuid | PK | |
+| `slug` | text | UNIQUE, NOT NULL | `norda` |
+| `name` | text | NOT NULL | `Norda` |
+| `website_url` | text | NOT NULL | `https://nordarun.com/` |
+| `description` | text | NOT NULL | |
+| `logo_url` | text | | |
+| `sort_order` | int | NOT NULL | `1` |
+| `created_at` | timestamptz | DEFAULT now() | |
+| `updated_at` | timestamptz | DEFAULT now() | |
 
-### Tab: `andes_faq`
+### `press`
 
-| Column | Type | Example | Notes |
-|--------|------|---------|-------|
-| `id` | string | `faq-001` | |
-| `question` | string | `Why would you do this?` | |
-| `answer` | text | `Because the best way...` | |
-| `order` | number | `1` | |
+| Column | Type | Constraints | Example |
+|--------|------|-------------|---------|
+| `id` | uuid | PK | |
+| `slug` | text | UNIQUE, NOT NULL | `clearwater-times-rockies` |
+| `title` | text | NOT NULL | `A Human-Powered Adventure into the Rockies` |
+| `publication` | text | NOT NULL | `Clearwater Times` |
+| `url` | text | NOT NULL | |
+| `display_date` | text | NOT NULL | `Mar 2024` |
+| `published_at` | date | | `2024-03-15` |
+| `type` | text | NOT NULL, CHECK | `press` |
+| `sort_order` | int | NOT NULL | `1` |
+| `created_at` | timestamptz | DEFAULT now() | |
+| `updated_at` | timestamptz | DEFAULT now() | |
 
-### Tab: `andes_waypoints`
+**CHECK:** `type IN ('press', 'speaking', 'feature')`
 
-| Column | Type | Example | Notes |
-|--------|------|---------|-------|
-| `id` | string | `aconcagua` | |
-| `name` | string | `Aconcagua` | |
-| `elevation_ft` | number | `22838` | Optional |
-| `description` | string | `Highest peak...` | Optional |
-| `order` | number | `1` | |
+### `andes_faq`
 
-### Tab: `stats`
+| Column | Type | Constraints | Example |
+|--------|------|-------------|---------|
+| `id` | uuid | PK | |
+| `question` | text | NOT NULL | `Why would you do this?` |
+| `answer` | text | NOT NULL | |
+| `sort_order` | int | NOT NULL | `1` |
+| `created_at` | timestamptz | DEFAULT now() | |
+| `updated_at` | timestamptz | DEFAULT now() | |
 
-| Column | Type | Example | Notes |
-|--------|------|---------|-------|
-| `id` | string | `miles-run` | |
-| `label` | string | `Miles Run` | |
-| `value` | number | `4500` | Raw number for counter animation |
-| `suffix` | string | `+` | Appended after number |
-| `page` | enum | `homepage` | `homepage`, `andes` — which page shows this stat |
-| `order` | number | `1` | |
+### `andes_waypoints`
 
-### Tab: `social_links`
+| Column | Type | Constraints | Example |
+|--------|------|-------------|---------|
+| `id` | uuid | PK | |
+| `name` | text | NOT NULL | `Aconcagua` |
+| `elevation_ft` | int | | `22838` |
+| `description` | text | | |
+| `sort_order` | int | NOT NULL | `1` |
+| `created_at` | timestamptz | DEFAULT now() | |
+| `updated_at` | timestamptz | DEFAULT now() | |
 
-| Column | Type | Example | Notes |
-|--------|------|---------|-------|
-| `id` | string | `instagram` | |
-| `platform` | string | `Instagram` | |
-| `url` | url | `https://instagram.com/ollycohen` | |
-| `icon` | string | `instagram` | For icon lookup |
-| `show_in_footer` | boolean | `TRUE` | |
-| `order` | number | `1` | |
+### `stats`
 
-### Tab: `site_config`
+| Column | Type | Constraints | Example |
+|--------|------|-------------|---------|
+| `id` | uuid | PK | |
+| `key` | text | UNIQUE, NOT NULL | `miles-run` |
+| `label` | text | NOT NULL | `Miles Run` |
+| `value` | int | NOT NULL | `4500` |
+| `suffix` | text | DEFAULT '' | `+` |
+| `page` | text | NOT NULL, CHECK | `homepage` |
+| `sort_order` | int | NOT NULL | `1` |
+| `created_at` | timestamptz | DEFAULT now() | |
+| `updated_at` | timestamptz | DEFAULT now() | |
 
-| Column | Type | Example | Notes |
-|--------|------|---------|-------|
-| `key` | string | `owner_name` | |
-| `value` | string | `Olly Cohen` | |
+**CHECK:** `page IN ('homepage', 'andes')`
 
-Key-value pairs for: `owner_name`, `owner_email`, `tagline`, `brand_name`, `meta_description`, `copyright_year`, `departure_date`.
+### `social_links`
+
+| Column | Type | Constraints | Example |
+|--------|------|-------------|---------|
+| `id` | uuid | PK | |
+| `platform` | text | UNIQUE, NOT NULL | `instagram` |
+| `label` | text | NOT NULL | `Instagram` |
+| `url` | text | NOT NULL | `https://instagram.com/ollycohen` |
+| `icon` | text | NOT NULL | `instagram` |
+| `show_in_footer` | boolean | DEFAULT true | `true` |
+| `sort_order` | int | NOT NULL | `1` |
+| `created_at` | timestamptz | DEFAULT now() | |
+| `updated_at` | timestamptz | DEFAULT now() | |
+
+### `site_config`
+
+| Column | Type | Constraints | Example |
+|--------|------|-------------|---------|
+| `key` | text | PK | `owner_name` |
+| `value` | text | NOT NULL | `Olly Cohen` |
+| `updated_at` | timestamptz | DEFAULT now() | |
+
+**Known keys:** `owner_name`, `owner_email`, `tagline`, `brand_name`, `meta_description`, `copyright_year`, `departure_date`.
+
+---
+
+## SQL Migration
+
+A single migration file at `supabase/migrations/001_initial_schema.sql` defines all tables, constraints, RLS policies, and the `updated_at` trigger.
+
+### Row Level Security
+
+Two roles:
+- **`anon`** — read-only access to all tables (for the build script using the public anon key)
+- **`service_role`** — full CRUD (for Claude, using the service role key stored as a secret)
+
+```sql
+-- Example RLS policy for blog_posts (same pattern for all tables)
+ALTER TABLE blog_posts ENABLE ROW LEVEL SECURITY;
+
+-- Anyone can read (build script uses anon key)
+CREATE POLICY "Public read access" ON blog_posts
+  FOR SELECT USING (true);
+
+-- Only service_role can write (Claude uses service role key)
+CREATE POLICY "Service role write access" ON blog_posts
+  FOR ALL USING (auth.role() = 'service_role');
+```
+
+### `updated_at` Trigger
+
+```sql
+CREATE OR REPLACE FUNCTION update_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Applied to every table (except site_config which uses key as PK)
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON blog_posts
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+-- ... repeated for all tables
+```
 
 ---
 
 ## Build Script
 
-Minimal script (~100-200 lines). Lives at `build/build.js` (or `build.py`).
+`build/build.js` — single file, ~150-250 lines.
 
-### Responsibilities
-1. Fetch all tabs from the Google Sheet via Sheets API
-2. Parse rows into typed objects
-3. For each page, load an HTML template and inject content
-4. Write rendered HTML to the output files (`index.html`, `pages/*.html`)
-5. Exit with status code (0 = success, 1 = error)
+### Dependencies (minimal)
+
+```json
+{
+  "dependencies": {
+    "@supabase/supabase-js": "^2",
+    "ejs": "^3"
+  }
+}
+```
+
+Two dependencies total. `@supabase/supabase-js` for DB queries, `ejs` for templating (embedded JS — no new syntax to learn, just `<%= variable %>` and `<% forEach %>` in HTML).
+
+### Pseudocode
+
+```js
+import { createClient } from '@supabase/supabase-js'
+import ejs from 'ejs'
+import fs from 'fs/promises'
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+// 1. Fetch all content in parallel
+const [blogPosts, adventures, sponsors, press, charities,
+       andesFaq, andesWaypoints, stats, socialLinks, siteConfig]
+  = await Promise.all([
+    supabase.from('blog_posts').select('*').order('published_at', { ascending: false }),
+    supabase.from('adventures').select('*').order('sort_order'),
+    supabase.from('sponsors').select('*').order('sort_order'),
+    supabase.from('press').select('*').order('sort_order'),
+    supabase.from('charities').select('*, adventures(title, slug)').order('sort_order'),
+    supabase.from('andes_faq').select('*').order('sort_order'),
+    supabase.from('andes_waypoints').select('*').order('sort_order'),
+    supabase.from('stats').select('*').order('sort_order'),
+    supabase.from('social_links').select('*').order('sort_order'),
+    supabase.from('site_config').select('*'),
+  ])
+
+// 2. Build shared context
+const config = Object.fromEntries(siteConfig.data.map(r => [r.key, r.value]))
+const ctx = { blogPosts, adventures, sponsors, press, charities,
+              andesFaq, andesWaypoints, stats, socialLinks, config }
+
+// 3. Render each page
+const pages = [
+  { template: 'templates/index.ejs', output: 'index.html' },
+  { template: 'templates/pages/blog.ejs', output: 'pages/blog.html' },
+  { template: 'templates/pages/adventures.ejs', output: 'pages/adventures.html' },
+  { template: 'templates/pages/andes.ejs', output: 'pages/andes.html' },
+  { template: 'templates/pages/engineering.ejs', output: 'pages/engineering.html' },
+  { template: 'templates/pages/impact.ejs', output: 'pages/impact.html' },
+  { template: 'templates/pages/sponsors.ejs', output: 'pages/sponsors.html' },
+  { template: 'templates/404.ejs', output: '404.html' },
+]
+
+for (const page of pages) {
+  const html = await ejs.renderFile(page.template, ctx)
+  await fs.writeFile(page.output, html)
+}
+```
 
 ### Templates
 
-Templates live in `templates/` and use simple `{{variable}}` / `{{#each items}}` syntax (Mustache or Handlebars — zero-dep single-file implementations exist).
-
 ```
 templates/
-├── index.html
+├── index.ejs
+├── 404.ejs
 ├── pages/
-│   ├── adventures.html
-│   ├── andes.html
-│   ├── blog.html
-│   ├── engineering.html
-│   ├── impact.html
-│   └── sponsors.html
+│   ├── adventures.ejs
+│   ├── andes.ejs
+│   ├── blog.ejs
+│   ├── engineering.ejs
+│   ├── impact.ejs
+│   └── sponsors.ejs
 └── partials/
-    ├── nav.html          # Shared nav (solves the duplication problem)
-    └── footer.html       # Shared footer
+    ├── head.ejs            # <head> with meta, fonts, CSS
+    ├── nav.ejs             # Shared navigation
+    └── footer.ejs          # Shared footer + social links
 ```
 
-Partials solve the current pain point of keeping nav/footer in sync across 8 files.
-
-### Output
-
-Rendered files go to the repo root (same paths as current), overwriting the existing static HTML. The build is idempotent — running it twice with the same sheet data produces identical output.
+Partials are included with `<%- include('partials/nav') %>` — solves the current 8-file nav sync problem.
 
 ---
 
 ## Claude Integration
 
-### Reading Content
-Claude calls the Sheets API (public read if sheet is published, or via service account) to list current content before making edits.
+### Environment
 
-### Adding Content
-Example: adding a new blog post.
-1. Claude appends a row to the `blog_posts` tab via Sheets API
-2. Claude triggers a GitHub Actions build via `workflow_dispatch`
-3. Build script pulls updated sheet, re-renders `pages/blog.html` and `index.html`, commits, pushes
-4. GitHub Pages deploys
+Claude needs two environment variables:
+- `SUPABASE_URL` — project URL (e.g. `https://abc123.supabase.co`)
+- `SUPABASE_SERVICE_ROLE_KEY` — service role key for write access
 
-### Editing Content
-Claude reads the sheet, finds the row by `id`, updates specific cells.
+### CRUD Operations
 
-### Removing Content
-Claude deletes the row from the sheet. Next build removes it from HTML.
+**Add a blog post:**
+```js
+await supabase.from('blog_posts').insert({
+  slug: 'new-post-title',
+  title: 'New Post Title',
+  url: 'https://irunearth.substack.com/p/new-post',
+  category: 'tech',
+  display_tag: 'Tech',
+  display_date: 'Mar 2026',
+  published_at: '2026-03-20',
+  featured_on_homepage: false,
+  sort_order: 1
+})
+```
 
-### Auth
-- **Service account** with edit access to the spreadsheet
-- Credentials stored as GitHub Actions secret + available to Claude via environment variable
-- Scoped to the single spreadsheet — no broader Google access
+**Update a stat:**
+```js
+await supabase.from('stats')
+  .update({ value: 5000 })
+  .eq('key', 'miles-run')
+```
+
+**Remove a press item:**
+```js
+await supabase.from('press')
+  .delete()
+  .eq('slug', 'old-article')
+```
+
+**Read all adventures:**
+```js
+const { data } = await supabase.from('adventures')
+  .select('*')
+  .order('sort_order')
+```
+
+### Triggering a Build After Edits
+
+Claude calls the GitHub Actions API after making DB changes:
+
+```bash
+gh workflow run build.yml
+```
+
+Or via REST:
+```
+POST /repos/ollycohen/ollycohen.com/actions/workflows/build.yml/dispatches
+{ "ref": "main" }
+```
 
 ---
 
@@ -243,67 +430,128 @@ Claude deletes the row from the sheet. Next build removes it from HTML.
 
 ```yaml
 # .github/workflows/build.yml
-name: Build Site from Sheets
+name: Build Site
 
 on:
+  workflow_dispatch:
   schedule:
-    - cron: '*/15 * * * *'    # Every 15 min (optional, can disable)
-  workflow_dispatch:            # Manual / Claude-triggered
+    - cron: '0 6 * * *'  # Daily at 6am UTC as safety net
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+
       - run: npm ci
-      - run: node build/build.js
+        working-directory: build
+
+      - run: node build.js
+        working-directory: build
         env:
-          GOOGLE_SHEETS_ID: ${{ secrets.GOOGLE_SHEETS_ID }}
-          GOOGLE_SERVICE_ACCOUNT_KEY: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
       - name: Commit and push if changed
         run: |
           git diff --quiet && exit 0
           git config user.name "Site Builder"
           git config user.email "noreply@ollycohen.com"
-          git add -A
-          git commit -m "Rebuild site from sheet data"
+          git add index.html 404.html pages/
+          git commit -m "Rebuild site from database"
           git push
+```
+
+Note: the build uses the **anon key** (read-only). The service role key is only needed by Claude for writes and is never stored in the build workflow.
+
+---
+
+## Project Structure (After Migration)
+
+```
+ollycohen.com/
+├── index.html                  # Generated — do not hand-edit
+├── 404.html                    # Generated
+├── pages/                      # Generated
+│   ├── adventures.html
+│   ├── andes.html
+│   ├── blog.html
+│   ├── engineering.html
+│   ├── impact.html
+│   └── sponsors.html
+├── css/
+│   └── style.css               # Not generated — still hand-edited
+├── js/
+│   └── main.js                 # Not generated — still hand-edited
+├── build/
+│   ├── build.js                # Build script
+│   └── package.json            # 2 dependencies
+├── templates/
+│   ├── index.ejs
+│   ├── 404.ejs
+│   ├── pages/
+│   │   ├── adventures.ejs
+│   │   ├── andes.ejs
+│   │   ├── blog.ejs
+│   │   ├── engineering.ejs
+│   │   ├── impact.ejs
+│   │   └── sponsors.ejs
+│   └── partials/
+│       ├── head.ejs
+│       ├── nav.ejs
+│       └── footer.ejs
+├── supabase/
+│   └── migrations/
+│       └── 001_initial_schema.sql
+├── .github/
+│   └── workflows/
+│       └── build.yml
+├── CNAME
+├── CLAUDE.md
+└── spec.md
 ```
 
 ---
 
 ## Migration Plan
 
-### Phase 1: Extract Data
-- Scrape current HTML into the Google Sheet (Claude does this)
-- Verify all content is captured, no data loss
+### Phase 1: Set Up Supabase (30 min)
+- Create Supabase project
+- Run `001_initial_schema.sql` to create all tables with constraints and RLS
+- Store project URL and keys
 
-### Phase 2: Build Templates
-- Convert current HTML files into templates with `{{placeholders}}`
+### Phase 2: Seed Data (1 hr)
+- Claude scrapes current HTML and inserts all existing content into Supabase tables
+- Human verifies data in the Table Editor UI — row counts match, no content lost
+
+### Phase 3: Build Templates + Script (2-3 hrs)
+- Convert each HTML page into an EJS template
 - Extract shared nav/footer into partials
-- Write the build script
-- Verify: `build output` === `current HTML` (diff should be zero or cosmetic)
+- Write `build/build.js`
+- Run build and diff output against current HTML — should be identical or cosmetic-only differences
 
-### Phase 3: Wire Up
-- Set up Google service account + share sheet
+### Phase 4: Wire Up CI (30 min)
 - Add GitHub Actions workflow
-- Store secrets
-- Test end-to-end: edit sheet → trigger build → verify deploy
+- Store `SUPABASE_URL` and `SUPABASE_ANON_KEY` as repo secrets
+- Test: trigger workflow → verify build succeeds → verify deployed site unchanged
 
-### Phase 4: Go Live
-- Merge build system to `main`
-- Claude starts using Sheets API for content updates
-- Delete hardcoded HTML (now generated)
+### Phase 5: Go Live
+- Merge to `main`
+- Claude switches to Supabase API for all content operations
+- HTML files are now generated artifacts (still committed for GitHub Pages)
 
 ---
 
 ## Constraints
 
-- **No runtime JS dependency on the database.** The site must work if the sheet is deleted — it's just static HTML.
-- **No new hosting costs.** Google Sheets API free tier is 300 requests/min — more than enough.
-- **Build must be fast.** Target: < 10 seconds. It's ~10 small HTML files and a few API calls.
-- **No framework creep.** The build script is a single file with minimal dependencies (googleapis client + a templating lib, nothing more).
-- **Backwards compatible.** At every phase, the live site looks identical to what's there now.
+- **No runtime dependency.** The site is static HTML. If Supabase goes down, the site stays up — it was already built.
+- **No cost.** Supabase free tier: 500 MB DB, 50K API requests/month, 2 projects. This site will use <1% of that.
+- **Fast builds.** Target: < 5 seconds. 10 parallel API calls + template rendering is near-instant.
+- **Minimal dependencies.** Two npm packages: `@supabase/supabase-js` and `ejs`. No frameworks.
+- **CSS and JS are NOT generated.** `style.css` and `main.js` remain hand-edited files. Only HTML is built from templates.
+- **Backwards compatible.** The output HTML is structurally identical to what exists today. No visual changes from migration.
+- **Schema is the source of truth.** The SQL migration file defines the exact structure. No ambiguity.

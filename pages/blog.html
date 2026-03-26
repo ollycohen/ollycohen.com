@@ -29,7 +29,44 @@
       color: var(--c-accent);
       background: rgba(125,184,125,0.08);
     }
-    .blog-list__item[data-hidden="true"] { display: none; }
+
+    /* Blog table */
+    .blog-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .blog-table__row {
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-md);
+      border-bottom: 1px solid var(--c-border);
+      text-decoration: none;
+      color: inherit;
+      padding: 0.85rem 0;
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+    .blog-table__row:first-child {
+      border-top: 1px solid var(--c-border);
+    }
+    .blog-table__row[data-hidden="true"] { display: none; }
+    .blog-table__date {
+      font-family: var(--f-mono);
+      font-size: 0.8rem;
+      color: var(--c-text-muted);
+      white-space: nowrap;
+      width: 90px;
+      flex-shrink: 0;
+    }
+    .blog-table__title {
+      color: var(--c-text);
+      font-family: var(--f-body);
+      font-size: 1rem;
+      transition: color var(--transition);
+    }
+    .blog-table__row:hover .blog-table__title {
+      color: var(--c-accent);
+    }
   </style>
 </head>
 <body>
@@ -59,10 +96,37 @@
 
       <div class="blog-filter" id="blogFilter">
         <button class="blog-filter__btn active" data-filter="all">All</button>
+        <button class="blog-filter__btn" data-filter="tech">Tech</button>
+        <button class="blog-filter__btn" data-filter="north-america">North America Run</button>
+        <button class="blog-filter__btn" data-filter="africa">Africa Run</button>
+        <button class="blog-filter__btn" data-filter="asia">Asia Run</button>
+        <button class="blog-filter__btn" data-filter="personal">Personal</button>
       </div>
 
+      <!-- BLOG_DATA_START -->
+<script>
+const BLOG_POSTS = [
+  { "title": "What's a Human For", "url": "https://irunearth.substack.com/p/whats-a-human-for", "category": "tech", "tag": "Tech", "date": "2026-02-01" },
+  { "title": "You're Fired", "url": "https://irunearth.substack.com/p/youre-fired", "category": "tech", "tag": "Tech", "date": "2026-01-01" },
+  { "title": "Miyako (1000 Miles Asia)", "url": "https://irunearth.substack.com/p/miyako-1000-miles-asia", "category": "asia", "tag": "Asia Run", "date": "2025-07-15" },
+  { "title": "Kirikiri", "url": "https://irunearth.substack.com/p/kirikiri", "category": "asia", "tag": "Asia Run", "date": "2025-07-01" },
+  { "title": "Asia Launch", "url": "https://irunearth.substack.com/p/asia-launch", "category": "asia", "tag": "Asia Run", "date": "2025-05-01" },
+  { "title": "Millbrook Alumni Summit", "url": "https://irunearth.substack.com/p/millbrook-alumni-summit", "category": "personal", "tag": "Personal", "date": "2025-04-15" },
+  { "title": "2025 Rainier Ski Descent", "url": "https://irunearth.substack.com/p/2025-rainier-ski-descent", "category": "personal", "tag": "Personal", "date": "2025-04-01" },
+  { "title": "How to Run with the Kenyans Pt. 1", "url": "https://irunearth.substack.com/p/how-to-run-with-the-kenyans-pt-1", "category": "africa", "tag": "Africa Run", "date": "2024-09-01" },
+  { "title": "Dar es Salaam", "url": "https://irunearth.substack.com/p/dar-es-salaam", "category": "africa", "tag": "Africa Run", "date": "2024-06-01" },
+  { "title": "Welcome to the USA", "url": "https://irunearth.substack.com/p/welcome-to-the-usa", "category": "north-america", "tag": "N. America", "date": "2024-04-15" },
+  { "title": "Farewell Canada", "url": "https://irunearth.substack.com/p/farewell-canada", "category": "north-america", "tag": "N. America", "date": "2024-04-01" },
+  { "title": "Jasper", "url": "https://irunearth.substack.com/p/jasper", "category": "north-america", "tag": "N. America", "date": "2024-03-15" },
+  { "title": "Onward", "url": "https://irunearth.substack.com/p/onward", "category": "north-america", "tag": "N. America", "date": "2024-03-01" },
+  { "title": "Welcome to Clearwater", "url": "https://irunearth.substack.com/p/welcome-to-clearwater", "category": "north-america", "tag": "N. America", "date": "2024-02-01" },
+  { "title": "Gone Skiing Take 2", "url": "https://irunearth.substack.com/p/gone-skiing-take-2", "category": "north-america", "tag": "N. America", "date": "2024-01-01" }
+];
+</script>
+<!-- BLOG_DATA_END -->
+
       <div class="blog-list" id="blogList">
-        <p id="blogLoading" style="color: var(--c-text-muted); font-family: var(--f-mono); font-size: 0.85rem;">Loading posts…</p>
+        <!-- Rows rendered synchronously by the script below from baked-in BLOG_POSTS -->
       </div>
 
       <p style="margin-top: var(--space-lg); text-align: center;">
@@ -75,133 +139,50 @@
     <div class="container"><div class="footer__bottom"><p>&copy; 2026 Olly Cohen. Built with Claude.</p></div></div>
   </footer>
   <script src="/js/main.js"></script>
-  <script src="/js/config.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script>
-    (async function () {
-      const blogList = document.getElementById('blogList');
-      const blogFilter = document.getElementById('blogFilter');
-      const loading = document.getElementById('blogLoading');
+    // Format a date string (YYYY-MM-DD) as "Mon YYYY"
+    function formatDate(dateStr) {
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const parts = dateStr.split('-');
+      return months[parseInt(parts[1], 10) - 1] + ' ' + parts[0];
+    }
 
-      // Category display labels for filter buttons
-      const CATEGORY_LABELS = {
-        'tech': 'Tech',
-        'north-america': 'North America Run',
-        'africa': 'Africa Run',
-        'asia': 'Asia Run',
-        'personal': 'Personal'
-      };
+    // Render posts into #blogList
+    function renderPosts(filter) {
+      const list = document.getElementById('blogList');
+      list.innerHTML = '';
+      BLOG_POSTS.forEach(post => {
+        const a = document.createElement('a');
+        a.href = post.url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.className = 'blog-table__row';
+        a.dataset.cat = post.category;
+        if (filter !== 'all' && post.category !== filter) a.dataset.hidden = 'true';
 
-      // Format date as "Mon YYYY"
-      function formatDate(dateStr) {
-        const d = new Date(dateStr + 'T00:00:00');
-        return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-      }
+        const dateSpan = document.createElement('span');
+        dateSpan.className = 'blog-table__date';
+        dateSpan.textContent = formatDate(post.date);
 
-      // Render blog posts into the list
-      function renderPosts(posts) {
-        // Remove loading indicator
-        if (loading) loading.remove();
+        const titleSpan = document.createElement('span');
+        titleSpan.className = 'blog-table__title';
+        titleSpan.textContent = post.title;
 
-        // Clear existing posts
-        blogList.querySelectorAll('.blog-list__item').forEach(el => el.remove());
+        a.appendChild(dateSpan);
+        a.appendChild(titleSpan);
+        list.appendChild(a);
+      });
+    }
 
-        posts.forEach(post => {
-          const a = document.createElement('a');
-          a.href = post.url;
-          a.target = '_blank';
-          a.className = 'blog-list__item';
-          a.dataset.cat = post.category;
+    renderPosts('all');
 
-          a.innerHTML =
-            '<span class="blog-list__tag">' + escapeHtml(post.tag) + '</span>' +
-            '<span class="blog-list__title">' + escapeHtml(post.title) + '</span>' +
-            '<span class="blog-list__date">' + formatDate(post.date) + '</span>';
-
-          blogList.appendChild(a);
-        });
-
-        // Re-init scroll reveal for new items
-        initReveal();
-      }
-
-      function escapeHtml(str) {
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
-      }
-
-      // Build filter buttons from categories found in data
-      function buildFilters(posts) {
-        const categories = [...new Set(posts.map(p => p.category))];
-
-        // Sort categories in a logical order
-        const ORDER = ['tech', 'north-america', 'africa', 'asia', 'personal'];
-        categories.sort((a, b) => (ORDER.indexOf(a) === -1 ? 99 : ORDER.indexOf(a)) - (ORDER.indexOf(b) === -1 ? 99 : ORDER.indexOf(b)));
-
-        categories.forEach(cat => {
-          const btn = document.createElement('button');
-          btn.className = 'blog-filter__btn';
-          btn.dataset.filter = cat;
-          btn.textContent = CATEGORY_LABELS[cat] || cat;
-          blogFilter.appendChild(btn);
-        });
-
-        // Wire up all filter buttons (including the "All" button already in HTML)
-        blogFilter.querySelectorAll('.blog-filter__btn').forEach(btn => {
-          btn.addEventListener('click', () => {
-            blogFilter.querySelectorAll('.blog-filter__btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            const filter = btn.dataset.filter;
-            blogList.querySelectorAll('.blog-list__item').forEach(item => {
-              if (filter === 'all' || item.dataset.cat === filter) {
-                item.setAttribute('data-hidden', 'false');
-                item.style.display = '';
-              } else {
-                item.setAttribute('data-hidden', 'true');
-                item.style.display = 'none';
-              }
-            });
-          });
-        });
-      }
-
-      // Re-initialize scroll reveal for dynamically added items
-      function initReveal() {
-        const observer = new IntersectionObserver((entries) => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              entry.target.style.opacity = '1';
-              entry.target.style.transform = 'translateY(0)';
-            }
-          });
-        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-
-        blogList.querySelectorAll('.blog-list__item').forEach((el, i) => {
-          el.style.opacity = '0';
-          el.style.transform = 'translateY(20px)';
-          el.style.transition = 'opacity 0.6s ease ' + (i * 0.02) + 's, transform 0.6s ease ' + (i * 0.02) + 's';
-          observer.observe(el);
-        });
-      }
-
-      // Fetch from Supabase
-      try {
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        const { data: posts, error } = await supabase
-          .from('blog_posts')
-          .select('title, url, category, tag, date')
-          .order('date', { ascending: false });
-
-        if (error) throw error;
-
-        buildFilters(posts);
-        renderPosts(posts);
-      } catch (err) {
-        console.error('Failed to load blog posts:', err);
-        if (loading) loading.textContent = 'Failed to load posts. Please try again later.';
-      }
-    })();
+    document.querySelectorAll('.blog-filter__btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.blog-filter__btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderPosts(btn.dataset.filter);
+      });
+    });
   </script>
 </body>
 </html>

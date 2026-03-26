@@ -1,557 +1,223 @@
-# spec.md — Database Backend for ollycohen.com
+# Content Architecture — ollycohen.com
 
-## Goal
+## The Principle
 
-Replace hardcoded HTML content with a real database so that:
-1. **Claude can read/write directly** via REST API to add, edit, and remove site content
-2. **A human can edit** through a spreadsheet-like table editor UI
-3. **The site stays static** — the DB is a content source at build time, not a runtime dependency
+Every editable string on the site lives in Supabase exactly once. HTML files contain layout and structure — no copy. When the homepage previews a deeper page, it reads from the same table as that page, filtered or limited. There is no separate "homepage version" of anything.
 
 ---
 
-## Approach: Supabase + GitHub Actions Static Build
+## How the Site Works
 
-**Supabase** (hosted Postgres) as the database. A Node build script queries all tables, renders HTML from templates, and commits to `main` for GitHub Pages deploy.
-
-### Why Supabase
-- **Real Postgres** — proper schemas, constraints, foreign keys, indexes
-- **Built-in Table Editor** — spreadsheet-style UI for human editing at `app.supabase.com`
-- **Auto-generated REST API** (PostgREST) — every table is instantly queryable via HTTP
-- **Row Level Security** — fine-grained access control, not just "public or private"
-- **Free tier** — 500 MB database, 50K monthly API requests, 2 projects — more than enough for a personal site with ~100 rows total
-- **Claude integration** — simple REST calls with an API key, or the `@supabase/supabase-js` client
-- **Realtime subscriptions** — could enable live preview of edits in the future
-- **SQL migrations** — schema changes are versioned and repeatable
-
-### Comparison
-
-| | Supabase | Google Sheets | Airtable | Notion |
-|---|---|---|---|---|
-| Real database | Postgres | No | No | No |
-| Proper schema/types | Yes | No | Partial | No |
-| Foreign keys | Yes | No | Link fields | Relations |
-| Free tier | Generous | Generous | Limited | Limited API |
-| Human-editable UI | Table Editor | Spreadsheet | Spreadsheet | Pages |
-| REST API | Auto-generated | Requires setup | Yes | Slow |
-| Auth/RLS | Built-in | Service account | API key | API key |
-| Migrations | SQL files | N/A | N/A | N/A |
+Runtime client-side architecture. Each HTML page loads `@supabase/supabase-js` from a CDN, queries the relevant tables on page load, and renders content into placeholder DOM nodes. Static HTML is committed to GitHub Pages; Supabase is the content layer. If Supabase is unavailable the page layout still loads — content areas show a loading state.
 
 ---
 
-## Architecture
+## Content Inventory
 
-```
-Supabase (Postgres — source of truth)
-       │
-       ▼
-  Build Script (Node.js)
-   ├── Queries all tables via Supabase REST API
-   ├── Renders HTML from EJS templates
-   └── Writes final .html files to repo root
-       │
-       ▼
-  git commit + push → GitHub Pages deploy
-```
+### Already fully CMS-driven ✓
 
-### Build Triggers
-- **GitHub Action: `workflow_dispatch`** — Claude triggers after DB edits
-- **GitHub Action: `schedule`** — optional cron (e.g. daily) as a safety net
-- **Local:** `npm run build` for development
+| Table | Pages that use it | How |
+|---|---|---|
+| `about` | `index.html` | Single row → heading + paragraphs |
+| `stats` | `index.html` | All rows → animated counter grid |
+| `adventures` | `index.html`, `adventures.html` | Homepage: 4 cards, limited by `sort_order`. Adventures page: all rows as timeline. Same table, two views. |
+| `blog_posts` | `index.html`, `blog.html`, `engineering.html` | Homepage: `WHERE featured = true LIMIT 4`. Blog page: all, client-side category filter. Engineering page: `WHERE category = 'tech'`. Same table, three views. |
+| `sponsors` | `sponsors.html` | All active rows |
+| `press_items` | `impact.html` | All rows → press list |
+| `fundraisers` | `impact.html` | All rows → charity grid, total calculated client-side |
 
-### Data Flow for a Typical Edit
+### Still hardcoded in HTML ✗
 
-```
-Claude (or human via Table Editor)
-  → INSERT/UPDATE/DELETE row in Supabase
-  → Trigger GitHub Actions workflow_dispatch
-  → Build script queries Supabase, renders HTML
-  → git commit + push
-  → GitHub Pages serves updated static site
-```
+**`andes.html`** — the entire page body is hardcoded:
+- Stats bar: "8,000 Total Miles", "~667 Miles / Month", "~167 Miles / Week", "12 Months"
+- The Concept: 3 paragraphs about the route
+- Waypoints: 1 paragraph about notable waypoints
+- The Cause: 1 paragraph with charity link
+- FAQ: 5 question/answer pairs
 
----
+**`engineering.html`** — four prose sections are hardcoded:
+- Philosophy: 3 paragraphs
+- Background: 2 paragraphs
+- What I Believe: 2 paragraphs
+- This Website: 1 paragraph
 
-## Database Schema
+**`index.html` — Andes Teaser section** is hardcoded:
+- Title: "The Andes Line"
+- Subtitle: "8,000 miles. 7 countries. 1 year."
+- Description paragraph
+- 4 stats: 8,000 / 667 / 22,838 / 7
 
-All tables use `id` as primary key (UUID, auto-generated). All tables include `created_at` and `updated_at` timestamps. Ordering uses `sort_order` (integer) where display sequence matters.
+**`index.html` — Engineering Preview section** is hardcoded:
+- Heading: "Building at the speed of ideas."
+- 2 paragraphs of philosophy copy
 
-### `blog_posts`
+### The duplication
 
-| Column | Type | Constraints | Example |
-|--------|------|-------------|---------|
-| `id` | uuid | PK, default `gen_random_uuid()` | |
-| `slug` | text | UNIQUE, NOT NULL | `whats-a-human-for` |
-| `title` | text | NOT NULL | `What's a Human For` |
-| `url` | text | NOT NULL | `https://irunearth.substack.com/p/...` |
-| `category` | text | NOT NULL, CHECK | `tech` |
-| `display_tag` | text | NOT NULL | `Tech` |
-| `display_date` | text | NOT NULL | `Feb 2026` |
-| `published_at` | date | NOT NULL | `2026-02-15` |
-| `featured_on_homepage` | boolean | DEFAULT false | `true` |
-| `homepage_excerpt` | text | | `AI is changing what it means to be an engineer...` |
-| `sort_order` | int | | `1` |
-| `created_at` | timestamptz | DEFAULT now() | |
-| `updated_at` | timestamptz | DEFAULT now() | |
+| Content | Location 1 | Location 2 |
+|---|---|---|
+| Andes stats (miles, pace) | `andes.html` stats bar | `index.html` Andes Teaser |
+| Andes description | `adventures` table (short) | `andes.html` Concept section (long, separate) |
+| Engineering philosophy | `engineering.html` | `index.html` Engineering Preview (different wording) |
 
-**CHECK constraint on `category`:** `category IN ('tech', 'north-america', 'africa', 'asia', 'personal')`
-
-### `adventures`
-
-| Column | Type | Constraints | Example |
-|--------|------|-------------|---------|
-| `id` | uuid | PK | |
-| `slug` | text | UNIQUE, NOT NULL | `andes` |
-| `title` | text | NOT NULL | `Andes FKT` |
-| `continent` | text | NOT NULL | `South America` |
-| `start_date` | text | NOT NULL | `May 2026` |
-| `end_date` | text | | |
-| `distance_miles` | int | NOT NULL | `8000` |
-| `duration_text` | text | | `12 months` |
-| `description` | text | NOT NULL | Full paragraph |
-| `route_details` | text | | `Colombia → Argentina` |
-| `status` | text | NOT NULL, CHECK | `upcoming` |
-| `featured` | boolean | DEFAULT false | `true` |
-| `homepage_excerpt` | text | | Card blurb |
-| `badge` | text | | `Next` |
-| `bg_gradient` | text | | `135deg, #2d5016, #1a3a0a` |
-| `image_url` | text | | |
-| `sort_order` | int | NOT NULL | `1` |
-| `created_at` | timestamptz | DEFAULT now() | |
-| `updated_at` | timestamptz | DEFAULT now() | |
-
-**CHECK:** `status IN ('upcoming', 'in-progress', 'completed')`
-
-### `charities`
-
-| Column | Type | Constraints | Example |
-|--------|------|-------------|---------|
-| `id` | uuid | PK | |
-| `slug` | text | UNIQUE, NOT NULL | `kilimanjaro-aid` |
-| `title` | text | NOT NULL | `Kilimanjaro Aid Project` |
-| `adventure_id` | uuid | FK → adventures.id | |
-| `year` | int | NOT NULL | `2026` |
-| `description` | text | NOT NULL | |
-| `website_url` | text | | |
-| `amount_raised` | text | | `$20K+` |
-| `sort_order` | int | NOT NULL | `1` |
-| `created_at` | timestamptz | DEFAULT now() | |
-| `updated_at` | timestamptz | DEFAULT now() | |
-
-### `sponsors`
-
-| Column | Type | Constraints | Example |
-|--------|------|-------------|---------|
-| `id` | uuid | PK | |
-| `slug` | text | UNIQUE, NOT NULL | `norda` |
-| `name` | text | NOT NULL | `Norda` |
-| `website_url` | text | NOT NULL | `https://nordarun.com/` |
-| `description` | text | NOT NULL | |
-| `logo_url` | text | | |
-| `sort_order` | int | NOT NULL | `1` |
-| `created_at` | timestamptz | DEFAULT now() | |
-| `updated_at` | timestamptz | DEFAULT now() | |
-
-### `press`
-
-| Column | Type | Constraints | Example |
-|--------|------|-------------|---------|
-| `id` | uuid | PK | |
-| `slug` | text | UNIQUE, NOT NULL | `clearwater-times-rockies` |
-| `title` | text | NOT NULL | `A Human-Powered Adventure into the Rockies` |
-| `publication` | text | NOT NULL | `Clearwater Times` |
-| `url` | text | NOT NULL | |
-| `display_date` | text | NOT NULL | `Mar 2024` |
-| `published_at` | date | | `2024-03-15` |
-| `type` | text | NOT NULL, CHECK | `press` |
-| `sort_order` | int | NOT NULL | `1` |
-| `created_at` | timestamptz | DEFAULT now() | |
-| `updated_at` | timestamptz | DEFAULT now() | |
-
-**CHECK:** `type IN ('press', 'speaking', 'feature')`
-
-### `andes_faq`
-
-| Column | Type | Constraints | Example |
-|--------|------|-------------|---------|
-| `id` | uuid | PK | |
-| `question` | text | NOT NULL | `Why would you do this?` |
-| `answer` | text | NOT NULL | |
-| `sort_order` | int | NOT NULL | `1` |
-| `created_at` | timestamptz | DEFAULT now() | |
-| `updated_at` | timestamptz | DEFAULT now() | |
-
-### `andes_waypoints`
-
-| Column | Type | Constraints | Example |
-|--------|------|-------------|---------|
-| `id` | uuid | PK | |
-| `name` | text | NOT NULL | `Aconcagua` |
-| `elevation_ft` | int | | `22838` |
-| `description` | text | | |
-| `sort_order` | int | NOT NULL | `1` |
-| `created_at` | timestamptz | DEFAULT now() | |
-| `updated_at` | timestamptz | DEFAULT now() | |
-
-### `stats`
-
-| Column | Type | Constraints | Example |
-|--------|------|-------------|---------|
-| `id` | uuid | PK | |
-| `key` | text | UNIQUE, NOT NULL | `miles-run` |
-| `label` | text | NOT NULL | `Miles Run` |
-| `value` | int | NOT NULL | `4500` |
-| `suffix` | text | DEFAULT '' | `+` |
-| `page` | text | NOT NULL, CHECK | `homepage` |
-| `sort_order` | int | NOT NULL | `1` |
-| `created_at` | timestamptz | DEFAULT now() | |
-| `updated_at` | timestamptz | DEFAULT now() | |
-
-**CHECK:** `page IN ('homepage', 'andes')`
-
-### `social_links`
-
-| Column | Type | Constraints | Example |
-|--------|------|-------------|---------|
-| `id` | uuid | PK | |
-| `platform` | text | UNIQUE, NOT NULL | `instagram` |
-| `label` | text | NOT NULL | `Instagram` |
-| `url` | text | NOT NULL | `https://instagram.com/ollycohen` |
-| `icon` | text | NOT NULL | `instagram` |
-| `show_in_footer` | boolean | DEFAULT true | `true` |
-| `sort_order` | int | NOT NULL | `1` |
-| `created_at` | timestamptz | DEFAULT now() | |
-| `updated_at` | timestamptz | DEFAULT now() | |
-
-### `site_config`
-
-| Column | Type | Constraints | Example |
-|--------|------|-------------|---------|
-| `key` | text | PK | `owner_name` |
-| `value` | text | NOT NULL | `Olly Cohen` |
-| `updated_at` | timestamptz | DEFAULT now() | |
-
-**Known keys:** `owner_name`, `owner_email`, `tagline`, `brand_name`, `meta_description`, `copyright_year`, `departure_date`.
+The homepage Andes Teaser and Engineering Preview are the main offenders — they duplicate content that belongs to their respective dedicated pages. Every edit to that content has to be made twice.
 
 ---
 
-## SQL Migration
+## Tables to Add
 
-A single migration file at `supabase/migrations/001_initial_schema.sql` defines all tables, constraints, RLS policies, and the `updated_at` trigger.
+### `andes_stats`
 
-### Row Level Security
+The key metrics for the Andes run. Used by both the andes.html stats bar and the index.html Andes Teaser.
 
-Two roles:
-- **`anon`** — read-only access to all tables (for the build script using the public anon key)
-- **`service_role`** — full CRUD (for Claude, using the service role key stored as a secret)
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | uuid PK | auto-generated |
+| `value` | text NOT NULL | e.g. `"8,000"`, `"~667"` |
+| `label` | text NOT NULL | e.g. `"Total Miles"` |
+| `show_on_homepage` | boolean DEFAULT false | `true` for the 4 stats in the homepage teaser |
+| `sort_order` | int NOT NULL | |
 
-```sql
--- Example RLS policy for blog_posts (same pattern for all tables)
-ALTER TABLE blog_posts ENABLE ROW LEVEL SECURITY;
+**Seed data:**
 
--- Anyone can read (build script uses anon key)
-CREATE POLICY "Public read access" ON blog_posts
-  FOR SELECT USING (true);
+| value | label | show_on_homepage | sort_order |
+|---|---|---|---|
+| 8,000 | Total Miles | true | 1 |
+| ~667 | Miles / Month | true | 2 |
+| ~167 | Miles / Week | false | 3 |
+| 12 | Months | false | 4 |
+| 22,838 | Ft Peak Elevation | true | 5 |
+| 7 | Countries | true | 6 |
 
--- Only service_role can write (Claude uses service role key)
-CREATE POLICY "Service role write access" ON blog_posts
-  FOR ALL USING (auth.role() = 'service_role');
-```
-
-### `updated_at` Trigger
-
-```sql
-CREATE OR REPLACE FUNCTION update_updated_at()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = now();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- Applied to every table (except site_config which uses key as PK)
-CREATE TRIGGER set_updated_at BEFORE UPDATE ON blog_posts
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
--- ... repeated for all tables
-```
+`andes.html` reads all rows ordered by `sort_order`.
+`index.html` reads `WHERE show_on_homepage = true`.
 
 ---
 
-## Build Script
+### `andes_sections`
 
-`build/build.js` — single file, ~150-250 lines.
+The prose content blocks on `andes.html`. Three named sections.
 
-### Dependencies (minimal)
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | uuid PK | |
+| `slug` | text UNIQUE NOT NULL | `concept`, `waypoints`, `cause` |
+| `heading` | text NOT NULL | Section `<h3>` |
+| `body` | text NOT NULL | Full prose, multiple sentences. Single block of text per section. |
+| `sort_order` | int NOT NULL | |
 
-```json
-{
-  "dependencies": {
-    "@supabase/supabase-js": "^2",
-    "ejs": "^3"
-  }
-}
-```
+**Seed data:**
 
-Two dependencies total. `@supabase/supabase-js` for DB queries, `ejs` for templating (embedded JS — no new syntax to learn, just `<%= variable %>` and `<% forEach %>` in HTML).
+| slug | heading | body |
+|---|---|---|
+| `concept` | The Concept | *(3 paragraphs from current andes.html, joined with newlines or stored as separate rows — see note below)* |
+| `waypoints` | Waypoints | *(current Waypoints paragraph)* |
+| `cause` | The Cause | *(current The Cause paragraph)* |
 
-### Pseudocode
+> **Note on multi-paragraph sections:** The Concept currently has 3 paragraphs. Options: (a) store them as a single `body` text field with newlines and split on render — simple but loses paragraph-level editability; (b) use `jsonb` array like `about.paragraphs` — consistent with existing pattern. Recommendation: use `jsonb` array to stay consistent.
 
-```js
-import { createClient } from '@supabase/supabase-js'
-import ejs from 'ejs'
-import fs from 'fs/promises'
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-
-// 1. Fetch all content in parallel
-const [blogPosts, adventures, sponsors, press, charities,
-       andesFaq, andesWaypoints, stats, socialLinks, siteConfig]
-  = await Promise.all([
-    supabase.from('blog_posts').select('*').order('published_at', { ascending: false }),
-    supabase.from('adventures').select('*').order('sort_order'),
-    supabase.from('sponsors').select('*').order('sort_order'),
-    supabase.from('press').select('*').order('sort_order'),
-    supabase.from('charities').select('*, adventures(title, slug)').order('sort_order'),
-    supabase.from('andes_faq').select('*').order('sort_order'),
-    supabase.from('andes_waypoints').select('*').order('sort_order'),
-    supabase.from('stats').select('*').order('sort_order'),
-    supabase.from('social_links').select('*').order('sort_order'),
-    supabase.from('site_config').select('*'),
-  ])
-
-// 2. Build shared context
-const config = Object.fromEntries(siteConfig.data.map(r => [r.key, r.value]))
-const ctx = { blogPosts, adventures, sponsors, press, charities,
-              andesFaq, andesWaypoints, stats, socialLinks, config }
-
-// 3. Render each page
-const pages = [
-  { template: 'templates/index.ejs', output: 'index.html' },
-  { template: 'templates/pages/blog.ejs', output: 'pages/blog.html' },
-  { template: 'templates/pages/adventures.ejs', output: 'pages/adventures.html' },
-  { template: 'templates/pages/andes.ejs', output: 'pages/andes.html' },
-  { template: 'templates/pages/engineering.ejs', output: 'pages/engineering.html' },
-  { template: 'templates/pages/impact.ejs', output: 'pages/impact.html' },
-  { template: 'templates/pages/sponsors.ejs', output: 'pages/sponsors.html' },
-  { template: 'templates/404.ejs', output: '404.html' },
-]
-
-for (const page of pages) {
-  const html = await ejs.renderFile(page.template, ctx)
-  await fs.writeFile(page.output, html)
-}
-```
-
-### Templates
-
-```
-templates/
-├── index.ejs
-├── 404.ejs
-├── pages/
-│   ├── adventures.ejs
-│   ├── andes.ejs
-│   ├── blog.ejs
-│   ├── engineering.ejs
-│   ├── impact.ejs
-│   └── sponsors.ejs
-└── partials/
-    ├── head.ejs            # <head> with meta, fonts, CSS
-    ├── nav.ejs             # Shared navigation
-    └── footer.ejs          # Shared footer + social links
-```
-
-Partials are included with `<%- include('partials/nav') %>` — solves the current 8-file nav sync problem.
+`andes.html` reads all rows ordered by `sort_order` and renders each as a heading + paragraphs block.
 
 ---
 
-## Claude Integration
+### `andes_faqs`
 
-### Environment
+The 5 FAQ items on `andes.html`.
 
-Claude needs two environment variables:
-- `SUPABASE_URL` — project URL (e.g. `https://abc123.supabase.co`)
-- `SUPABASE_SERVICE_ROLE_KEY` — service role key for write access
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | uuid PK | |
+| `question` | text NOT NULL | |
+| `answer` | text NOT NULL | May contain inline links — render as HTML or store raw text with links separately |
+| `sort_order` | int NOT NULL | |
 
-### CRUD Operations
+**Seed data (5 rows from current HTML):**
 
-**Add a blog post:**
-```js
-await supabase.from('blog_posts').insert({
-  slug: 'new-post-title',
-  title: 'New Post Title',
-  url: 'https://irunearth.substack.com/p/new-post',
-  category: 'tech',
-  display_tag: 'Tech',
-  display_date: 'Mar 2026',
-  published_at: '2026-03-20',
-  featured_on_homepage: false,
-  sort_order: 1
-})
-```
+1. Why would you do this?
+2. Why set an FKT?
+3. How will you be supported?
+4. How can I follow along?
+5. I'm a business. Why should I sponsor this?
 
-**Update a stat:**
-```js
-await supabase.from('stats')
-  .update({ value: 5000 })
-  .eq('key', 'miles-run')
-```
-
-**Remove a press item:**
-```js
-await supabase.from('press')
-  .delete()
-  .eq('slug', 'old-article')
-```
-
-**Read all adventures:**
-```js
-const { data } = await supabase.from('adventures')
-  .select('*')
-  .order('sort_order')
-```
-
-### Triggering a Build After Edits
-
-Claude calls the GitHub Actions API after making DB changes:
-
-```bash
-gh workflow run build.yml
-```
-
-Or via REST:
-```
-POST /repos/ollycohen/ollycohen.com/actions/workflows/build.yml/dispatches
-{ "ref": "main" }
-```
+`andes.html` reads all rows ordered by `sort_order`.
 
 ---
 
-## GitHub Actions Workflow
+### `engineering_sections`
 
-```yaml
-# .github/workflows/build.yml
-name: Build Site
+The four named prose sections on `engineering.html`.
 
-on:
-  workflow_dispatch:
-  schedule:
-    - cron: '0 6 * * *'  # Daily at 6am UTC as safety net
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | uuid PK | |
+| `slug` | text UNIQUE NOT NULL | `philosophy`, `background`, `beliefs`, `website` |
+| `heading` | text NOT NULL | Section `<h3>` |
+| `paragraphs` | jsonb NOT NULL | Ordered array of paragraph strings — same pattern as `about.paragraphs` |
+| `sort_order` | int NOT NULL | |
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+**Seed data:**
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
+| slug | heading | paragraphs |
+|---|---|---|
+| `philosophy` | Philosophy | 3 paragraphs from current engineering.html |
+| `background` | Background | 2 paragraphs |
+| `beliefs` | What I Believe | 2 paragraphs |
+| `website` | This Website | 1 paragraph |
 
-      - run: npm ci
-        working-directory: build
-
-      - run: node build.js
-        working-directory: build
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-
-      - name: Commit and push if changed
-        run: |
-          git diff --quiet && exit 0
-          git config user.name "Site Builder"
-          git config user.email "noreply@ollycohen.com"
-          git add index.html 404.html pages/
-          git commit -m "Rebuild site from database"
-          git push
-```
-
-Note: the build uses the **anon key** (read-only). The service role key is only needed by Claude for writes and is never stored in the build workflow.
+`engineering.html` reads all 4 rows and renders each section.
+`index.html` Engineering Preview reads `WHERE slug = 'philosophy'` and renders only the first paragraph as the teaser.
 
 ---
 
-## Project Structure (After Migration)
+## Homepage Preview Pattern
 
-```
-ollycohen.com/
-├── index.html                  # Generated — do not hand-edit
-├── 404.html                    # Generated
-├── pages/                      # Generated
-│   ├── adventures.html
-│   ├── andes.html
-│   ├── blog.html
-│   ├── engineering.html
-│   ├── impact.html
-│   └── sponsors.html
-├── css/
-│   └── style.css               # Not generated — still hand-edited
-├── js/
-│   └── main.js                 # Not generated — still hand-edited
-├── build/
-│   ├── build.js                # Build script
-│   └── package.json            # 2 dependencies
-├── templates/
-│   ├── index.ejs
-│   ├── 404.ejs
-│   ├── pages/
-│   │   ├── adventures.ejs
-│   │   ├── andes.ejs
-│   │   ├── blog.ejs
-│   │   ├── engineering.ejs
-│   │   ├── impact.ejs
-│   │   └── sponsors.ejs
-│   └── partials/
-│       ├── head.ejs
-│       ├── nav.ejs
-│       └── footer.ejs
-├── supabase/
-│   └── migrations/
-│       └── 001_initial_schema.sql
-├── .github/
-│   └── workflows/
-│       └── build.yml
-├── CNAME
-├── CLAUDE.md
-└── spec.md
-```
+No homepage section owns its own copy of content. Every homepage preview section is a filtered or limited view of a table that a full page also reads.
+
+| Homepage Section | Source Table | Filter / Limit |
+|---|---|---|
+| About | `about` | single row |
+| Stats | `stats` | all rows |
+| Adventure Cards | `adventures` | `ORDER BY sort_order LIMIT 4` |
+| Blog Preview | `blog_posts` | `WHERE featured = true ORDER BY sort_order LIMIT 4` |
+| Andes Teaser — text | `adventures` | `WHERE slug = 'andes-fkt'` → `title`, `subtitle`, `description` |
+| Andes Teaser — stats | `andes_stats` | `WHERE show_on_homepage = true` |
+| Engineering Preview — text | `engineering_sections` | `WHERE slug = 'philosophy'` → first paragraph of `paragraphs` array |
+| Engineering Preview — terminal | *(hardcoded)* | The terminal mockup is a design element, not CMS content |
+
+The terminal mockup in the Engineering Preview is the only intentionally hardcoded piece of copy — it's illustrative UI, not a content string that needs editing.
 
 ---
 
-## Migration Plan
+## What Stays in the `adventures` Table
 
-### Phase 1: Set Up Supabase (30 min)
-- Create Supabase project
-- Run `001_initial_schema.sql` to create all tables with constraints and RLS
-- Store project URL and keys
+The `adventures` table currently stores a short `description` for each adventure. For the Andes, this short description is what appears on the homepage card and adventures.html timeline. The long-form content (Concept, Waypoints, Cause sections) lives in `andes_sections` — a separate table for the dedicated page.
 
-### Phase 2: Seed Data (1 hr)
-- Claude scrapes current HTML and inserts all existing content into Supabase tables
-- Human verifies data in the Table Editor UI — row counts match, no content lost
+The `adventures` table row for `slug = 'andes-fkt'` should also carry:
+- `teaser_title` text — "The Andes Line" (the homepage Andes Teaser heading). If null, falls back to `title`.
+- `teaser_subtitle` text — "8,000 miles. 7 countries. 1 year." If null, falls back to `subtitle`.
 
-### Phase 3: Build Templates + Script (2-3 hrs)
-- Convert each HTML page into an EJS template
-- Extract shared nav/footer into partials
-- Write `build/build.js`
-- Run build and diff output against current HTML — should be identical or cosmetic-only differences
+This avoids a schema change to the homepage section title while keeping the data in one place.
 
-### Phase 4: Wire Up CI (30 min)
-- Add GitHub Actions workflow
-- Store `SUPABASE_URL` and `SUPABASE_ANON_KEY` as repo secrets
-- Test: trigger workflow → verify build succeeds → verify deployed site unchanged
+---
 
-### Phase 5: Go Live
-- Merge to `main`
-- Claude switches to Supabase API for all content operations
-- HTML files are now generated artifacts (still committed for GitHub Pages)
+## Migration Steps
+
+1. **Run SQL** — add `andes_stats`, `andes_sections`, `andes_faqs`, `engineering_sections` tables in Supabase SQL Editor. Add `teaser_title` / `teaser_subtitle` columns to `adventures`.
+
+2. **Seed data** — insert current hardcoded content from `andes.html` and `engineering.html` into the new tables. Update the `andes-fkt` adventure row with `teaser_title` and `teaser_subtitle`.
+
+3. **Update `andes.html`** — remove hardcoded stats bar, sections, and FAQ. Add Supabase fetches for `andes_stats`, `andes_sections`, `andes_faqs`. Render dynamically.
+
+4. **Update `engineering.html`** — remove hardcoded Philosophy/Background/Beliefs/Website sections. Add Supabase fetch for `engineering_sections`. Render dynamically. Writing on Tech section already works — leave it.
+
+5. **Update `index.html` Andes Teaser** — remove hardcoded copy and stats. Read `adventures WHERE slug = 'andes-fkt'` for `teaser_title`, `teaser_subtitle`, `description`. Read `andes_stats WHERE show_on_homepage = true` for the stats row. Both queries can join the existing `Promise.all`.
+
+6. **Update `index.html` Engineering Preview** — remove hardcoded heading and paragraphs. Read `engineering_sections WHERE slug = 'philosophy'`, use `heading` and `paragraphs[0]`.
 
 ---
 
 ## Constraints
 
-- **No runtime dependency.** The site is static HTML. If Supabase goes down, the site stays up — it was already built.
-- **No cost.** Supabase free tier: 500 MB DB, 50K API requests/month, 2 projects. This site will use <1% of that.
-- **Fast builds.** Target: < 5 seconds. 10 parallel API calls + template rendering is near-instant.
-- **Minimal dependencies.** Two npm packages: `@supabase/supabase-js` and `ejs`. No frameworks.
-- **CSS and JS are NOT generated.** `style.css` and `main.js` remain hand-edited files. Only HTML is built from templates.
-- **Backwards compatible.** The output HTML is structurally identical to what exists today. No visual changes from migration.
-- **Schema is the source of truth.** The SQL migration file defines the exact structure. No ambiguity.
+- **No new tables for one-off content.** The terminal mockup on the homepage is hardcoded by design. Avoid creating Supabase tables for content that will never change or has no real edit workflow.
+- **Same table, multiple views** is preferred over separate tables or duplicate rows. The `blog_posts` → three-page pattern is the model.
+- **`jsonb` arrays for ordered paragraphs** — consistent with `about.paragraphs`. Do not use separate paragraph rows or newline-delimited text.
+- **`show_on_homepage`** boolean pattern (used in `andes_stats`) is preferred over duplicating rows with different `page` values.

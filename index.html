@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Olly Cohen — Adventurer & AI Engineer</title>
   <meta name="description" content="Olly Cohen runs 1000 miles on every continent. Adventurer, AI engineer, and writer based in Seattle.">
-  <meta name="keywords" content="Olly Cohen, I Run Earth, ultra running, adventure, AI engineer, Andes FKT">
+  <meta name="keywords" content="Olly Cohen, I Run Earth, ultra running, adventure, AI engineer, South America">
   <meta property="og:title" content="Olly Cohen — Adventurer & AI Engineer">
   <meta property="og:description" content="1000 miles on every continent. Software engineer by trade, adventurer by calling.">
   <meta property="og:type" content="website">
@@ -24,7 +24,7 @@
     </button>
     <div class="nav__links" id="navLinks">
       <a href="/pages/adventures.html">Adventures</a>
-      <a href="/pages/andes.html">Andes FKT</a>
+      <a href="/pages/andes.html">South America</a>
       <a href="/pages/engineering.html">Engineering</a>
       <a href="/pages/blog.html">Blog</a>
       <a href="/pages/impact.html">Impact</a>
@@ -46,7 +46,7 @@
       </h1>
       <p class="hero__subtitle">Adventurer. AI Engineer. Writer.</p>
       <div class="hero__cta">
-        <a href="/pages/andes.html" class="btn btn--primary">Andes FKT 2026 →</a>
+        <a href="/pages/andes.html" class="btn btn--primary">South America 2026 →</a>
         <a href="/pages/adventures.html" class="btn btn--ghost">Past Adventures</a>
       </div>
     </div>
@@ -60,30 +60,12 @@
   <section class="section about" id="about">
     <div class="container">
       <div class="about__grid">
-        <div class="about__text">
+        <div class="about__text" id="aboutText">
           <span class="section__label">About</span>
-          <h2 class="section__heading">I see myself as an artist and my life as the canvas.</h2>
-          <p>I'm Olly Cohen — a 27-year-old adventurer and software engineer based in Seattle. In 2024, I ran 1,500 miles from Seattle to Jasper, Alberta, and back pushing a baby stroller with my skis strapped to it. Then, I ran 1,000 continuous miles from the Indian Ocean to the top of Kilimanjaro to East Africa's only public children's hospital.</p>
-          <p>In 2025, I ran 1,000 miles across India and Japan. My goal is to travel 1,000 continuous miles on foot on every continent by 2030. Next up: the full length of the Andes.</p>
-          <p>By day, I build software with AI. I believe the role of the human engineer is knowing what game is worth playing — then setting up feedback loops for AI to win it.</p>
+          <p id="aboutLoading" style="color:var(--c-text-muted);font-family:var(--f-mono);font-size:0.85rem;">Loading…</p>
         </div>
-        <div class="about__stats">
-          <div class="stat">
-            <span class="stat__number" data-count="4500">0</span><span class="stat__suffix">+</span>
-            <span class="stat__label">Miles Run</span>
-          </div>
-          <div class="stat">
-            <span class="stat__number" data-count="4">0</span>
-            <span class="stat__label">Continents</span>
-          </div>
-          <div class="stat">
-            <span class="stat__number" data-count="20">0</span><span class="stat__suffix">K+</span>
-            <span class="stat__label">Raised for Charity</span>
-          </div>
-          <div class="stat">
-            <span class="stat__number" data-count="8000">0</span>
-            <span class="stat__label">Andes Miles Planned</span>
-          </div>
+        <div class="about__stats" id="statsGrid">
+          <p id="statsLoading" style="color:var(--c-text-muted);font-family:var(--f-mono);font-size:0.85rem;">Loading…</p>
         </div>
       </div>
     </div>
@@ -94,60 +76,8 @@
     <div class="container">
       <span class="section__label">Adventures</span>
       <h2 class="section__heading">Continents traversed</h2>
-      <div class="adventures__grid">
-
-        <a href="/pages/andes.html" class="adventure-card adventure-card--featured">
-          <div class="adventure-card__badge">Next</div>
-          <div class="adventure-card__img" style="background: linear-gradient(135deg, #1a3a2a, #2d5a3d, #1a3a2a);">
-            <div class="adventure-card__overlay">
-              <span class="adventure-card__continent">South America</span>
-              <span class="adventure-card__year">May 2026</span>
-            </div>
-          </div>
-          <div class="adventure-card__body">
-            <h3>Andes FKT</h3>
-            <p>8,000 miles across the world's longest mountain range. Fastest Known Time attempt, heading north to south over 12 months.</p>
-          </div>
-        </a>
-
-        <a href="/pages/adventures.html#asia" class="adventure-card">
-          <div class="adventure-card__img" style="background: linear-gradient(135deg, #2a1a3a, #5a2d4d, #2a1a3a);">
-            <div class="adventure-card__overlay">
-              <span class="adventure-card__continent">Asia</span>
-              <span class="adventure-card__year">2025</span>
-            </div>
-          </div>
-          <div class="adventure-card__body">
-            <h3>India & Japan</h3>
-            <p>379 miles through the Indian Himalayas, 294 miles over Mt Fuji and the Japanese Alps, 300+ miles along Japan's tsunami coast.</p>
-          </div>
-        </a>
-
-        <a href="/pages/adventures.html#africa" class="adventure-card">
-          <div class="adventure-card__img" style="background: linear-gradient(135deg, #3a2a1a, #5a4d2d, #3a2a1a);">
-            <div class="adventure-card__overlay">
-              <span class="adventure-card__continent">Africa</span>
-              <span class="adventure-card__year">2024</span>
-            </div>
-          </div>
-          <div class="adventure-card__body">
-            <h3>Indian Ocean to Kilimanjaro</h3>
-            <p>1,000 miles with Rocky Mtui through villages, desert, jungle, and the Great Rift Valley to East Africa's only public children's hospital.</p>
-          </div>
-        </a>
-
-        <a href="/pages/adventures.html#northamerica" class="adventure-card">
-          <div class="adventure-card__img" style="background: linear-gradient(135deg, #1a2a3a, #2d4a5a, #1a2a3a);">
-            <div class="adventure-card__overlay">
-              <span class="adventure-card__continent">North America</span>
-              <span class="adventure-card__year">2024</span>
-            </div>
-          </div>
-          <div class="adventure-card__body">
-            <h3>Seattle to Jasper & Back</h3>
-            <p>1,500 miles pushing a baby stroller with skis strapped to it, relying on local kindness to survive the winter.</p>
-          </div>
-        </a>
+      <div class="adventures__grid" id="adventuresGrid">
+        <p id="adventuresLoading" style="color:var(--c-text-muted);font-family:var(--f-mono);font-size:0.85rem;">Loading adventures…</p>
       </div>
     </div>
   </section>
@@ -159,8 +89,9 @@
         <div class="eng__text">
           <span class="section__label">Engineering</span>
           <h2 class="section__heading">Building at the speed of ideas.</h2>
-          <p>I write software with Claude. The most important skill for engineers now is setting up feedback loops for AI to build and test integrated components. As implementation gets cheaper, the value shifts entirely to problem selection.</p>
-          <p>I've fired principal engineers with 10+ years of experience because I could deliver their work faster with AI. That's not arrogance — it's the new reality of software.</p>
+          <div id="engPreviewText">
+            <p id="engPreviewLoading" style="color:var(--c-text-muted);font-family:var(--f-mono);font-size:0.85rem;">Loading…</p>
+          </div>
           <a href="/pages/engineering.html" class="btn btn--primary">Read More →</a>
         </div>
         <div class="eng__terminal">
@@ -192,26 +123,11 @@
     <div class="container">
       <div class="andes-teaser__content">
         <span class="section__label section__label--light">Next Adventure</span>
-        <h2 class="andes-teaser__title">The Andes Line</h2>
-        <p class="andes-teaser__subtitle">8,000 miles. 7 countries. 1 year.</p>
-        <p>Attempting the fastest known time traversing the full length of the world's longest mountain range, north to south. May 2026 to May 2027.</p>
-        <div class="andes-teaser__details">
-          <div class="andes-detail">
-            <span class="andes-detail__value">8,000</span>
-            <span class="andes-detail__label">Miles</span>
-          </div>
-          <div class="andes-detail">
-            <span class="andes-detail__value">667</span>
-            <span class="andes-detail__label">Miles/Month</span>
-          </div>
-          <div class="andes-detail">
-            <span class="andes-detail__value">22,838</span>
-            <span class="andes-detail__label">Ft Peak Elevation</span>
-          </div>
-          <div class="andes-detail">
-            <span class="andes-detail__value">7</span>
-            <span class="andes-detail__label">Countries</span>
-          </div>
+        <h2 class="andes-teaser__title" id="andesTeaserTitle"></h2>
+        <p class="andes-teaser__subtitle" id="andesTeaserSubtitle"></p>
+        <p id="andesTeaserDesc"></p>
+        <div class="andes-teaser__details" id="andesTeaserStats">
+          <p id="andesTeaserLoading" style="color:rgba(255,255,255,0.5);font-family:var(--f-mono);font-size:0.85rem;">Loading…</p>
         </div>
         <a href="/pages/andes.html" class="btn btn--light">Full Route & Details →</a>
       </div>
@@ -223,31 +139,8 @@
     <div class="container">
       <span class="section__label">Writing</span>
       <h2 class="section__heading">From the blog</h2>
-      <div class="blog__grid">
-        <a href="https://irunearth.substack.com/p/whats-a-human-for" target="_blank" class="blog-card">
-          <span class="blog-card__tag">Tech</span>
-          <h3 class="blog-card__title">What's a Human For</h3>
-          <p class="blog-card__excerpt">The most important skill for software engineers is setting up feedback loops for AI to build and test integrated components of a system.</p>
-          <span class="blog-card__date">February 2026</span>
-        </a>
-        <a href="https://irunearth.substack.com/p/youre-fired" target="_blank" class="blog-card">
-          <span class="blog-card__tag">Tech</span>
-          <h3 class="blog-card__title">You're Fired</h3>
-          <p class="blog-card__excerpt">Today, I'm planning to fire two highly talented Principal Engineers with 10+ years of experience because I think I can do their job with Claude.</p>
-          <span class="blog-card__date">January 2026</span>
-        </a>
-        <a href="https://irunearth.substack.com/p/millbrook-alumni-summit" target="_blank" class="blog-card">
-          <span class="blog-card__tag">Personal</span>
-          <h3 class="blog-card__title">Millbrook Alumni Summit</h3>
-          <p class="blog-card__excerpt">Our culture raises men to believe their value is tied to money. I crested a hill in the rain, feeling the weight of my soaking backpack, and broke into tears.</p>
-          <span class="blog-card__date">April 2025</span>
-        </a>
-        <a href="https://irunearth.substack.com/p/how-to-run-with-the-kenyans-pt-1" target="_blank" class="blog-card">
-          <span class="blog-card__tag">Africa Run</span>
-          <h3 class="blog-card__title">How to Run with the Kenyans</h3>
-          <p class="blog-card__excerpt">My introduction to running with Kenyan pros in the legendary town of Iten — the daily routines of the world's greatest athletes.</p>
-          <span class="blog-card__date">September 2024</span>
-        </a>
+      <div class="blog__grid" id="blogGrid">
+        <p id="blogLoading" style="color:var(--c-text-muted);font-family:var(--f-mono);font-size:0.85rem;">Loading posts…</p>
       </div>
       <a href="/pages/blog.html" class="btn btn--primary" style="margin-top: 2rem;">All Posts →</a>
     </div>
@@ -264,7 +157,7 @@
         <div class="footer__links">
           <h4>Explore</h4>
           <a href="/pages/adventures.html">Adventures</a>
-          <a href="/pages/andes.html">Andes FKT</a>
+          <a href="/pages/andes.html">South America</a>
           <a href="/pages/engineering.html">Engineering</a>
           <a href="/pages/blog.html">Blog</a>
         </div>
@@ -288,5 +181,150 @@
   </footer>
 
   <script src="/js/main.js"></script>
+  <script src="/js/config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+  (async function () {
+    function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+    function fmtDate(ds) {
+      const [y, m] = ds.split('-');
+      return ['January','February','March','April','May','June','July','August','September','October','November','December'][parseInt(m) - 1] + ' ' + y;
+    }
+    function animateCounter(el, target) {
+      const dur = 2000, t0 = performance.now();
+      const fmt = n => n >= 1000 ? n.toLocaleString() : String(n);
+      (function step(t) {
+        const p = Math.min((t - t0) / dur, 1);
+        el.textContent = fmt(Math.floor((1 - Math.pow(1 - p, 3)) * target));
+        if (p < 1) requestAnimationFrame(step);
+      })(t0);
+    }
+
+    try {
+      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      const [aboutRes, statsRes, advRes, blogRes, andesTeaserAdv, andesStatsRes, engPhilosophyRes] = await Promise.all([
+        sb.from('about').select('heading,paragraphs').limit(1).single(),
+        sb.from('stats').select('label,value,suffix').order('sort_order'),
+        sb.from('adventures').select('continent,title,description,badge,gradient,image_url,card_href,card_year').order('sort_order').limit(4),
+        sb.from('blog_posts').select('title,url,tag,excerpt,date').eq('featured', true).order('sort_order').limit(4),
+        sb.from('adventures').select('teaser_title,teaser_subtitle,description').eq('slug', 'andes-fkt').single(),
+        sb.from('andes_stats').select('value,label').eq('show_on_homepage', true).order('sort_order'),
+        sb.from('engineering_sections').select('paragraphs').eq('slug', 'philosophy').single()
+      ]);
+
+      // ── ABOUT ──────────────────────────────────────────────
+      const aboutText = document.getElementById('aboutText');
+      document.getElementById('aboutLoading')?.remove();
+      if (aboutRes.data) {
+        const h2 = document.createElement('h2');
+        h2.className = 'section__heading';
+        h2.textContent = aboutRes.data.heading;
+        aboutText.appendChild(h2);
+        (aboutRes.data.paragraphs || []).forEach(text => {
+          const p = document.createElement('p');
+          p.textContent = text;
+          aboutText.appendChild(p);
+        });
+      }
+
+      // ── STATS ──────────────────────────────────────────────
+      const statsGrid = document.getElementById('statsGrid');
+      document.getElementById('statsLoading')?.remove();
+      (statsRes.data || []).forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'stat';
+        const num = document.createElement('span');
+        num.className = 'stat__number';
+        num.textContent = '0';
+        div.appendChild(num);
+        if (s.suffix) {
+          const suf = document.createElement('span');
+          suf.className = 'stat__suffix';
+          suf.textContent = s.suffix;
+          div.appendChild(suf);
+        }
+        const lbl = document.createElement('span');
+        lbl.className = 'stat__label';
+        lbl.textContent = s.label;
+        div.appendChild(lbl);
+        statsGrid.appendChild(div);
+        const obs = new IntersectionObserver(es => { if (es[0].isIntersecting) { animateCounter(num, s.value); obs.disconnect(); } }, { threshold: 0.5 });
+        obs.observe(num);
+      });
+
+      // ── ADVENTURE CARDS ────────────────────────────────────
+      const advGrid = document.getElementById('adventuresGrid');
+      document.getElementById('adventuresLoading')?.remove();
+      (advRes.data || []).forEach((adv, i) => {
+        const a = document.createElement('a');
+        a.href = adv.card_href || '/pages/adventures.html';
+        a.className = 'adventure-card' + (i === 0 ? ' adventure-card--featured' : '');
+        const grad = adv.gradient || 'linear-gradient(135deg, #1a2a1a, #2d3d2d, #1a2a1a)';
+        const imgStyle = adv.image_url
+          ? 'background-image:url(' + esc(adv.image_url) + ');background-size:cover;background-position:center;'
+          : 'background:' + esc(grad) + ';';
+        a.innerHTML =
+          (adv.badge ? '<div class="adventure-card__badge">' + esc(adv.badge) + '</div>' : '') +
+          '<div class="adventure-card__img" style="' + imgStyle + '">' +
+            '<div class="adventure-card__overlay">' +
+              '<span class="adventure-card__continent">' + esc(adv.continent) + '</span>' +
+              '<span class="adventure-card__year">' + esc(adv.card_year || '') + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="adventure-card__body"><h3>' + esc(adv.title) + '</h3><p>' + esc(adv.description) + '</p></div>';
+        advGrid.appendChild(a);
+      });
+
+      // ── BLOG PREVIEW ───────────────────────────────────────
+      const blogGrid = document.getElementById('blogGrid');
+      document.getElementById('blogLoading')?.remove();
+      (blogRes.data || []).forEach(post => {
+        const a = document.createElement('a');
+        a.href = post.url;
+        a.target = '_blank';
+        a.className = 'blog-card';
+        a.innerHTML =
+          '<span class="blog-card__tag">' + esc(post.tag) + '</span>' +
+          '<h3 class="blog-card__title">' + esc(post.title) + '</h3>' +
+          (post.excerpt ? '<p class="blog-card__excerpt">' + esc(post.excerpt) + '</p>' : '') +
+          '<span class="blog-card__date">' + fmtDate(post.date) + '</span>';
+        blogGrid.appendChild(a);
+      });
+
+      // ── ANDES TEASER ───────────────────────────────────────
+      if (andesTeaserAdv.data) {
+        const adv = andesTeaserAdv.data;
+        document.getElementById('andesTeaserTitle').textContent = adv.teaser_title || '';
+        document.getElementById('andesTeaserSubtitle').textContent = adv.teaser_subtitle || '';
+        document.getElementById('andesTeaserDesc').textContent = adv.description || '';
+      }
+      const andesTeaserStats = document.getElementById('andesTeaserStats');
+      document.getElementById('andesTeaserLoading')?.remove();
+      (andesStatsRes.data || []).forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'andes-detail';
+        div.innerHTML =
+          '<span class="andes-detail__value">' + esc(s.value) + '</span>' +
+          '<span class="andes-detail__label">' + esc(s.label) + '</span>';
+        andesTeaserStats.appendChild(div);
+      });
+
+      // ── ENGINEERING PREVIEW ────────────────────────────────
+      const engPreviewText = document.getElementById('engPreviewText');
+      document.getElementById('engPreviewLoading')?.remove();
+      if (engPhilosophyRes.data) {
+        (engPhilosophyRes.data.paragraphs || []).slice(0, 2).forEach(text => {
+          const p = document.createElement('p');
+          p.textContent = text;
+          engPreviewText.appendChild(p);
+        });
+      }
+
+    } catch (err) {
+      console.error('CMS load error:', err);
+    }
+  })();
+  </script>
 </body>
 </html>

@@ -16,7 +16,7 @@
     <button class="nav__toggle" id="navToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
     <div class="nav__links" id="navLinks">
       <a href="/pages/adventures.html">Adventures</a>
-      <a href="/pages/andes.html">South America</a>
+      <a href="/pages/andes.html">Andes</a>
       <a href="/pages/engineering.html">Engineering</a>
       <a href="/pages/blog.html">Blog</a>
       <a href="/pages/impact.html">Impact</a>
@@ -28,21 +28,23 @@
     <div class="container">
       <p class="page-header__eyebrow">Software</p>
       <h1 class="page-header__title">Engineering</h1>
-      <p class="page-header__desc">Building software at the speed of ideas. I believe the future belongs to engineers who know what problems are worth solving — then let AI solve them.</p>
+      <p class="page-header__desc">I build custom software for small businesses to run on, replacing big box solutions.</p>
     </div>
   </header>
 
   <section class="page-content">
     <div class="container">
 
-      <div id="engSectionsContainer">
-        <p id="engSectionsLoading" style="color:var(--c-text-muted);font-family:var(--f-mono);font-size:0.85rem;">Loading…</p>
-      </div>
-      <p style="margin-top: var(--space-md);">If you're interested in working together, email <a href="mailto:olly.k.cohen@gmail.com">olly.k.cohen@gmail.com</a>.</p>
+      <h3>Case Studies</h3>
+      <p style="color: var(--c-text-muted);">APM Steam — coming soon.</p>
 
-      <h3>Writing on Tech</h3>
-      <div class="blog-list" id="techPostsList" style="margin-top: 1rem;">
-        <p id="techPostsLoading" style="color:var(--c-text-muted);font-family:var(--f-mono);font-size:0.85rem;">Loading…</p>
+      <h3 style="margin-top: var(--space-lg);">This Website</h3>
+      <p>This website was built entirely with Claude. It's a static site — no frameworks, no build tools, no dependencies. HTML, CSS, JavaScript. It loads fast, it's accessible, and it's deployable anywhere. The source code is on <a href="https://github.com/ollycohen/ollycohen.com" target="_blank">GitHub</a>.</p>
+      <p>If you're interested in working together, email <a href="mailto:olly.k.cohen@gmail.com">olly.k.cohen@gmail.com</a>.</p>
+
+      <h3 style="margin-top: var(--space-lg);">Writing</h3>
+      <div class="blog-list" id="techWriting" style="margin-top: 1rem;">
+        <p id="techLoading" style="color: var(--c-text-muted); font-family: var(--f-mono); font-size: 0.85rem;">Loading posts…</p>
       </div>
 
     </div>
@@ -55,55 +57,48 @@
   <script src="/js/config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script>
-  (async function () {
-    function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
-    function fmtDate(ds) {
-      const [y, m] = ds.split('-');
-      return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(m) - 1] + ' ' + y;
-    }
-    const list = document.getElementById('techPostsList');
-    try {
-      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    (async function () {
+      const list = document.getElementById('techWriting');
+      const loading = document.getElementById('techLoading');
 
-      const [sectionsRes, postsRes] = await Promise.all([
-        sb.from('engineering_sections').select('heading,paragraphs').order('sort_order'),
-        sb.from('blog_posts').select('title,url,tag,date').eq('category', 'tech').order('date', { ascending: false })
-      ]);
+      function formatDate(dateStr) {
+        const d = new Date(dateStr + 'T00:00:00');
+        return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      }
 
-      // ── SECTIONS ─────────────────────────────────────────
-      const container = document.getElementById('engSectionsContainer');
-      document.getElementById('engSectionsLoading')?.remove();
-      (sectionsRes.data || []).forEach(sec => {
-        const h3 = document.createElement('h3');
-        h3.textContent = sec.heading;
-        container.appendChild(h3);
-        (sec.paragraphs || []).forEach(text => {
-          const p = document.createElement('p');
-          p.textContent = text;
-          container.appendChild(p);
+      function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      }
+
+      try {
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const { data: posts, error } = await supabase
+          .from('blog_posts')
+          .select('title, url, tag, date')
+          .eq('category', 'tech')
+          .order('date', { ascending: false });
+
+        if (error) throw error;
+        if (loading) loading.remove();
+
+        posts.forEach(post => {
+          const a = document.createElement('a');
+          a.href = post.url;
+          a.target = '_blank';
+          a.className = 'blog-list__item';
+          a.innerHTML =
+            '<span class="blog-list__tag">' + escapeHtml(post.tag) + '</span>' +
+            '<span class="blog-list__title">' + escapeHtml(post.title) + '</span>' +
+            '<span class="blog-list__date">' + formatDate(post.date) + '</span>';
+          list.appendChild(a);
         });
-      });
-
-      // ── TECH POSTS ───────────────────────────────────────
-      document.getElementById('techPostsLoading')?.remove();
-      if (postsRes.error) throw postsRes.error;
-      (postsRes.data || []).forEach(post => {
-        const a = document.createElement('a');
-        a.href = post.url;
-        a.target = '_blank';
-        a.className = 'blog-list__item';
-        a.innerHTML =
-          '<span class="blog-list__tag">' + esc(post.tag) + '</span>' +
-          '<span class="blog-list__title">' + esc(post.title) + '</span>' +
-          '<span class="blog-list__date">' + fmtDate(post.date) + '</span>';
-        list.appendChild(a);
-      });
-    } catch (err) {
-      console.error('Failed to load engineering page:', err);
-      const loading = document.getElementById('techPostsLoading');
-      if (loading) loading.textContent = 'Failed to load posts.';
-    }
-  })();
+      } catch (err) {
+        console.error('Failed to load tech posts:', err);
+        if (loading) loading.textContent = 'Failed to load posts.';
+      }
+    })();
   </script>
 </body>
 </html>

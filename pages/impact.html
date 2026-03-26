@@ -16,7 +16,7 @@
     <button class="nav__toggle" id="navToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
     <div class="nav__links" id="navLinks">
       <a href="/pages/adventures.html">Adventures</a>
-      <a href="/pages/andes.html">South America</a>
+      <a href="/pages/andes.html">Andes</a>
       <a href="/pages/engineering.html">Engineering</a>
       <a href="/pages/blog.html">Blog</a>
       <a href="/pages/impact.html">Impact</a>
@@ -37,18 +37,41 @@
 
       <!-- PHILANTHROPY -->
       <span class="section__label">Philanthropy</span>
-      <h3 style="margin-top: 0.5rem;" id="philanthropy-heading">Raised for charity since 2024</h3>
+      <h3 style="margin-top: 0.5rem;">Over $20K raised for charity since 2024</h3>
 
-      <div class="impact__grid" id="causesGrid" style="margin-top: var(--space-md); margin-bottom: var(--space-xl);">
-        <p id="causesLoading" style="color:var(--c-text-muted);font-family:var(--f-mono);font-size:0.85rem;">Loading…</p>
+      <div class="impact__grid" style="margin-top: var(--space-md); margin-bottom: var(--space-xl);">
+        <div class="impact-card">
+          <span class="impact-card__type">Andes 2026</span>
+          <h4 class="impact-card__title">Kilimanjaro Aid Project</h4>
+          <p class="impact-card__desc">Building chicken coops to provide food and self-sustaining income to underfed families in the foothills of Kilimanjaro. Corporate sponsors are funding this initiative through the Andes FKT.</p>
+        </div>
+        <div class="impact-card">
+          <span class="impact-card__type">Asia 2025</span>
+          <h4 class="impact-card__title">Rise Against Hunger</h4>
+          <p class="impact-card__desc">Providing school feeding programs across the world, including India, Africa, and the United States. 4-star Charity Navigator rating (90%) and Platinum GuideStar rating.</p>
+        </div>
+        <div class="impact-card">
+          <span class="impact-card__type">Africa 2024</span>
+          <h4 class="impact-card__title">Children's Hospital & GiveDirectly</h4>
+          <p class="impact-card__desc">Ran to the Shoe 4 Africa Hospital — East Africa's only public children's hospital. Raised nearly $10K for direct cash transfers to people living in poverty.</p>
+        </div>
       </div>
 
       <!-- PRESS -->
       <span class="section__label">Press</span>
       <h3 style="margin-top: 0.5rem;">Media coverage</h3>
 
-      <div class="blog-list" id="pressList" style="margin-top: var(--space-md);">
-        <p id="pressLoading" style="color:var(--c-text-muted);font-family:var(--f-mono);font-size:0.85rem;">Loading…</p>
+      <div class="blog-list" style="margin-top: var(--space-md);">
+        <a href="https://www.clearwatertimes.com/local-news/a-human-powered-adventure-into-the-rockies-with-olly-7326150" target="_blank" class="blog-list__item">
+          <span class="blog-list__tag">Press</span>
+          <span class="blog-list__title">A Human-Powered Adventure into the Rockies with Olly</span>
+          <span class="blog-list__date">Clearwater Times, Mar 2024</span>
+        </a>
+        <a href="https://www.millbrook.org/school-life/academics/alumni-summit/alumni-summit-speakers-2025/oliver-cohen-16" target="_blank" class="blog-list__item">
+          <span class="blog-list__tag">Speaking</span>
+          <span class="blog-list__title">Millbrook School Alumni Summit Speaker</span>
+          <span class="blog-list__date">Millbrook School, 2025</span>
+        </a>
       </div>
 
       <p style="margin-top: var(--space-xl);">For press inquiries, email <a href="mailto:olly.k.cohen@gmail.com">olly.k.cohen@gmail.com</a>.</p>
@@ -59,57 +82,5 @@
     <div class="container"><div class="footer__bottom"><p>&copy; 2026 Olly Cohen. Built with Claude.</p></div></div>
   </footer>
   <script src="/js/main.js"></script>
-  <script src="/js/config.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script>
-  (async function () {
-    function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
-
-    try {
-      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-      const [fundraisersRes, pressRes] = await Promise.all([
-        sb.from('fundraisers').select('name,url,dates,charity,money_raised').order('sort_order'),
-        sb.from('press_items').select('title,url,source,tag,date').order('sort_order')
-      ]);
-
-      // ── FUNDRAISERS ────────────────────────────────────────
-      const causesGrid = document.getElementById('causesGrid');
-      document.getElementById('causesLoading')?.remove();
-      const total = (fundraisersRes.data || []).reduce((sum, f) => sum + (f.money_raised || 0), 0);
-      const heading = document.getElementById('philanthropy-heading');
-      if (heading && total > 0) heading.textContent = '$' + total.toLocaleString() + ' raised for charity since 2024';
-      (fundraisersRes.data || []).forEach(f => {
-        const raised = '$' + f.money_raised.toLocaleString() + ' raised';
-        const div = document.createElement('div');
-        div.className = 'impact-card';
-        div.innerHTML =
-          '<span class="impact-card__type">' + esc(f.dates) + '</span>' +
-          '<h4 class="impact-card__title">' + esc(f.name) + '</h4>' +
-          '<p class="impact-card__desc">' + esc(f.charity) + ' — ' + esc(raised) + '</p>' +
-          '<a href="' + esc(f.url) + '" target="_blank" style="color:var(--c-accent);font-size:0.9rem;">View fundraiser →</a>';
-        causesGrid.appendChild(div);
-      });
-
-      // ── PRESS ──────────────────────────────────────────────
-      const pressList = document.getElementById('pressList');
-      document.getElementById('pressLoading')?.remove();
-      (pressRes.data || []).forEach(p => {
-        const a = document.createElement('a');
-        a.href = p.url;
-        a.target = '_blank';
-        a.className = 'blog-list__item';
-        a.innerHTML =
-          '<span class="blog-list__tag">' + esc(p.tag) + '</span>' +
-          '<span class="blog-list__title">' + esc(p.title) + '</span>' +
-          '<span class="blog-list__date">' + esc(p.source) + ', ' + esc(p.date) + '</span>';
-        pressList.appendChild(a);
-      });
-
-    } catch (err) {
-      console.error('Failed to load impact data:', err);
-    }
-  })();
-  </script>
 </body>
 </html>

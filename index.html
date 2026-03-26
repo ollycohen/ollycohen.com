@@ -206,7 +206,7 @@
       const [aboutRes, statsRes, advRes, blogRes, andesTeaserAdv, andesStatsRes, engPhilosophyRes] = await Promise.all([
         sb.from('about').select('heading,paragraphs').limit(1).single(),
         sb.from('stats').select('label,value,suffix').order('sort_order'),
-        sb.from('adventures').select('continent,title,description,badge,gradient,image_url,card_href,card_year').order('sort_order').limit(4),
+        sb.from('adventures').select('continent,title,description,badge,gradient,card_href,card_year').order('sort_order').limit(4),
         sb.from('blog_posts').select('title,url,tag,excerpt,date').eq('featured', true).order('sort_order').limit(4),
         sb.from('adventures').select('teaser_title,teaser_subtitle,description').eq('slug', 'andes-fkt').single(),
         sb.from('andes_stats').select('value,label').eq('show_on_homepage', true).order('sort_order'),
@@ -261,9 +261,7 @@
         a.href = adv.card_href || '/pages/adventures.html';
         a.className = 'adventure-card' + (i === 0 ? ' adventure-card--featured' : '');
         const grad = adv.gradient || 'linear-gradient(135deg, #1a2a1a, #2d3d2d, #1a2a1a)';
-        const imgStyle = adv.image_url
-          ? 'background-image:url(' + esc(adv.image_url) + ');background-size:cover;background-position:center;'
-          : 'background:' + esc(grad) + ';';
+        const imgStyle = 'background:' + esc(grad) + ';';
         a.innerHTML =
           (adv.badge ? '<div class="adventure-card__badge">' + esc(adv.badge) + '</div>' : '') +
           '<div class="adventure-card__img" style="' + imgStyle + '">' +

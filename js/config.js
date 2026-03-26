@@ -1,9 +1,8 @@
-// ============================================================
-// Supabase configuration — ollycohen.com
-// Get these values from:
-//   https://supabase.com/dashboard/project/YOUR_PROJECT/settings/api
-// The anon key is safe to commit — it's public-facing by design
-// and restricted to SELECT by Row Level Security policies.
-// ============================================================
-const SUPABASE_URL     = 'https://YOUR_PROJECT_REF.supabase.co';
-const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY_HERE';
+// ==========================================
+// SUPABASE CONFIG — ollycohen.com
+// ==========================================
+// The anon key is safe to expose — RLS restricts it to read-only.
+// Update these values with your Supabase project credentials.
+
+const SUPABASE_URL = 'https://upocwcjkyyhufaaalblz.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVwb2N3Y2preXlodWZhYWFsYmx6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMDMyNTAsImV4cCI6MjA4OTg3OTI1MH0.bcidMyG-1ko6uzK5vDKlQsvn0cxrY1ytAS36ojRmCMs';

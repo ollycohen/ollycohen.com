@@ -75,7 +75,7 @@
     <button class="nav__toggle" id="navToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
     <div class="nav__links" id="navLinks">
       <a href="/pages/adventures.html">Adventures</a>
-      <a href="/pages/andes.html">Andes FKT</a>
+      <a href="/pages/andes.html">Andes</a>
       <a href="/pages/engineering.html">Engineering</a>
       <a href="/pages/blog.html">Blog</a>
       <a href="/pages/impact.html">Impact</a>
@@ -94,7 +94,7 @@
   <section class="page-content">
     <div class="container">
 
-      <div class="blog-filter">
+      <div class="blog-filter" id="blogFilter">
         <button class="blog-filter__btn active" data-filter="all">All</button>
         <button class="blog-filter__btn" data-filter="tech">Tech</button>
         <button class="blog-filter__btn" data-filter="north-america">North America Run</button>
@@ -126,7 +126,7 @@ const BLOG_POSTS = [
 <!-- BLOG_DATA_END -->
 
       <div class="blog-list" id="blogList">
-        <!-- Rows rendered by the script below -->
+        <!-- Rows rendered synchronously by the script below from baked-in BLOG_POSTS -->
       </div>
 
       <p style="margin-top: var(--space-lg); text-align: center;">
@@ -140,13 +140,11 @@ const BLOG_POSTS = [
   </footer>
   <script src="/js/main.js"></script>
   <script>
-    // Format a date string (YYYY-MM-DD or YYYY-MM) as "Mon YYYY"
+    // Format a date string (YYYY-MM-DD) as "Mon YYYY"
     function formatDate(dateStr) {
       const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
       const parts = dateStr.split('-');
-      const year = parts[0];
-      const month = parseInt(parts[1], 10) - 1;
-      return months[month] + ' ' + year;
+      return months[parseInt(parts[1], 10) - 1] + ' ' + parts[0];
     }
 
     // Render posts into #blogList
@@ -154,14 +152,13 @@ const BLOG_POSTS = [
       const list = document.getElementById('blogList');
       list.innerHTML = '';
       BLOG_POSTS.forEach(post => {
-        const hidden = filter !== 'all' && post.category !== filter;
         const a = document.createElement('a');
         a.href = post.url;
         a.target = '_blank';
         a.rel = 'noopener noreferrer';
         a.className = 'blog-table__row';
         a.dataset.cat = post.category;
-        if (hidden) a.dataset.hidden = 'true';
+        if (filter !== 'all' && post.category !== filter) a.dataset.hidden = 'true';
 
         const dateSpan = document.createElement('span');
         dateSpan.className = 'blog-table__date';
@@ -177,10 +174,8 @@ const BLOG_POSTS = [
       });
     }
 
-    // Initial render
     renderPosts('all');
 
-    // Filter buttons
     document.querySelectorAll('.blog-filter__btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.blog-filter__btn').forEach(b => b.classList.remove('active'));

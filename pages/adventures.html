@@ -16,7 +16,7 @@
     <button class="nav__toggle" id="navToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
     <div class="nav__links" id="navLinks">
       <a href="/pages/adventures.html">Adventures</a>
-      <a href="/pages/andes.html">Andes FKT</a>
+      <a href="/pages/andes.html">South America</a>
       <a href="/pages/engineering.html">Engineering</a>
       <a href="/pages/blog.html">Blog</a>
       <a href="/pages/impact.html">Impact</a>
@@ -34,33 +34,8 @@
 
   <section class="page-content">
     <div class="container">
-      <div class="timeline">
-
-        <div class="timeline__item" id="andes">
-          <span class="timeline__year">May 2026 — May 2027</span>
-          <h3 class="timeline__title">South America: Andes FKT</h3>
-          <p class="timeline__desc">Attempting the fastest known time traversing the full length of the Andes — 8,000 miles across 7 countries, north to south. Footpaths, horse trails, and rugged mountain terrain. The goal: finish in one year.</p>
-          <a href="/pages/andes.html" class="btn btn--primary" style="margin-top: 1rem;">Learn More →</a>
-        </div>
-
-        <div class="timeline__item" id="asia">
-          <span class="timeline__year">May — July 2025</span>
-          <h3 class="timeline__title">Asia: India & Japan</h3>
-          <p class="timeline__desc">379 miles through the Indian Himalayas climbing over 100,000 feet. 294 miles over Mt Fuji and the Japanese Alps from the Pacific Ocean to the Sea of Japan. 305 miles along Japan's tsunami-affected northeast coast on the Michinoku Trail. 1,000 total miles across two countries in 8 weeks. Fundraiser for Rise Against Hunger.</p>
-        </div>
-
-        <div class="timeline__item" id="africa">
-          <span class="timeline__year">June — October 2024</span>
-          <h3 class="timeline__title">Africa: Indian Ocean to Kilimanjaro</h3>
-          <p class="timeline__desc">1,000 miles with Rocky Mtui from the Indian Ocean to the top of Kilimanjaro and on to the Shoe 4 Africa Hospital — East Africa's only public children's hospital. Through villages, desert, jungle, and the Great Rift Valley. Ran with Kenyan pros in the legendary town of Iten. Fundraiser for GiveDirectly and Children's Hospital.</p>
-        </div>
-
-        <div class="timeline__item" id="northamerica">
-          <span class="timeline__year">January — May 2024</span>
-          <h3 class="timeline__title">North America: Seattle to Jasper & Back</h3>
-          <p class="timeline__desc">1,500 miles from Seattle to Jasper, Alberta, and back pushing a baby stroller with skis strapped to it. Ran through the winter relying on the kindness of locals — from Marblemount to Whistler to Clearwater to Blue River to the Rockies and back. 51 marathons in 108 days. Telemark skiing along the way.</p>
-        </div>
-
+      <div class="timeline" id="timeline">
+        <p id="timelineLoading" style="color:var(--c-text-muted);font-family:var(--f-mono);font-size:0.85rem;">Loading adventures…</p>
       </div>
     </div>
   </section>
@@ -85,5 +60,50 @@
     </div>
   </footer>
   <script src="/js/main.js"></script>
+  <script src="/js/config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+  (async function () {
+    function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+    const timeline = document.getElementById('timeline');
+
+    try {
+      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      const { data, error } = await sb
+        .from('adventures')
+        .select('continent,title,date_range,description,dedicated_page,section_id')
+        .order('sort_order');
+
+      document.getElementById('timelineLoading')?.remove();
+      if (error) throw error;
+
+      (data || []).forEach(adv => {
+        const div = document.createElement('div');
+        div.className = 'timeline__item';
+        if (adv.section_id) div.id = adv.section_id;
+        div.innerHTML =
+          '<span class="timeline__year">' + esc(adv.date_range) + '</span>' +
+          '<h3 class="timeline__title">' + esc(adv.continent) + ': ' + esc(adv.title) + '</h3>' +
+          '<p class="timeline__desc">' + esc(adv.description) + '</p>' +
+          (adv.dedicated_page
+            ? '<a href="' + esc(adv.dedicated_page) + '" class="btn btn--primary" style="margin-top:1rem;">Learn More →</a>'
+            : '');
+        timeline.appendChild(div);
+      });
+
+      // Scroll to anchor if URL has one (e.g. #asia)
+      if (window.location.hash) {
+        const target = document.querySelector(window.location.hash);
+        if (target) setTimeout(() => target.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+      }
+
+    } catch (err) {
+      console.error('Failed to load adventures:', err);
+      const loading = document.getElementById('timelineLoading');
+      if (loading) loading.textContent = 'Failed to load adventures.';
+    }
+  })();
+  </script>
 </body>
 </html>

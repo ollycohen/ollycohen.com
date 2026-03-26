@@ -16,7 +16,7 @@
     <button class="nav__toggle" id="navToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
     <div class="nav__links" id="navLinks">
       <a href="/pages/adventures.html">Adventures</a>
-      <a href="/pages/andes.html">Andes FKT</a>
+      <a href="/pages/andes.html">South America</a>
       <a href="/pages/engineering.html">Engineering</a>
       <a href="/pages/blog.html">Blog</a>
       <a href="/pages/impact.html">Impact</a>
@@ -35,22 +35,15 @@
   <section class="page-content">
     <div class="container">
 
-      <div class="sponsors__grid">
-        <a href="https://nordarun.com/" target="_blank" class="sponsor-card">
-          <h3 class="sponsor-card__name">Norda</h3>
-          <p class="sponsor-card__desc">Premium trail running footwear built for the most demanding terrain on Earth. Norda shoes have carried me across continents.</p>
-        </a>
-        <a href="https://blackdiamondequipment.com/" target="_blank" class="sponsor-card">
-          <h3 class="sponsor-card__name">Black Diamond</h3>
-          <p class="sponsor-card__desc">Mountain equipment for climbing, skiing, and trail running. Black Diamond Helio 88 skis powered my Rainier descent and backcountry adventures.</p>
-        </a>
+      <div class="sponsors__grid" id="sponsorsGrid">
+        <p id="sponsorsLoading" style="color: var(--c-text-muted); font-family: var(--f-mono); font-size: 0.85rem;">Loading sponsors…</p>
       </div>
 
       <div style="margin-top: var(--space-xl); padding: var(--space-lg); background: var(--c-bg-card); border: 1px solid var(--c-border); border-radius: var(--radius-lg);">
-        <h3 style="font-family: var(--f-display); font-size: 1.4rem; margin-bottom: var(--space-sm);">Partner with the Andes FKT</h3>
-        <p style="color: var(--c-text-muted); margin-bottom: var(--space-md); max-width: 600px;">The Andes FKT will generate content for 12 months straight — blog posts read by thousands, videos viewed hundreds of thousands of times, and a story that could reach millions. Align your brand with one of the most ambitious endurance projects on the planet.</p>
+        <h3 style="font-family: var(--f-display); font-size: 1.4rem; margin-bottom: var(--space-sm);">Partner on the South America Run</h3>
+        <p style="color: var(--c-text-muted); margin-bottom: var(--space-md); max-width: 600px;">My South America run will generate content across blog posts, video, and social — reaching an audience built across three continents of adventure. Align your brand with one of the most ambitious endurance projects on the planet.</p>
         <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
-          <a href="mailto:olly.k.cohen@gmail.com?subject=Andes%20FKT%20Sponsorship" class="btn btn--primary">Get in Touch →</a>
+          <a href="mailto:olly.k.cohen@gmail.com?subject=South%20America%20Run%20Sponsorship" class="btn btn--primary">Get in Touch →</a>
           <span style="color: var(--c-text-muted); font-size: 0.9rem;">olly.k.cohen@gmail.com</span>
         </div>
       </div>
@@ -62,5 +55,53 @@
     <div class="container"><div class="footer__bottom"><p>&copy; 2026 Olly Cohen. Built with Claude.</p></div></div>
   </footer>
   <script src="/js/main.js"></script>
+  <script src="/js/config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+    (async function () {
+      const grid = document.getElementById('sponsorsGrid');
+      const loading = document.getElementById('sponsorsLoading');
+
+      function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      }
+
+      try {
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const { data: sponsors, error } = await supabase
+          .from('sponsors')
+          .select('name, url, description, logo_url')
+          .eq('active', true)
+          .order('sort_order');
+
+        if (error) throw error;
+        if (loading) loading.remove();
+
+        sponsors.forEach(s => {
+          const a = document.createElement('a');
+          a.href = s.url;
+          a.target = '_blank';
+          a.className = 'sponsor-card';
+
+          let logoHtml = '';
+          if (s.logo_url) {
+            logoHtml = '<img class="sponsor-card__logo" src="' + escapeHtml(s.logo_url) + '" alt="' + escapeHtml(s.name) + ' logo">';
+          }
+
+          a.innerHTML =
+            logoHtml +
+            '<h3 class="sponsor-card__name">' + escapeHtml(s.name) + '</h3>' +
+            '<p class="sponsor-card__desc">' + escapeHtml(s.description) + '</p>';
+
+          grid.appendChild(a);
+        });
+      } catch (err) {
+        console.error('Failed to load sponsors:', err);
+        if (loading) loading.textContent = 'Failed to load sponsors.';
+      }
+    })();
+  </script>
 </body>
 </html>

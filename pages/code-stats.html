@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Code Activity — Olly Cohen</title>
+  <meta name="description" content="Daily contribution stats and code activity across the APM Steam codebase.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="nav" id="nav">
+    <a href="/" class="nav__logo">olly cohen</a>
+    <button class="nav__toggle" id="navToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+    <div class="nav__links" id="navLinks">
+      <a href="/pages/adventures.html">Adventures</a>
+      <a href="/pages/andes.html">Andes</a>
+      <a href="/pages/engineering.html">Engineering</a>
+      <a href="/pages/code-stats.html">Code</a>
+      <a href="/pages/blog.html">Blog</a>
+      <a href="/pages/impact.html">Impact</a>
+      <a href="/pages/sponsors.html">Sponsors</a>
+    </div>
+  </nav>
+
+  <header class="page-header">
+    <div class="container">
+      <p class="page-header__eyebrow">Engineering</p>
+      <h1 class="page-header__title">Code Activity</h1>
+      <p class="page-header__desc">Daily contribution stats across the APM Steam codebase. Updated daily via GitHub Actions.</p>
+    </div>
+  </header>
+
+  <!-- Summary Cards -->
+  <section class="section">
+    <div class="container">
+      <div class="stats-cards" id="statsCards">
+        <p style="color: var(--c-text-muted); font-family: var(--f-mono); font-size: 0.85rem;">Loading stats&hellip;</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contribution Heatmap -->
+  <section class="section">
+    <div class="container">
+      <p class="section__label">Last 90 Days</p>
+      <h2 class="section__heading">Contribution Calendar</h2>
+      <div class="heatmap" id="heatmap">
+        <div class="heatmap__day-labels">
+          <span>Mon</span>
+          <span></span>
+          <span>Wed</span>
+          <span></span>
+          <span>Fri</span>
+          <span></span>
+          <span></span>
+        </div>
+        <div class="heatmap__grid" id="heatmapGrid"></div>
+      </div>
+      <div class="heatmap__legend">
+        <span class="heatmap__legend-label">Less</span>
+        <span class="heatmap__cell" style="background: var(--c-bg-card)"></span>
+        <span class="heatmap__cell" style="background: rgba(106,173,106,0.25)"></span>
+        <span class="heatmap__cell" style="background: rgba(106,173,106,0.50)"></span>
+        <span class="heatmap__cell" style="background: rgba(106,173,106,0.75)"></span>
+        <span class="heatmap__cell" style="background: var(--c-accent-bright)"></span>
+        <span class="heatmap__legend-label">More</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Charts -->
+  <section class="section">
+    <div class="container">
+      <p class="section__label">Trends</p>
+      <h2 class="section__heading">Commits & Lines of Code</h2>
+      <div class="chart-row">
+        <div class="chart-container">
+          <canvas id="commitsChart"></canvas>
+        </div>
+        <div class="chart-container">
+          <canvas id="locChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Repo Breakdown -->
+  <section class="section">
+    <div class="container">
+      <p class="section__label">Repositories</p>
+      <h2 class="section__heading">Per-Repo Breakdown</h2>
+      <div class="repo-breakdown" id="repoBreakdown"></div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__bottom">
+        <p id="lastUpdated" style="color: var(--c-text-muted); font-size: 0.8rem; margin-bottom: 0.5rem;"></p>
+        <p>&copy; 2026 Olly Cohen. Built with Claude.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/js/main.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <script>
+  (async function () {
+    var REPO_COLORS = {
+      'apm-steam-mobile': '#6aad6a',
+      'apm-steam-web': '#c8945a',
+      'apm-steam-api': '#6a8aad',
+      'apm-steam-azure-functions': '#ad6a8a'
+    };
+
+    var data;
+    try {
+      var res = await fetch('/data/github-stats.json');
+      if (!res.ok) throw new Error('not found');
+      data = await res.json();
+    } catch (e) {
+      document.getElementById('statsCards').innerHTML =
+        '<p style="color: var(--c-text-muted); font-family: var(--f-mono); font-size: 0.85rem;">No data available yet. Stats will appear after the first GitHub Action run.</p>';
+      return;
+    }
+
+    // Summary cards
+    var cards = [
+      { label: 'Commits', value: data.summary.total_commits.toLocaleString() },
+      { label: 'Lines Added', value: '+' + data.summary.total_additions.toLocaleString() },
+      { label: 'Active Days', value: data.summary.active_days },
+      { label: 'Longest Streak', value: data.summary.longest_streak + 'd' }
+    ];
+    document.getElementById('statsCards').innerHTML = cards.map(function (c) {
+      return '<div class="stats-card"><span class="stats-card__value">' + c.value +
+        '</span><span class="stats-card__label">' + c.label + '</span></div>';
+    }).join('');
+
+    // Heatmap
+    renderHeatmap(data);
+
+    // Charts
+    renderCommitsChart(data);
+    renderLocChart(data);
+
+    // Repo breakdown
+    renderRepoBreakdown(data);
+
+    // Footer timestamp
+    var d = new Date(data.generated_at);
+    document.getElementById('lastUpdated').textContent =
+      'Last updated ' + d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+    function getDates(data) {
+      var dates = [];
+      var cur = new Date(data.date_range.start + 'T00:00:00');
+      var end = new Date(data.date_range.end + 'T00:00:00');
+      while (cur <= end) {
+        dates.push(cur.toISOString().split('T')[0]);
+        cur.setDate(cur.getDate() + 1);
+      }
+      return dates;
+    }
+
+    function renderHeatmap(data) {
+      var grid = document.getElementById('heatmapGrid');
+      var start = new Date(data.date_range.start + 'T00:00:00');
+      var end = new Date(data.date_range.end + 'T00:00:00');
+
+      // Adjust start to previous Monday (grid rows: Mon=0 .. Sun=6)
+      var adj = new Date(start);
+      var dow = adj.getDay(); // 0=Sun..6=Sat
+      var mondayOff = dow === 0 ? 6 : dow - 1;
+      adj.setDate(adj.getDate() - mondayOff);
+
+      // Find max commits for color scaling
+      var maxC = 0;
+      Object.values(data.daily).forEach(function (d) { if (d.commits > maxC) maxC = d.commits; });
+      if (maxC === 0) maxC = 1;
+
+      var cur = new Date(adj);
+      while (cur <= end) {
+        var ds = cur.toISOString().split('T')[0];
+        var dd = data.daily[ds];
+        var commits = dd ? dd.commits : 0;
+
+        var cell = document.createElement('div');
+        cell.className = 'heatmap__cell';
+        cell.title = ds + ': ' + commits + ' commit' + (commits !== 1 ? 's' : '');
+
+        if (commits === 0) {
+          cell.style.background = 'var(--c-bg-card)';
+        } else {
+          var intensity = Math.min(commits / maxC, 1);
+          var alpha = 0.2 + intensity * 0.8;
+          cell.style.background = 'rgba(106,173,106,' + alpha.toFixed(2) + ')';
+        }
+
+        if (cur < start) cell.style.opacity = '0.25';
+
+        grid.appendChild(cell);
+        cur.setDate(cur.getDate() + 1);
+      }
+    }
+
+    function renderCommitsChart(data) {
+      var dates = getDates(data);
+      var commits = dates.map(function (d) { return data.daily[d] ? data.daily[d].commits : 0; });
+
+      new Chart(document.getElementById('commitsChart'), {
+        type: 'line',
+        data: {
+          labels: dates,
+          datasets: [{
+            label: 'Commits',
+            data: commits,
+            borderColor: '#6aad6a',
+            backgroundColor: 'rgba(106,173,106,0.08)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 0,
+            pointHitRadius: 10,
+            borderWidth: 2
+          }]
+        },
+        options: chartOptions('Daily Commits')
+      });
+    }
+
+    function renderLocChart(data) {
+      var dates = getDates(data);
+      var additions = dates.map(function (d) { return data.daily[d] ? data.daily[d].additions : 0; });
+      var deletions = dates.map(function (d) { return data.daily[d] ? -(data.daily[d].deletions) : 0; });
+
+      new Chart(document.getElementById('locChart'), {
+        type: 'bar',
+        data: {
+          labels: dates,
+          datasets: [
+            {
+              label: 'Additions',
+              data: additions,
+              backgroundColor: 'rgba(106,173,106,0.6)',
+              borderColor: '#6aad6a',
+              borderWidth: 1
+            },
+            {
+              label: 'Deletions',
+              data: deletions,
+              backgroundColor: 'rgba(200,100,100,0.5)',
+              borderColor: '#c86464',
+              borderWidth: 1
+            }
+          ]
+        },
+        options: Object.assign({}, chartOptions('Daily Lines of Code'), {
+          scales: {
+            x: {
+              stacked: true,
+              ticks: { color: '#8a8477', maxTicksLimit: 8, font: { size: 11 } },
+              grid: { color: 'rgba(255,255,255,0.04)' }
+            },
+            y: {
+              stacked: true,
+              ticks: { color: '#8a8477', font: { size: 11 } },
+              grid: { color: 'rgba(255,255,255,0.04)' }
+            }
+          }
+        })
+      });
+    }
+
+    function chartOptions(title) {
+      return {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true,
+            labels: { color: '#8a8477', font: { family: "'JetBrains Mono', monospace", size: 11 }, boxWidth: 12 }
+          },
+          title: {
+            display: true,
+            text: title,
+            color: '#ece8df',
+            font: { family: "'JetBrains Mono', monospace", size: 13, weight: '400' },
+            padding: { bottom: 12 }
+          },
+          tooltip: {
+            backgroundColor: '#1a1f16',
+            titleColor: '#ece8df',
+            bodyColor: '#8a8477',
+            borderColor: 'rgba(255,255,255,0.1)',
+            borderWidth: 1,
+            titleFont: { family: "'JetBrains Mono', monospace", size: 12 },
+            bodyFont: { family: "'JetBrains Mono', monospace", size: 11 }
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: '#8a8477', maxTicksLimit: 8, font: { size: 11 } },
+            grid: { color: 'rgba(255,255,255,0.04)' }
+          },
+          y: {
+            ticks: { color: '#8a8477', font: { size: 11 } },
+            grid: { color: 'rgba(255,255,255,0.04)' },
+            beginAtZero: true
+          }
+        }
+      };
+    }
+
+    function renderRepoBreakdown(data) {
+      var container = document.getElementById('repoBreakdown');
+      var repos = Object.entries(data.by_repo).sort(function (a, b) { return b[1].commits - a[1].commits; });
+      var maxCommits = repos[0] ? repos[0][1].commits : 1;
+
+      container.innerHTML = repos.map(function (entry) {
+        var name = entry[0];
+        var s = entry[1];
+        var color = REPO_COLORS[name] || '#6aad6a';
+        var pct = Math.round(s.commits / maxCommits * 100);
+        return '<div class="repo-row">' +
+          '<div class="repo-row__header">' +
+          '<span class="repo-row__name" style="color:' + color + '">' + name + '</span>' +
+          '<span class="repo-row__stats">' + s.commits + ' commits &middot; +' +
+          s.additions.toLocaleString() + ' / -' + s.deletions.toLocaleString() + '</span>' +
+          '</div>' +
+          '<div class="repo-row__bar-bg">' +
+          '<div class="repo-row__bar" style="width:' + pct + '%;background:' + color + '"></div>' +
+          '</div></div>';
+      }).join('');
+    }
+  })();
+  </script>
+</body>
+</html>

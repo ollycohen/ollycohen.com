@@ -1127,7 +1127,6 @@ img { max-width: 100%; display: block; }
   .page-header__eyebrow::before { width: 16px; }
 
   .stats-cards { grid-template-columns: repeat(2, 1fr); }
-  .chart-row { grid-template-columns: 1fr; }
   .repo-row__header {
     flex-direction: column;
     align-items: flex-start;
@@ -1219,9 +1218,9 @@ img { max-width: 100%; display: block; }
 }
 
 /* Charts */
-.chart-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+.chart-stack {
+  display: flex;
+  flex-direction: column;
   gap: var(--space-md);
 }
 .chart-container {
@@ -1230,6 +1229,9 @@ img { max-width: 100%; display: block; }
   border-radius: var(--radius-lg);
   padding: var(--space-md);
   height: 300px;
+}
+.chart-container--full {
+  height: 340px;
 }
 
 /* Repo Breakdown */

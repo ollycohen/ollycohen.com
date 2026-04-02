@@ -13,7 +13,7 @@ const GITHUB_API = 'https://api.github.com';
 const USERNAME = process.env.GITHUB_USERNAME || 'OllyCohen';
 const ORG = process.env.GITHUB_ORG || 'apm-apps';
 const REPOS = (process.env.GITHUB_REPOS || 'apm-steam-mobile,apm-steam-web,apm-steam-api,apm-steam-azure-functions').split(',');
-const DAYS_BACK = parseInt(process.env.DAYS_BACK || '90', 10);
+const DAYS_BACK = parseInt(process.env.DAYS_BACK || '365', 10);
 const BATCH_SIZE = 10;
 
 const TOKEN = process.env.GITHUB_TOKEN;

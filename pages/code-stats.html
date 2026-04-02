@@ -33,54 +33,16 @@
     </div>
   </header>
 
-  <!-- Summary Cards -->
-  <section class="section">
-    <div class="container">
-      <div class="stats-cards" id="statsCards">
-        <p style="color: var(--c-text-muted); font-family: var(--f-mono); font-size: 0.85rem;">Loading stats&hellip;</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Contribution Heatmap -->
-  <section class="section">
-    <div class="container">
-      <p class="section__label">Last 90 Days</p>
-      <h2 class="section__heading">Contribution Calendar</h2>
-      <div class="heatmap" id="heatmap">
-        <div class="heatmap__day-labels">
-          <span>Mon</span>
-          <span></span>
-          <span>Wed</span>
-          <span></span>
-          <span>Fri</span>
-          <span></span>
-          <span></span>
-        </div>
-        <div class="heatmap__grid" id="heatmapGrid"></div>
-      </div>
-      <div class="heatmap__legend">
-        <span class="heatmap__legend-label">Less</span>
-        <span class="heatmap__cell" style="background: var(--c-bg-card)"></span>
-        <span class="heatmap__cell" style="background: rgba(106,173,106,0.25)"></span>
-        <span class="heatmap__cell" style="background: rgba(106,173,106,0.50)"></span>
-        <span class="heatmap__cell" style="background: rgba(106,173,106,0.75)"></span>
-        <span class="heatmap__cell" style="background: var(--c-accent-bright)"></span>
-        <span class="heatmap__legend-label">More</span>
-      </div>
-    </div>
-  </section>
-
   <!-- Charts -->
   <section class="section">
     <div class="container">
       <p class="section__label">Trends</p>
       <h2 class="section__heading">Commits & Lines of Code</h2>
-      <div class="chart-row">
-        <div class="chart-container">
+      <div class="chart-stack">
+        <div class="chart-container chart-container--full">
           <canvas id="commitsChart"></canvas>
         </div>
-        <div class="chart-container">
+        <div class="chart-container chart-container--full">
           <canvas id="locChart"></canvas>
         </div>
       </div>
@@ -115,6 +77,7 @@
       'apm-steam-api': '#6a8aad',
       'apm-steam-azure-functions': '#ad6a8a'
     };
+    var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
     var data;
     try {
@@ -122,34 +85,13 @@
       if (!res.ok) throw new Error('not found');
       data = await res.json();
     } catch (e) {
-      document.getElementById('statsCards').innerHTML =
-        '<p style="color: var(--c-text-muted); font-family: var(--f-mono); font-size: 0.85rem;">No data available yet. Stats will appear after the first GitHub Action run.</p>';
       return;
     }
 
-    // Summary cards
-    var cards = [
-      { label: 'Commits', value: data.summary.total_commits.toLocaleString() },
-      { label: 'Lines Added', value: '+' + data.summary.total_additions.toLocaleString() },
-      { label: 'Active Days', value: data.summary.active_days },
-      { label: 'Longest Streak', value: data.summary.longest_streak + 'd' }
-    ];
-    document.getElementById('statsCards').innerHTML = cards.map(function (c) {
-      return '<div class="stats-card"><span class="stats-card__value">' + c.value +
-        '</span><span class="stats-card__label">' + c.label + '</span></div>';
-    }).join('');
-
-    // Heatmap
-    renderHeatmap(data);
-
-    // Charts
     renderCommitsChart(data);
     renderLocChart(data);
-
-    // Repo breakdown
     renderRepoBreakdown(data);
 
-    // Footer timestamp
     var d = new Date(data.generated_at);
     document.getElementById('lastUpdated').textContent =
       'Last updated ' + d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
@@ -165,45 +107,75 @@
       return dates;
     }
 
-    function renderHeatmap(data) {
-      var grid = document.getElementById('heatmapGrid');
-      var start = new Date(data.date_range.start + 'T00:00:00');
-      var end = new Date(data.date_range.end + 'T00:00:00');
+    function monthTickCallback(value, index) {
+      var label = this.getLabelForValue(value);
+      if (typeof label !== 'string') return null;
+      var parts = label.split('-');
+      if (parts.length < 3) return null;
+      var day = parseInt(parts[2], 10);
+      if (day !== 1) return null;
+      var month = parseInt(parts[1], 10);
+      var year = parts[0];
+      if (month === 1) return year;
+      return MONTHS[month - 1];
+    }
 
-      // Adjust start to previous Monday (grid rows: Mon=0 .. Sun=6)
-      var adj = new Date(start);
-      var dow = adj.getDay(); // 0=Sun..6=Sat
-      var mondayOff = dow === 0 ? 6 : dow - 1;
-      adj.setDate(adj.getDate() - mondayOff);
+    function xAxisConfig(stacked) {
+      return {
+        stacked: stacked || false,
+        ticks: {
+          autoSkip: false,
+          maxRotation: 0,
+          callback: monthTickCallback,
+          color: function(ctx) {
+            var label = ctx.tick && ctx.tick.label;
+            return /^\d{4}$/.test(label) ? '#ece8df' : '#8a8477';
+          },
+          font: function(ctx) {
+            var label = ctx.tick && ctx.tick.label;
+            var isYear = /^\d{4}$/.test(label);
+            return { size: isYear ? 13 : 11, weight: isYear ? 'bold' : 'normal', family: "'JetBrains Mono', monospace" };
+          }
+        },
+        grid: { color: 'rgba(255,255,255,0.04)' }
+      };
+    }
 
-      // Find max commits for color scaling
-      var maxC = 0;
-      Object.values(data.daily).forEach(function (d) { if (d.commits > maxC) maxC = d.commits; });
-      if (maxC === 0) maxC = 1;
-
-      var cur = new Date(adj);
-      while (cur <= end) {
-        var ds = cur.toISOString().split('T')[0];
-        var dd = data.daily[ds];
-        var commits = dd ? dd.commits : 0;
-
-        var cell = document.createElement('div');
-        cell.className = 'heatmap__cell';
-        cell.title = ds + ': ' + commits + ' commit' + (commits !== 1 ? 's' : '');
-
-        if (commits === 0) {
-          cell.style.background = 'var(--c-bg-card)';
-        } else {
-          var intensity = Math.min(commits / maxC, 1);
-          var alpha = 0.2 + intensity * 0.8;
-          cell.style.background = 'rgba(106,173,106,' + alpha.toFixed(2) + ')';
+    function chartOptions(title) {
+      return {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true,
+            labels: { color: '#8a8477', font: { family: "'JetBrains Mono', monospace", size: 11 }, boxWidth: 12 }
+          },
+          title: {
+            display: true,
+            text: title,
+            color: '#ece8df',
+            font: { family: "'JetBrains Mono', monospace", size: 13, weight: '400' },
+            padding: { bottom: 12 }
+          },
+          tooltip: {
+            backgroundColor: '#1a1f16',
+            titleColor: '#ece8df',
+            bodyColor: '#8a8477',
+            borderColor: 'rgba(255,255,255,0.1)',
+            borderWidth: 1,
+            titleFont: { family: "'JetBrains Mono', monospace", size: 12 },
+            bodyFont: { family: "'JetBrains Mono', monospace", size: 11 }
+          }
+        },
+        scales: {
+          x: xAxisConfig(),
+          y: {
+            ticks: { color: '#8a8477', font: { size: 11 } },
+            grid: { color: 'rgba(255,255,255,0.04)' },
+            beginAtZero: true
+          }
         }
-
-        if (cur < start) cell.style.opacity = '0.25';
-
-        grid.appendChild(cell);
-        cur.setDate(cur.getDate() + 1);
-      }
+      };
     }
 
     function renderCommitsChart(data) {
@@ -235,6 +207,10 @@
       var additions = dates.map(function (d) { return data.daily[d] ? data.daily[d].additions : 0; });
       var deletions = dates.map(function (d) { return data.daily[d] ? -(data.daily[d].deletions) : 0; });
 
+      var opts = chartOptions('Daily Lines of Code');
+      opts.scales.x = xAxisConfig(true);
+      opts.scales.y = { stacked: true, ticks: { color: '#8a8477', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.04)' } };
+
       new Chart(document.getElementById('locChart'), {
         type: 'bar',
         data: {
@@ -256,78 +232,34 @@
             }
           ]
         },
-        options: Object.assign({}, chartOptions('Daily Lines of Code'), {
-          scales: {
-            x: {
-              stacked: true,
-              ticks: { color: '#8a8477', maxTicksLimit: 8, font: { size: 11 } },
-              grid: { color: 'rgba(255,255,255,0.04)' }
-            },
-            y: {
-              stacked: true,
-              ticks: { color: '#8a8477', font: { size: 11 } },
-              grid: { color: 'rgba(255,255,255,0.04)' }
-            }
-          }
-        })
+        options: opts
       });
-    }
-
-    function chartOptions(title) {
-      return {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: true,
-            labels: { color: '#8a8477', font: { family: "'JetBrains Mono', monospace", size: 11 }, boxWidth: 12 }
-          },
-          title: {
-            display: true,
-            text: title,
-            color: '#ece8df',
-            font: { family: "'JetBrains Mono', monospace", size: 13, weight: '400' },
-            padding: { bottom: 12 }
-          },
-          tooltip: {
-            backgroundColor: '#1a1f16',
-            titleColor: '#ece8df',
-            bodyColor: '#8a8477',
-            borderColor: 'rgba(255,255,255,0.1)',
-            borderWidth: 1,
-            titleFont: { family: "'JetBrains Mono', monospace", size: 12 },
-            bodyFont: { family: "'JetBrains Mono', monospace", size: 11 }
-          }
-        },
-        scales: {
-          x: {
-            ticks: { color: '#8a8477', maxTicksLimit: 8, font: { size: 11 } },
-            grid: { color: 'rgba(255,255,255,0.04)' }
-          },
-          y: {
-            ticks: { color: '#8a8477', font: { size: 11 } },
-            grid: { color: 'rgba(255,255,255,0.04)' },
-            beginAtZero: true
-          }
-        }
-      };
     }
 
     function renderRepoBreakdown(data) {
       var container = document.getElementById('repoBreakdown');
       var repos = Object.entries(data.by_repo).sort(function (a, b) { return b[1].commits - a[1].commits; });
-      var maxCommits = repos[0] ? repos[0][1].commits : 1;
+
+      // Calculate days and months in range
+      var start = new Date(data.date_range.start + 'T00:00:00');
+      var end = new Date(data.date_range.end + 'T00:00:00');
+      var totalDays = Math.round((end - start) / (1000 * 60 * 60 * 24)) || 1;
+      var totalMonths = ((end.getFullYear() - start.getFullYear()) * 12 + end.getMonth() - start.getMonth()) || 1;
+
+      var maxRate = 0;
+      repos.forEach(function(r) { var rate = r[1].commits / totalDays; if (rate > maxRate) maxRate = rate; });
 
       container.innerHTML = repos.map(function (entry) {
         var name = entry[0];
         var s = entry[1];
         var color = REPO_COLORS[name] || '#6aad6a';
-        var pct = Math.round(s.commits / maxCommits * 100);
+        var commitsPerDay = (s.commits / totalDays).toFixed(1);
+        var linesPerMonth = Math.round(s.additions / totalMonths).toLocaleString();
+        var pct = Math.round((s.commits / totalDays) / maxRate * 100);
         return '<div class="repo-row">' +
           '<div class="repo-row__header">' +
           '<span class="repo-row__name" style="color:' + color + '">' + name + '</span>' +
-          '<span class="repo-row__stats">' + s.commits + ' commits &middot; +' +
-          s.additions.toLocaleString() + ' / -' + s.deletions.toLocaleString() + '</span>' +
+          '<span class="repo-row__stats">' + commitsPerDay + ' commits/day &middot; ' + linesPerMonth + ' lines/mo</span>' +
           '</div>' +
           '<div class="repo-row__bar-bg">' +
           '<div class="repo-row__bar" style="width:' + pct + '%;background:' + color + '"></div>' +

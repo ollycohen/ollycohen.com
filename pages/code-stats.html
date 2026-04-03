@@ -243,7 +243,10 @@
       var container = document.getElementById('repoCharts');
       var monthKeys = getMonthKeys(data);
       var labels = monthKeys.map(monthLabel);
-      var repos = Object.entries(data.by_repo).sort(function(a, b) { return b[1].commits - a[1].commits; });
+      var FEATURED = ['apm-steam-mobile', 'apm-steam-web', 'apm-steam-api', 'apm-steam-azure-functions', 'ollycohen.com'];
+      var repos = Object.entries(data.by_repo)
+        .filter(function(entry) { return FEATURED.indexOf(entry[0]) !== -1; })
+        .sort(function(a, b) { return b[1].commits - a[1].commits; });
 
       repos.forEach(function(entry) {
         var name = entry[0];

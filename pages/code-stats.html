@@ -37,6 +37,7 @@
   <section class="section">
     <div class="container">
       <h2 class="section__heading">Commits & Lines of Code</h2>
+      <p class="chart-footnote" id="chartFootnote"></p>
       <div class="chart-stack">
         <div class="chart-container chart-container--full">
           <canvas id="commitsChart"></canvas>
@@ -84,6 +85,12 @@
       if (!res.ok) throw new Error('not found');
       data = await res.json();
     } catch (e) { return; }
+
+    // Footnote
+    var user = data.username || 'OllyCohen';
+    var repoCount = data.repos_scanned ? data.repos_scanned.length : 0;
+    document.getElementById('chartFootnote').textContent =
+      'All commits and lines of code by ' + user + ' across ' + repoCount + ' repositories on GitHub.';
 
     renderCommitsChart(data);
     renderLocChart(data);

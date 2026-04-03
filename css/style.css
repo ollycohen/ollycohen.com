@@ -1218,6 +1218,12 @@ img { max-width: 100%; display: block; }
 }
 
 /* Charts */
+.chart-footnote {
+  font-family: var(--f-mono);
+  font-size: 0.75rem;
+  color: var(--c-text-muted);
+  margin-bottom: var(--space-sm);
+}
 .chart-stack {
   display: flex;
   flex-direction: column;

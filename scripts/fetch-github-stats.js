@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
- * Fetch GitHub contribution stats for OllyCohen across APM Steam repos.
+ * Fetch GitHub contribution stats for a user across ALL accessible repos.
+ * Discovers repos from personal account + org, fetches commits + LOC.
  * Outputs data/github-stats.json for the static site.
  *
  * Usage: GITHUB_TOKEN=ghp_xxx node scripts/fetch-github-stats.js
@@ -11,8 +12,7 @@ const path = require('path');
 
 const GITHUB_API = 'https://api.github.com';
 const USERNAME = process.env.GITHUB_USERNAME || 'OllyCohen';
-const ORG = process.env.GITHUB_ORG || 'apm-apps';
-const REPOS = (process.env.GITHUB_REPOS || 'apm-steam-mobile,apm-steam-web,apm-steam-api,apm-steam-azure-functions').split(',');
+const ORGS = (process.env.GITHUB_ORGS || 'apm-apps').split(',');
 const DAYS_BACK = parseInt(process.env.DAYS_BACK || '365', 10);
 const BATCH_SIZE = 10;
 
@@ -23,14 +23,14 @@ if (!TOKEN) {
 }
 
 const headers = {
-  'Authorization': `token ${TOKEN}`,
-  'Accept': 'application/vnd.github.v3+json',
-  'User-Agent': 'ollycohen.com-stats'
+  Authorization: `token ${TOKEN}`,
+  Accept: 'application/vnd.github.v3+json',
+  'User-Agent': 'ollycohen.com-stats',
 };
 
 async function fetchJSON(url) {
   const res = await fetch(url, { headers });
-  if (res.status === 409) return null; // Empty repo
+  if (res.status === 409) return null;
   if (!res.ok) throw new Error(`${res.status} ${res.statusText}: ${url}`);
   return res.json();
 }
@@ -42,7 +42,8 @@ async function fetchAllPages(url) {
     const sep = url.includes('?') ? '&' : '?';
     const pageUrl = `${url}${sep}per_page=100&page=${page}`;
     const res = await fetch(pageUrl, { headers });
-    if (res.status === 409) return []; // Empty repo
+    if (res.status === 409) return [];
+    if (res.status === 404) return [];
     if (!res.ok) throw new Error(`${res.status}: ${pageUrl}`);
     const data = await res.json();
     if (data.length === 0) break;
@@ -65,7 +66,7 @@ async function batchFetch(items, fn) {
     const batchResults = await Promise.all(batch.map(fn));
     results.push(...batchResults);
     if (i + BATCH_SIZE < items.length) {
-      await new Promise(r => setTimeout(r, 200));
+      await new Promise((r) => setTimeout(r, 200));
     }
   }
   return results;
@@ -73,6 +74,43 @@ async function batchFetch(items, fn) {
 
 function toDateStr(date) {
   return date.toISOString().split('T')[0];
+}
+
+async function discoverRepos(since) {
+  const repos = new Map(); // key: "owner/name"
+
+  // Personal repos
+  console.log(`Discovering repos for ${USERNAME}...`);
+  const personal = await fetchAllPages(
+    `${GITHUB_API}/users/${USERNAME}/repos?sort=pushed&direction=desc`
+  );
+  for (const r of personal) {
+    if (new Date(r.pushed_at) >= since) {
+      repos.set(r.full_name, { owner: r.owner.login, name: r.name });
+    }
+  }
+  console.log(
+    `  ${personal.length} personal repos, ${repos.size} with recent activity`
+  );
+
+  // Org repos
+  for (const org of ORGS) {
+    const orgRepos = await fetchAllPages(
+      `${GITHUB_API}/orgs/${org}/repos?sort=pushed&direction=desc`
+    );
+    let added = 0;
+    for (const r of orgRepos) {
+      if (new Date(r.pushed_at) >= since && !repos.has(r.full_name)) {
+        repos.set(r.full_name, { owner: r.owner.login, name: r.name });
+        added++;
+      }
+    }
+    console.log(
+      `  ${orgRepos.length} repos in ${org}, ${added} new with recent activity`
+    );
+  }
+
+  return Array.from(repos.values());
 }
 
 async function main() {
@@ -83,39 +121,51 @@ async function main() {
   const since = startDate.toISOString();
   const until = endDate.toISOString();
 
-  console.log(`Fetching stats for ${USERNAME} across ${ORG} repos`);
-  console.log(`Date range: ${toDateStr(startDate)} to ${toDateStr(endDate)}`);
+  console.log(`Fetching stats for ${USERNAME} across all accessible repos`);
+  console.log(`Date range: ${toDateStr(startDate)} to ${toDateStr(endDate)}\n`);
+
+  // Discover repos with recent activity
+  const repos = await discoverRepos(startDate);
+  console.log(`\nTotal repos to scan: ${repos.length}\n`);
 
   const daily = {};
   const byRepo = {};
   let totalCommits = 0;
   let totalAdditions = 0;
   let totalDeletions = 0;
+  const reposWithActivity = [];
 
-  for (const repo of REPOS) {
-    console.log(`\n--- ${ORG}/${repo} ---`);
+  for (const { owner, name } of repos) {
+    const fullName = `${owner}/${name}`;
 
     let commits;
     try {
       commits = await fetchAllPages(
-        `${GITHUB_API}/repos/${ORG}/${repo}/commits?author=${USERNAME}&since=${since}&until=${until}`
+        `${GITHUB_API}/repos/${owner}/${name}/commits?author=${USERNAME}&since=${since}&until=${until}`
       );
     } catch (err) {
-      console.warn(`  Skipping (${err.message})`);
-      byRepo[repo] = { commits: 0, additions: 0, deletions: 0 };
+      console.log(`  ${fullName}: skipped (${err.message})`);
       continue;
     }
 
-    console.log(`  ${commits.length} commits found. Fetching stats...`);
+    if (commits.length === 0) {
+      console.log(`  ${fullName}: 0 commits`);
+      continue;
+    }
+
+    console.log(
+      `  ${fullName}: ${commits.length} commits — fetching stats...`
+    );
+    reposWithActivity.push(fullName);
 
     const statsResults = await batchFetch(commits, (commit) =>
-      fetchCommitStats(ORG, repo, commit.sha).then(stats => ({
+      fetchCommitStats(owner, name, commit.sha).then((stats) => ({
         date: toDateStr(new Date(commit.commit.author.date)),
-        stats
+        stats,
       }))
     );
 
-    byRepo[repo] = { commits: 0, additions: 0, deletions: 0 };
+    byRepo[name] = { commits: 0, additions: 0, deletions: 0 };
 
     for (const { date, stats } of statsResults) {
       if (!daily[date]) {
@@ -125,23 +175,25 @@ async function main() {
       daily[date].additions += stats.additions;
       daily[date].deletions += stats.deletions;
 
-      if (!daily[date].by_repo[repo]) {
-        daily[date].by_repo[repo] = { commits: 0, additions: 0, deletions: 0 };
+      if (!daily[date].by_repo[name]) {
+        daily[date].by_repo[name] = { commits: 0, additions: 0, deletions: 0 };
       }
-      daily[date].by_repo[repo].commits++;
-      daily[date].by_repo[repo].additions += stats.additions;
-      daily[date].by_repo[repo].deletions += stats.deletions;
+      daily[date].by_repo[name].commits++;
+      daily[date].by_repo[name].additions += stats.additions;
+      daily[date].by_repo[name].deletions += stats.deletions;
 
-      byRepo[repo].commits++;
-      byRepo[repo].additions += stats.additions;
-      byRepo[repo].deletions += stats.deletions;
+      byRepo[name].commits++;
+      byRepo[name].additions += stats.additions;
+      byRepo[name].deletions += stats.deletions;
 
       totalCommits++;
       totalAdditions += stats.additions;
       totalDeletions += stats.deletions;
     }
 
-    console.log(`  ${byRepo[repo].commits} commits, +${byRepo[repo].additions}/-${byRepo[repo].deletions}`);
+    console.log(
+      `    → ${byRepo[name].commits} commits, +${byRepo[name].additions}/-${byRepo[name].deletions}`
+    );
   }
 
   // Calculate streaks and active days
@@ -163,16 +215,18 @@ async function main() {
 
   const output = {
     generated_at: new Date().toISOString(),
+    username: USERNAME,
     date_range: { start: toDateStr(startDate), end: toDateStr(endDate) },
+    repos_scanned: reposWithActivity,
     summary: {
       total_commits: totalCommits,
       total_additions: totalAdditions,
       total_deletions: totalDeletions,
       active_days: activeDays,
-      longest_streak: longestStreak
+      longest_streak: longestStreak,
     },
     daily,
-    by_repo: byRepo
+    by_repo: byRepo,
   };
 
   const outDir = path.join(__dirname, '..', 'data');
@@ -181,10 +235,15 @@ async function main() {
   fs.writeFileSync(outPath, JSON.stringify(output, null, 2));
 
   console.log(`\nWrote ${outPath}`);
-  console.log(`Summary: ${totalCommits} commits, +${totalAdditions}/-${totalDeletions}, ${activeDays} active days, ${longestStreak}-day streak`);
+  console.log(
+    `Repos with activity: ${reposWithActivity.length} (${reposWithActivity.join(', ')})`
+  );
+  console.log(
+    `Summary: ${totalCommits} commits, +${totalAdditions}/-${totalDeletions}, ${activeDays} active days, ${longestStreak}-day streak`
+  );
 }
 
-main().catch(err => {
+main().catch((err) => {
   console.error('Fatal:', err.message);
   process.exit(1);
 });

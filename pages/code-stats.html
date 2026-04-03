@@ -86,6 +86,9 @@
       data = await res.json();
     } catch (e) { return; }
 
+    // Remove known noisy dates (bulk lock-file / generated-code commits)
+    ['2025-08-11', '2025-08-12', '2025-08-13'].forEach(function(d) { delete data.daily[d]; });
+
     // Footnote
     var user = data.username || 'OllyCohen';
     var repoCount = data.repos_scanned ? data.repos_scanned.length : 0;

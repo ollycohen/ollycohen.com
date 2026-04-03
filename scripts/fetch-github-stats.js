@@ -53,10 +53,38 @@ async function fetchAllPages(url) {
   return results;
 }
 
+// Files to exclude from LOC counts (lock files, generated/minified assets)
+const NOISY_PATTERNS = [
+  /package-lock\.json$/,
+  /yarn\.lock$/,
+  /pnpm-lock\.yaml$/,
+  /Podfile\.lock$/,
+  /\.min\.js$/,
+  /\.min\.css$/,
+  /\.generated\./,
+  /dist\//,
+];
+
+function isNoisyFile(filename) {
+  return NOISY_PATTERNS.some((p) => p.test(filename));
+}
+
 async function fetchCommitStats(owner, repo, sha) {
   const data = await fetchJSON(`${GITHUB_API}/repos/${owner}/${repo}/commits/${sha}`);
   if (!data) return { additions: 0, deletions: 0, total: 0 };
-  return data.stats || { additions: 0, deletions: 0, total: 0 };
+  if (!data.files || data.files.length === 0) {
+    return data.stats || { additions: 0, deletions: 0, total: 0 };
+  }
+  // Sum only non-noisy files
+  let additions = 0;
+  let deletions = 0;
+  for (const f of data.files) {
+    if (!isNoisyFile(f.filename)) {
+      additions += f.additions;
+      deletions += f.deletions;
+    }
+  }
+  return { additions, deletions, total: additions + deletions };
 }
 
 async function batchFetch(items, fn) {

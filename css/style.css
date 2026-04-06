@@ -1135,6 +1135,23 @@ img { max-width: 100%; display: block; }
 }
 
 /* ========================
+   ANDES PAGE LAYOUT
+   ======================== */
+.andes-layout {
+  display: grid;
+  gap: var(--space-lg);
+}
+@media (min-width: 900px) {
+  .andes-layout {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+  .andes-layout__map iframe {
+    height: 500px;
+  }
+}
+
+/* ========================
    CODE STATS PAGE
    ======================== */
 .stats-cards {

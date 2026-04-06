@@ -23,13 +23,13 @@
       <span></span><span></span><span></span>
     </button>
     <div class="nav__links" id="navLinks">
-      <a href="/pages/adventures.html">Adventures</a>
-      <a href="/pages/andes.html">South America</a>
-      <a href="/pages/engineering.html">Engineering</a>
-      <a href="/pages/code-stats.html">Code</a>
-      <a href="/pages/blog.html">Blog</a>
-      <a href="/pages/impact.html">Impact</a>
-      <a href="/pages/sponsors.html">Sponsors</a>
+      <a href="/adventures/">Adventures</a>
+      <a href="/andes/">South America</a>
+      <a href="/engineering/">Engineering</a>
+      <a href="/code-stats/">Code</a>
+      <a href="/blog/">Blog</a>
+      <a href="/impact/">Impact</a>
+      <a href="/sponsors/">Sponsors</a>
     </div>
   </nav>
 
@@ -47,8 +47,8 @@
       </h1>
       <p class="hero__subtitle">Adventurer. AI Engineer. Writer.</p>
       <div class="hero__cta">
-        <a href="/pages/andes.html" class="btn btn--primary">South America 2026 →</a>
-        <a href="/pages/adventures.html" class="btn btn--ghost">Past Adventures</a>
+        <a href="/andes/" class="btn btn--primary">South America 2026 →</a>
+        <a href="/adventures/" class="btn btn--ghost">Past Adventures</a>
       </div>
     </div>
     <div class="hero__scroll">
@@ -93,7 +93,7 @@
           <div id="engPreviewText">
             <p id="engPreviewLoading" style="color:var(--c-text-muted);font-family:var(--f-mono);font-size:0.85rem;">Loading…</p>
           </div>
-          <a href="/pages/engineering.html" class="btn btn--primary">Read More →</a>
+          <a href="/engineering/" class="btn btn--primary">Read More →</a>
         </div>
         <div class="eng__terminal">
           <div class="terminal">
@@ -130,7 +130,7 @@
         <div class="andes-teaser__details" id="andesTeaserStats">
           <p id="andesTeaserLoading" style="color:rgba(255,255,255,0.5);font-family:var(--f-mono);font-size:0.85rem;">Loading…</p>
         </div>
-        <a href="/pages/andes.html" class="btn btn--light">Full Route & Details →</a>
+        <a href="/andes/" class="btn btn--light">Full Route & Details →</a>
       </div>
     </div>
   </section>
@@ -143,7 +143,7 @@
       <div class="blog__grid" id="blogGrid">
         <p id="blogLoading" style="color:var(--c-text-muted);font-family:var(--f-mono);font-size:0.85rem;">Loading posts…</p>
       </div>
-      <a href="/pages/blog.html" class="btn btn--primary" style="margin-top: 2rem;">All Posts →</a>
+      <a href="/blog/" class="btn btn--primary" style="margin-top: 2rem;">All Posts →</a>
     </div>
   </section>
 
@@ -157,10 +157,10 @@
         </div>
         <div class="footer__links">
           <h4>Explore</h4>
-          <a href="/pages/adventures.html">Adventures</a>
-          <a href="/pages/andes.html">South America</a>
-          <a href="/pages/engineering.html">Engineering</a>
-          <a href="/pages/blog.html">Blog</a>
+          <a href="/adventures/">Adventures</a>
+          <a href="/andes/">South America</a>
+          <a href="/engineering/">Engineering</a>
+          <a href="/blog/">Blog</a>
         </div>
         <div class="footer__links">
           <h4>Connect</h4>
@@ -171,8 +171,8 @@
         </div>
         <div class="footer__links">
           <h4>More</h4>
-          <a href="/pages/impact.html">Impact</a>
-          <a href="/pages/sponsors.html">Sponsors</a>
+          <a href="/impact/">Impact</a>
+          <a href="/sponsors/">Sponsors</a>
         </div>
       </div>
       <div class="footer__bottom">
@@ -259,7 +259,7 @@
       document.getElementById('adventuresLoading')?.remove();
       (advRes.data || []).forEach((adv, i) => {
         const a = document.createElement('a');
-        a.href = adv.card_href || '/pages/adventures.html';
+        a.href = adv.card_href || '/adventures/';
         a.className = 'adventure-card' + (i === 0 ? ' adventure-card--featured' : '');
         const grad = adv.gradient || 'linear-gradient(135deg, #1a2a1a, #2d3d2d, #1a2a1a)';
         const imgStyle = 'background:' + esc(grad) + ';';

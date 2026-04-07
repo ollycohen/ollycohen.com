@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Code Activity — Olly Cohen</title>
-  <meta name="description" content="Daily contribution stats and code activity across the APM Steam codebase.">
+  <title>Engineering — Olly Cohen</title>
+  <meta name="description" content="Olly Cohen's software engineering work. Building with AI, delivering integrated systems, and redefining what engineers do.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -20,8 +20,7 @@
     <div class="nav__links" id="navLinks">
       <a href="/adventures/">Adventures</a>
       <a href="/andes/">Andes</a>
-      <a href="/engineering/">Engineering</a>
-      <a href="/code-stats/">Code</a>
+      <a href="/code-stats/">Engineering</a>
       <a href="/blog/">Blog</a>
       <a href="/impact/">Impact</a>
       <a href="/sponsors/">Sponsors</a>
@@ -30,11 +29,21 @@
 
   <header class="page-header">
     <div class="container">
-      <p class="page-header__eyebrow">Engineering</p>
-      <h1 class="page-header__title">Code Activity</h1>
-      <p class="page-header__desc">Daily contribution stats across the APM Steam codebase. Updated daily via GitHub Actions.</p>
+      <p class="page-header__eyebrow">Software</p>
+      <h1 class="page-header__title">Engineering</h1>
+      <p class="page-header__desc">I build custom software for small businesses to run on, replacing big box solutions.</p>
     </div>
   </header>
+
+  <!-- Tech Blogs -->
+  <section class="page-content">
+    <div class="container">
+      <h3>Writing</h3>
+      <div class="blog-list" id="techWriting" style="margin-top: 1rem;">
+        <p id="techLoading" style="color: var(--c-text-muted); font-family: var(--f-mono); font-size: 0.85rem;">Loading posts…</p>
+      </div>
+    </div>
+  </section>
 
   <!-- Charts -->
   <section class="section">
@@ -61,6 +70,15 @@
     </div>
   </section>
 
+  <!-- This Website -->
+  <section class="page-content">
+    <div class="container">
+      <h3>This Website</h3>
+      <p>This website was built entirely with Claude. It's a static site — no frameworks, no build tools, no dependencies. HTML, CSS, JavaScript. It loads fast, it's accessible, and it's deployable anywhere. The source code is on <a href="https://github.com/ollycohen/ollycohen.com" target="_blank">GitHub</a>.</p>
+      <p>If you're interested in working together, email <a href="mailto:olly.k.cohen@gmail.com">olly.k.cohen@gmail.com</a>.</p>
+    </div>
+  </section>
+
   <footer class="footer">
     <div class="container">
       <div class="footer__bottom">
@@ -71,6 +89,52 @@
   </footer>
 
   <script src="/js/main.js"></script>
+  <script src="/js/config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+    (async function () {
+      const list = document.getElementById('techWriting');
+      const loading = document.getElementById('techLoading');
+
+      function formatDate(dateStr) {
+        const d = new Date(dateStr + 'T00:00:00');
+        return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      }
+
+      function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      }
+
+      try {
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const { data: posts, error } = await supabase
+          .from('blog_posts')
+          .select('title, url, tag, date')
+          .eq('category', 'tech')
+          .order('date', { ascending: false });
+
+        if (error) throw error;
+        if (loading) loading.remove();
+
+        posts.forEach(post => {
+          const a = document.createElement('a');
+          a.href = post.url;
+          a.target = '_blank';
+          a.className = 'blog-list__item';
+          a.innerHTML =
+            '<span class="blog-list__tag">' + escapeHtml(post.tag) + '</span>' +
+            '<span class="blog-list__title">' + escapeHtml(post.title) + '</span>' +
+            '<span class="blog-list__date">' + formatDate(post.date) + '</span>';
+          list.appendChild(a);
+        });
+      } catch (err) {
+        console.error('Failed to load tech posts:', err);
+        if (loading) loading.textContent = 'Failed to load posts.';
+      }
+    })();
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
   <script>
   (async function () {

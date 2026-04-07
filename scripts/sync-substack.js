@@ -41,7 +41,16 @@ if (!SUPABASE_SERVICE_KEY) {
 // ── Helpers ──────────────────────────────────────────────────────────────────
 function httpsGet(url) {
   return new Promise((resolve, reject) => {
-    https.get(url, (res) => {
+    const parsed = new URL(url);
+    const opts = {
+      hostname: parsed.hostname,
+      path: parsed.pathname + parsed.search,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; ollycohen-blog-sync/1.0)',
+        'Accept': 'application/rss+xml, application/xml, text/xml, */*',
+      },
+    };
+    https.get(opts, (res) => {
       let body = '';
       res.on('data', (chunk) => { body += chunk; });
       res.on('end', () => {

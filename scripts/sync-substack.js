@@ -135,7 +135,7 @@ async function fetchPostsFromRss() {
 async function upsertPosts(posts) {
   if (posts.length === 0) { console.log('No posts to upsert'); return; }
 
-  const url = `${SUPABASE_URL}/rest/v1/blog_posts`;
+  const url = `${SUPABASE_URL}/rest/v1/blog_posts?on_conflict=url`;
   const headers = {
     'apikey': SUPABASE_SERVICE_KEY,
     'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,

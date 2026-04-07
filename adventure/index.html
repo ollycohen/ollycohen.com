@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adventure — Olly Cohen</title>
+  <meta name="description" content="Olly Cohen's running adventures across every continent.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+</head>
+<body>
+  <nav class="nav" id="nav">
+    <a href="/" class="nav__logo">olly cohen</a>
+    <button class="nav__toggle" id="navToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+    <div class="nav__links" id="navLinks">
+      <a href="/adventures/">Adventures</a>
+      <a href="/adventure/?slug=andes">Andes</a>
+      <a href="/code-stats/">Engineering</a>
+      <a href="/blog/">Blog</a>
+      <a href="/impact/">Impact</a>
+      <a href="/sponsors/">Sponsors</a>
+    </div>
+  </nav>
+
+  <header class="page-header" style="padding-bottom: var(--space-xl);">
+    <div class="container">
+      <p class="page-header__eyebrow" id="adventureEyebrow"></p>
+      <h1 class="page-header__title" id="adventureTitle">Loading...</h1>
+      <p class="page-header__desc" id="adventureDesc"></p>
+    </div>
+  </header>
+
+  <!-- Text sections + Map -->
+  <section class="page-content" id="adventureContent" style="padding-bottom: var(--space-xl); display: none;">
+    <div class="container">
+      <div class="adventure-layout">
+        <div class="adventure-layout__text" id="adventureText"></div>
+        <div class="adventure-layout__map" id="adventureMap" style="display: none;">
+          <h2 style="font-family: var(--f-display); font-size: 1.5rem; margin-bottom: var(--space-md);">Route Map</h2>
+          <div style="border-radius: var(--radius-lg); overflow: hidden;">
+            <iframe id="adventureMapIframe" width="100%" height="600" style="display: block; border: none;"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Gallery -->
+  <section class="section" id="gallerySection" style="display: none;">
+    <div class="container">
+      <span class="section__label">Gallery</span>
+      <h2 class="section__heading" id="galleryHeading">Photos & Videos</h2>
+      <div class="gallery__grid" id="galleryGrid"></div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container"><div class="footer__bottom"><p>&copy; 2026 Olly Cohen. Built with Claude.</p></div></div>
+  </footer>
+
+  <script src="/js/main.js"></script>
+  <script src="/js/config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+  (async function () {
+    function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+    var slug = new URLSearchParams(window.location.search).get('slug');
+    if (!slug) { window.location.href = '/adventures/'; return; }
+
+    try {
+      var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      // Fetch adventure (required) — try full columns, fallback to base if new columns not migrated
+      var advRes = await sb.from('adventures')
+        .select('*')
+        .eq('slug', slug)
+        .single();
+
+      if (advRes.error || !advRes.data) {
+        console.error('Adventure query error:', JSON.stringify(advRes.error));
+        window.location.href = '/adventures/';
+        return;
+      }
+
+      // Sections + media are optional (tables may not exist yet)
+      var sectRes = { data: [] };
+      var mediaRes = { data: [] };
+      try {
+        var results = await Promise.all([
+          sb.from('adventure_sections')
+            .select('heading,paragraphs,link_url,link_label')
+            .eq('adventure_slug', slug)
+            .order('sort_order'),
+          sb.from('adventure_media')
+            .select('type,title,thumbnail_path,youtube_id,taken_date')
+            .eq('adventure_slug', slug)
+            .order('taken_date', { ascending: false })
+        ]);
+        if (!results[0].error) sectRes = results[0];
+        if (!results[1].error) mediaRes = results[1];
+      } catch (e) { /* tables may not exist yet */ }
+
+      var adv = advRes.data;
+
+      // Page title & meta
+      document.title = adv.continent + ': ' + adv.title + ' — Olly Cohen';
+      var metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc) metaDesc.content = adv.description;
+
+      // Header
+      document.getElementById('adventureEyebrow').textContent = adv.eyebrow || adv.date_range;
+      document.getElementById('adventureTitle').textContent = adv.continent + ': ' + adv.title;
+      document.getElementById('adventureDesc').textContent = adv.subtitle || adv.description;
+
+      // Sections + Map
+      var sections = sectRes.data || [];
+      var hasContent = sections.length > 0 || adv.map_url;
+
+      if (hasContent) {
+        document.getElementById('adventureContent').style.display = '';
+
+        // Text sections
+        var textEl = document.getElementById('adventureText');
+        sections.forEach(function (sec) {
+          if (sec.heading) {
+            var h = document.createElement('h2');
+            h.style.fontFamily = 'var(--f-display)';
+            h.style.fontSize = '1.5rem';
+            h.style.marginBottom = 'var(--space-sm)';
+            h.style.marginTop = 'var(--space-md)';
+            h.style.color = 'var(--c-text)';
+            h.textContent = sec.heading;
+            textEl.appendChild(h);
+          }
+          var paras = sec.paragraphs || [];
+          paras.forEach(function (p) {
+            var pEl = document.createElement('p');
+            pEl.textContent = p;
+            textEl.appendChild(pEl);
+          });
+          if (sec.link_url && sec.link_label) {
+            var a = document.createElement('a');
+            a.href = sec.link_url;
+            a.target = '_blank';
+            a.className = 'btn btn--primary';
+            a.style.marginTop = 'var(--space-sm)';
+            a.style.display = 'inline-block';
+            a.textContent = sec.link_label;
+            textEl.appendChild(a);
+          }
+        });
+
+        // Map
+        if (adv.map_url) {
+          document.getElementById('adventureMap').style.display = '';
+          document.getElementById('adventureMapIframe').src = adv.map_url;
+        }
+      }
+
+      // Gallery
+      var media = mediaRes.data || [];
+      if (media.length > 0) {
+        document.getElementById('gallerySection').style.display = '';
+        var grid = document.getElementById('galleryGrid');
+
+        media.forEach(function (item) {
+          var div = document.createElement('div');
+          div.className = 'gallery__item' + (item.type === 'video' ? ' gallery__item--video' : '');
+
+          var img = document.createElement('img');
+          img.src = item.thumbnail_path;
+          img.alt = item.title || '';
+          img.loading = 'lazy';
+          div.appendChild(img);
+
+          if (item.type === 'video' && item.youtube_id) {
+            div.addEventListener('click', function () { openVideoModal(item.youtube_id); });
+          }
+
+          grid.appendChild(div);
+        });
+      }
+
+    } catch (err) {
+      console.error('Adventure load error:', err);
+    }
+  })();
+  </script>
+</body>
+</html>

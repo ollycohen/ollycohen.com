@@ -1,0 +1,34 @@
+name: Sync Substack Posts
+
+on:
+  schedule:
+    - cron: '47 7 * * *' # 7:47 AM UTC daily
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Sync Substack to Supabase
+        env:
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: node scripts/sync-substack.js
+
+      - name: Regenerate baked blog data
+        run: node scripts/generate-blog.js
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add blog/index.html
+          git diff --staged --quiet || git commit -m "chore: sync substack posts"
+          git push

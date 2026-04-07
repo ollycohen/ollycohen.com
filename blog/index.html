@@ -144,14 +144,24 @@ let BLOG_POSTS = [
   <script src="/js/main.js"></script>
   <script src="/js/config.js"></script>
   <script>
-    // Substack tag mapping per category
+    // Substack tag mapping per category (slug used in irunearth.substack.com/t/<slug>)
     const SUBSTACK_TAGS = {
       'all': '',
-      'tech': 'tech',
+      'tech': 'ai',
       'north-america': 'north-america',
       'africa': 'africa',
       'asia': 'asia',
       'personal': 'personal'
+    };
+
+    // Display names for the Substack button per category
+    const SECTION_NAMES = {
+      'all': '',
+      'tech': 'Tech',
+      'north-america': 'North America',
+      'africa': 'Africa',
+      'asia': 'Asia',
+      'personal': 'Life and Writing'
     };
 
     // Format a date string (YYYY-MM-DD) as "Mon YYYY"
@@ -161,11 +171,12 @@ let BLOG_POSTS = [
       return months[parseInt(parts[1], 10) - 1] + ' ' + parts[0];
     }
 
-    // Render posts into #blogList
+    // Render posts into #blogList (sorted by date descending)
     function renderPosts(filter) {
       const list = document.getElementById('blogList');
       list.innerHTML = '';
-      BLOG_POSTS.forEach(post => {
+      const sorted = BLOG_POSTS.slice().sort((a, b) => b.date.localeCompare(a.date));
+      sorted.forEach(post => {
         const a = document.createElement('a');
         a.href = post.url;
         a.target = '_blank';
@@ -195,10 +206,14 @@ let BLOG_POSTS = [
     function updateSubstackLink(filter) {
       const linkContainer = document.getElementById('substackLink');
       const tag = SUBSTACK_TAGS[filter] || '';
+      const sectionName = SECTION_NAMES[filter] || '';
       const url = tag
         ? 'https://irunearth.substack.com/t/' + tag
         : 'https://irunearth.substack.com';
-      linkContainer.innerHTML = '<a href="' + url + '" target="_blank" class="btn btn--primary">Read All Posts on Substack →</a>';
+      const label = sectionName
+        ? 'Read all ' + sectionName + ' posts on Substack →'
+        : 'Read all posts on Substack →';
+      linkContainer.innerHTML = '<a href="' + url + '" target="_blank" class="btn btn--primary">' + label + '</a>';
     }
 
     // Render immediately with baked data

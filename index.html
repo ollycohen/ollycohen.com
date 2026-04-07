@@ -47,32 +47,13 @@
         <span class="hero__line hero__line--1">1000 miles</span>
         <span class="hero__line hero__line--2">every continent.</span>
       </h1>
-      <p class="hero__subtitle">Adventurer. AI Engineer. Writer.</p>
+      <p class="hero__subtitle">Writer. Adventurer. Engineer.</p>
       <div class="hero__cta">
         <a href="/andes/" class="btn btn--primary">South America 2026 →</a>
         <a href="/adventures/" class="btn btn--ghost">Past Adventures</a>
       </div>
     </div>
-    <div class="hero__scroll">
-      <span>scroll</span>
-      <div class="hero__scroll-line"></div>
-    </div>
   </header>
-
-  <!-- ABOUT -->
-  <section class="section about" id="about">
-    <div class="container">
-      <div class="about__grid">
-        <div class="about__text" id="aboutText">
-          <span class="section__label">About</span>
-          <p id="aboutLoading" style="color:var(--c-text-muted);font-family:var(--f-mono);font-size:0.85rem;">Loading…</p>
-        </div>
-        <div class="about__stats" id="statsGrid">
-          <p id="statsLoading" style="color:var(--c-text-muted);font-family:var(--f-mono);font-size:0.85rem;">Loading…</p>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <!-- ADVENTURES PREVIEW -->
   <section class="section adventures-preview">
@@ -206,55 +187,13 @@
     try {
       const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-      const [aboutRes, statsRes, advRes, blogRes, andesTeaserAdv, andesStatsRes, engPhilosophyRes] = await Promise.all([
-        sb.from('about').select('heading,paragraphs').limit(1).single(),
-        sb.from('stats').select('label,value,suffix').order('sort_order'),
+      const [advRes, blogRes, andesTeaserAdv, andesStatsRes, engPhilosophyRes] = await Promise.all([
         sb.from('adventures').select('continent,title,description,badge,gradient,card_href,card_year').order('sort_order').limit(4),
         sb.from('blog_posts').select('title,url,tag,excerpt,date').eq('featured', true).order('sort_order').limit(4),
         sb.from('adventures').select('teaser_title,teaser_subtitle,description').eq('slug', 'andes-fkt').single(),
         sb.from('andes_stats').select('value,label').eq('show_on_homepage', true).order('sort_order'),
         sb.from('engineering_sections').select('paragraphs').eq('slug', 'philosophy').single()
       ]);
-
-      // ── ABOUT ──────────────────────────────────────────────
-      const aboutText = document.getElementById('aboutText');
-      document.getElementById('aboutLoading')?.remove();
-      if (aboutRes.data) {
-        const h2 = document.createElement('h2');
-        h2.className = 'section__heading';
-        h2.textContent = aboutRes.data.heading;
-        aboutText.appendChild(h2);
-        (aboutRes.data.paragraphs || []).forEach(text => {
-          const p = document.createElement('p');
-          p.textContent = text;
-          aboutText.appendChild(p);
-        });
-      }
-
-      // ── STATS ──────────────────────────────────────────────
-      const statsGrid = document.getElementById('statsGrid');
-      document.getElementById('statsLoading')?.remove();
-      (statsRes.data || []).forEach(s => {
-        const div = document.createElement('div');
-        div.className = 'stat';
-        const num = document.createElement('span');
-        num.className = 'stat__number';
-        num.textContent = '0';
-        div.appendChild(num);
-        if (s.suffix) {
-          const suf = document.createElement('span');
-          suf.className = 'stat__suffix';
-          suf.textContent = s.suffix;
-          div.appendChild(suf);
-        }
-        const lbl = document.createElement('span');
-        lbl.className = 'stat__label';
-        lbl.textContent = s.label;
-        div.appendChild(lbl);
-        statsGrid.appendChild(div);
-        const obs = new IntersectionObserver(es => { if (es[0].isIntersecting) { animateCounter(num, s.value); obs.disconnect(); } }, { threshold: 0.5 });
-        obs.observe(num);
-      });
 
       // ── ADVENTURE CARDS ────────────────────────────────────
       const advGrid = document.getElementById('adventuresGrid');

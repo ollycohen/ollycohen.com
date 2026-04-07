@@ -68,6 +68,9 @@
       color: var(--c-accent);
     }
   </style>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 </head>
 <body>
   <nav class="nav" id="nav">
@@ -96,17 +99,17 @@
     <div class="container">
 
       <div class="blog-filter" id="blogFilter">
-        <button class="blog-filter__btn active" data-filter="all">All</button>
+        <button class="blog-filter__btn active" data-filter="all">Recent</button>
         <button class="blog-filter__btn" data-filter="tech">Tech</button>
-        <button class="blog-filter__btn" data-filter="north-america">North America Run</button>
-        <button class="blog-filter__btn" data-filter="africa">Africa Run</button>
-        <button class="blog-filter__btn" data-filter="asia">Asia Run</button>
-        <button class="blog-filter__btn" data-filter="personal">Personal</button>
+        <button class="blog-filter__btn" data-filter="north-america">North America</button>
+        <button class="blog-filter__btn" data-filter="africa">Africa</button>
+        <button class="blog-filter__btn" data-filter="asia">Asia</button>
+        <button class="blog-filter__btn" data-filter="personal">Life and Writing</button>
       </div>
 
       <!-- BLOG_DATA_START -->
 <script>
-const BLOG_POSTS = [
+let BLOG_POSTS = [
   { "title": "What's a Human For", "url": "https://irunearth.substack.com/p/whats-a-human-for", "category": "tech", "tag": "Tech", "date": "2026-02-01" },
   { "title": "You're Fired", "url": "https://irunearth.substack.com/p/youre-fired", "category": "tech", "tag": "Tech", "date": "2026-01-01" },
   { "title": "Miyako (1000 Miles Asia)", "url": "https://irunearth.substack.com/p/miyako-1000-miles-asia", "category": "asia", "tag": "Asia Run", "date": "2025-07-15" },
@@ -130,7 +133,7 @@ const BLOG_POSTS = [
         <!-- Rows rendered synchronously by the script below from baked-in BLOG_POSTS -->
       </div>
 
-      <p style="margin-top: var(--space-lg); text-align: center;">
+      <p id="substackLink" style="margin-top: var(--space-lg); text-align: center;">
         <a href="https://irunearth.substack.com" target="_blank" class="btn btn--primary">Read All Posts on Substack →</a>
       </p>
     </div>
@@ -140,7 +143,18 @@ const BLOG_POSTS = [
     <div class="container"><div class="footer__bottom"><p>&copy; 2026 Olly Cohen. Built with Claude.</p></div></div>
   </footer>
   <script src="/js/main.js"></script>
+  <script src="/js/config.js"></script>
   <script>
+    // Substack tag mapping per category
+    const SUBSTACK_TAGS = {
+      'all': '',
+      'tech': 'tech',
+      'north-america': 'north-america',
+      'africa': 'africa',
+      'asia': 'asia',
+      'personal': 'personal'
+    };
+
     // Format a date string (YYYY-MM-DD) as "Mon YYYY"
     function formatDate(dateStr) {
       const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -173,9 +187,45 @@ const BLOG_POSTS = [
         a.appendChild(titleSpan);
         list.appendChild(a);
       });
+
+      // Update Substack link for active section
+      updateSubstackLink(filter);
     }
 
+    // Update the Substack link based on active filter
+    function updateSubstackLink(filter) {
+      const linkContainer = document.getElementById('substackLink');
+      const tag = SUBSTACK_TAGS[filter] || '';
+      const url = tag
+        ? 'https://irunearth.substack.com/t/' + tag
+        : 'https://irunearth.substack.com';
+      linkContainer.innerHTML = '<a href="' + url + '" target="_blank" class="btn btn--primary">Read All Posts on Substack →</a>';
+    }
+
+    // Render immediately with baked data
     renderPosts('all');
+
+    // Fetch fresh data from Supabase and re-render
+    (function fetchPosts() {
+      var url = SUPABASE_URL + '/rest/v1/blog_posts?select=title,url,category,tag,date&order=date.desc';
+      fetch(url, {
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+        }
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(posts) {
+        if (Array.isArray(posts) && posts.length > 0) {
+          BLOG_POSTS = posts;
+          // Re-render with current active filter
+          var activeBtn = document.querySelector('.blog-filter__btn.active');
+          var currentFilter = activeBtn ? activeBtn.dataset.filter : 'all';
+          renderPosts(currentFilter);
+        }
+      })
+      .catch(function() { /* baked data already rendered, silent fallback */ });
+    })();
 
     document.querySelectorAll('.blog-filter__btn').forEach(btn => {
       btn.addEventListener('click', () => {

@@ -50,6 +50,14 @@ document.addEventListener('DOMContentLoaded', () => {
     revealObserver.observe(el);
   });
 
+  // Expose for dynamically-loaded content (Supabase pages)
+  window.observeReveal = function (el, delay) {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'opacity 0.6s ease ' + (delay || 0) + 's, transform 0.6s ease ' + (delay || 0) + 's';
+    revealObserver.observe(el);
+  };
+
   // COUNTER ANIMATION
   const counters = document.querySelectorAll('[data-count]');
   const counterObserver = new IntersectionObserver((entries) => {
@@ -91,3 +99,29 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
 });
+
+// ==========================================
+// VIDEO MODAL (available globally for adventure pages)
+// ==========================================
+function openVideoModal(youtubeId) {
+  var modal = document.createElement('div');
+  modal.className = 'video-modal';
+  modal.innerHTML =
+    '<div class="video-modal__inner">' +
+      '<button class="video-modal__close" aria-label="Close">&times;</button>' +
+      '<iframe src="https://www.youtube.com/embed/' + youtubeId + '?autoplay=1&rel=0" ' +
+        'allowfullscreen allow="autoplay; encrypted-media"></iframe>' +
+    '</div>';
+
+  function close() { modal.remove(); }
+
+  modal.addEventListener('click', function (e) {
+    if (e.target === modal) close();
+  });
+  modal.querySelector('.video-modal__close').addEventListener('click', close);
+  document.addEventListener('keydown', function handler(e) {
+    if (e.key === 'Escape') { close(); document.removeEventListener('keydown', handler); }
+  });
+
+  document.body.appendChild(modal);
+}

@@ -9,6 +9,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 </head>
 <body>
   <nav class="nav" id="nav">
@@ -16,7 +19,7 @@
     <button class="nav__toggle" id="navToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
     <div class="nav__links" id="navLinks">
       <a href="/adventures/">Adventures</a>
-      <a href="/andes/">Andes</a>
+      <a href="/andes/">South America</a>
       <a href="/engineering/">Engineering</a>
       <a href="/code-stats/">Code</a>
       <a href="/blog/">Blog</a>
@@ -36,43 +39,16 @@
   <section class="page-content">
     <div class="container">
 
-      <!-- PHILANTHROPY -->
-      <span class="section__label">Philanthropy</span>
-      <h3 style="margin-top: 0.5rem;">Over $20K raised for charity since 2024</h3>
-
-      <div class="impact__grid" style="margin-top: var(--space-md); margin-bottom: var(--space-xl);">
-        <div class="impact-card">
-          <span class="impact-card__type">Andes 2026</span>
-          <h4 class="impact-card__title">Kilimanjaro Aid Project</h4>
-          <p class="impact-card__desc">Building chicken coops to provide food and self-sustaining income to underfed families in the foothills of Kilimanjaro. Corporate sponsors are funding this initiative through the Andes FKT.</p>
-        </div>
-        <div class="impact-card">
-          <span class="impact-card__type">Asia 2025</span>
-          <h4 class="impact-card__title">Rise Against Hunger</h4>
-          <p class="impact-card__desc">Providing school feeding programs across the world, including India, Africa, and the United States. 4-star Charity Navigator rating (90%) and Platinum GuideStar rating.</p>
-        </div>
-        <div class="impact-card">
-          <span class="impact-card__type">Africa 2024</span>
-          <h4 class="impact-card__title">Children's Hospital & GiveDirectly</h4>
-          <p class="impact-card__desc">Ran to the Shoe 4 Africa Hospital — East Africa's only public children's hospital. Raised nearly $10K for direct cash transfers to people living in poverty.</p>
-        </div>
+      <!-- MONEY RAISED -->
+      <span class="section__label">Money Raised</span>
+      <div id="fundraisersTable" style="margin-top: var(--space-md); margin-bottom: var(--space-xl);">
+        <p id="fundraisersLoading" style="color:var(--c-text-muted);font-family:var(--f-mono);font-size:0.85rem;">Loading…</p>
       </div>
 
       <!-- PRESS -->
       <span class="section__label">Press</span>
-      <h3 style="margin-top: 0.5rem;">Media coverage</h3>
-
-      <div class="blog-list" style="margin-top: var(--space-md);">
-        <a href="https://www.clearwatertimes.com/local-news/a-human-powered-adventure-into-the-rockies-with-olly-7326150" target="_blank" class="blog-list__item">
-          <span class="blog-list__tag">Press</span>
-          <span class="blog-list__title">A Human-Powered Adventure into the Rockies with Olly</span>
-          <span class="blog-list__date">Clearwater Times, Mar 2024</span>
-        </a>
-        <a href="https://www.millbrook.org/school-life/academics/alumni-summit/alumni-summit-speakers-2025/oliver-cohen-16" target="_blank" class="blog-list__item">
-          <span class="blog-list__tag">Speaking</span>
-          <span class="blog-list__title">Millbrook School Alumni Summit Speaker</span>
-          <span class="blog-list__date">Millbrook School, 2025</span>
-        </a>
+      <div id="pressTable" style="margin-top: var(--space-md);">
+        <p id="pressLoading" style="color:var(--c-text-muted);font-family:var(--f-mono);font-size:0.85rem;">Loading…</p>
       </div>
 
       <p style="margin-top: var(--space-xl);">For press inquiries, email <a href="mailto:olly.k.cohen@gmail.com">olly.k.cohen@gmail.com</a>.</p>
@@ -83,5 +59,64 @@
     <div class="container"><div class="footer__bottom"><p>&copy; 2026 Olly Cohen. Built with Claude.</p></div></div>
   </footer>
   <script src="/js/main.js"></script>
+  <script src="/js/config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+  (async function () {
+    function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+    try {
+      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      const [fundraisersRes, pressRes] = await Promise.all([
+        sb.from('fundraisers').select('dates,charity,url,money_raised').order('sort_order'),
+        sb.from('press_items').select('date,title,url,source').order('sort_order')
+      ]);
+
+      // ── FUNDRAISERS TABLE ──────────────────────────────────
+      const fundraisersContainer = document.getElementById('fundraisersTable');
+      document.getElementById('fundraisersLoading')?.remove();
+      if (fundraisersRes.data && fundraisersRes.data.length) {
+        const table = document.createElement('table');
+        table.className = 'impact-table';
+        table.innerHTML =
+          '<thead><tr><th>Dates</th><th>Charity</th><th>Money Raised</th></tr></thead>' +
+          '<tbody>' +
+          fundraisersRes.data.map(f =>
+            '<tr>' +
+            '<td>' + esc(f.dates) + '</td>' +
+            '<td><a href="' + esc(f.url) + '" target="_blank" rel="noopener">' + esc(f.charity) + '</a></td>' +
+            '<td>$' + Number(f.money_raised).toLocaleString() + '</td>' +
+            '</tr>'
+          ).join('') +
+          '</tbody>';
+        fundraisersContainer.appendChild(table);
+      }
+
+      // ── PRESS TABLE ────────────────────────────────────────
+      const pressContainer = document.getElementById('pressTable');
+      document.getElementById('pressLoading')?.remove();
+      if (pressRes.data && pressRes.data.length) {
+        const table = document.createElement('table');
+        table.className = 'impact-table';
+        table.innerHTML =
+          '<thead><tr><th>Date</th><th>Title</th><th>Source</th></tr></thead>' +
+          '<tbody>' +
+          pressRes.data.map(p =>
+            '<tr>' +
+            '<td>' + esc(p.date) + '</td>' +
+            '<td><a href="' + esc(p.url) + '" target="_blank" rel="noopener">' + esc(p.title) + '</a></td>' +
+            '<td>' + esc(p.source) + '</td>' +
+            '</tr>'
+          ).join('') +
+          '</tbody>';
+        pressContainer.appendChild(table);
+      }
+
+    } catch (err) {
+      console.error('CMS load error:', err);
+    }
+  })();
+  </script>
 </body>
 </html>

@@ -1,12 +1,12 @@
 // scripts/generate-blog.js
-// Fetches blog_posts from Supabase and bakes them into pages/blog.html as a static JS array.
+// Fetches blog_posts from Supabase and bakes them into blog/index.html as a static JS array.
 //
 // Usage: node scripts/generate-blog.js
 //
 // Reads SUPABASE_URL and SUPABASE_ANON_KEY from js/config.js, then calls the
 // Supabase REST API to get all posts ordered newest-first, and replaces the
 // content between <!-- BLOG_DATA_START --> and <!-- BLOG_DATA_END --> in
-// pages/blog.html with a fresh <script> block containing the data.
+// blog/index.html with a fresh <script> block containing the data.
 
 'use strict';
 
@@ -17,7 +17,7 @@ const path = require('path');
 // ── Resolve paths relative to repo root (one level up from scripts/) ──────────
 const repoRoot = path.resolve(__dirname, '..');
 const configPath = path.join(repoRoot, 'js', 'config.js');
-const blogPath = path.join(repoRoot, 'pages', 'blog.html');
+const blogPath = path.join(repoRoot, 'blog', 'index.html');
 
 // ── Read and parse js/config.js ───────────────────────────────────────────────
 const configSource = fs.readFileSync(configPath, 'utf8');
@@ -77,7 +77,7 @@ const req = https.request(options, (res) => {
     // ── Build the replacement block ───────────────────────────────────────────
     const json = JSON.stringify(posts, null, 2);
     const replacement =
-      `<!-- BLOG_DATA_START -->\n<script>\nconst BLOG_POSTS = ${json};\n</script>\n<!-- BLOG_DATA_END -->`;
+      `<!-- BLOG_DATA_START -->\n<script>\nlet BLOG_POSTS = ${json};\n</script>\n<!-- BLOG_DATA_END -->`;
 
     // ── Patch blog.html ───────────────────────────────────────────────────────
     const html = fs.readFileSync(blogPath, 'utf8');
@@ -88,14 +88,14 @@ const req = https.request(options, (res) => {
     const endIdx = html.indexOf(endMarker);
 
     if (startIdx === -1 || endIdx === -1) {
-      console.error('ERROR: Could not find <!-- BLOG_DATA_START --> / <!-- BLOG_DATA_END --> markers in pages/blog.html');
+      console.error('ERROR: Could not find <!-- BLOG_DATA_START --> / <!-- BLOG_DATA_END --> markers in blog/index.html');
       process.exit(1);
     }
 
     const updated = html.slice(0, startIdx) + replacement + html.slice(endIdx + endMarker.length);
     fs.writeFileSync(blogPath, updated, 'utf8');
 
-    console.log(`Done. Baked ${posts.length} post${posts.length !== 1 ? 's' : ''} into pages/blog.html`);
+    console.log(`Done. Baked ${posts.length} post${posts.length !== 1 ? 's' : ''} into blog/index.html`);
   });
 });
 

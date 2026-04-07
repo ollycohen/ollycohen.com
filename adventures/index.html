@@ -9,6 +9,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 </head>
 <body>
   <nav class="nav" id="nav">
@@ -70,7 +73,7 @@
     try {
       const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       const { data, error } = await sb.from('adventures')
-        .select('continent,title,date_range,description,dedicated_page,section_id')
+        .select('*')
         .order('sort_order');
 
       if (error) throw error;
@@ -78,20 +81,28 @@
       const timeline = document.getElementById('timeline');
       document.getElementById('timelineLoading')?.remove();
 
-      (data || []).forEach(adv => {
+      (data || []).forEach((adv, i) => {
         const div = document.createElement('div');
         div.className = 'timeline__item';
         if (adv.section_id) div.id = adv.section_id;
 
+        const imgHtml = adv.image_url
+          ? '<img class="timeline__image" src="' + esc(adv.image_url) + '" alt="' + esc(adv.continent) + '" loading="lazy">'
+          : '';
+
         div.innerHTML =
+          imgHtml +
           '<span class="timeline__year">' + esc(adv.date_range) + '</span>' +
           '<h3 class="timeline__title">' + esc(adv.continent) + ': ' + esc(adv.title) + '</h3>' +
           '<p class="timeline__desc">' + esc(adv.description) + '</p>' +
-          (adv.dedicated_page
-            ? '<a href="' + esc(adv.dedicated_page) + '" class="btn btn--primary" style="margin-top: 1rem;">Learn More →</a>'
-            : '');
+          '<a href="/adventure/?slug=' + esc(adv.slug) + '" class="btn btn--primary" style="margin-top: 1rem;">Explore →</a>';
 
         timeline.appendChild(div);
+        // Animate in with stagger delay
+        div.style.opacity = '0';
+        div.style.transform = 'translateY(20px)';
+        div.style.transition = 'opacity 0.6s ease ' + (i * 0.1) + 's, transform 0.6s ease ' + (i * 0.1) + 's';
+        setTimeout(function () { div.style.opacity = '1'; div.style.transform = 'translateY(0)'; }, 50);
       });
     } catch (err) {
       console.error('Adventures load error:', err);

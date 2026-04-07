@@ -106,6 +106,10 @@ Replace `background: linear-gradient(...)` on `.adventure-card__img` elements wi
 ### Update nav across all pages
 The nav is duplicated in every HTML file. When changing nav links, update all 8 files: `index.html`, `404.html`, and all 6 files in `pages/`.
 
+## Deployment
+
+After completing changes, always deploy by default: commit and push to `main`. GitHub Pages auto-deploys from `main`.
+
 ## Git Practices
 
 - Commit messages: imperative mood, concise (`Add blog post: Title`, `Update sponsor section`, `Fix mobile nav`)

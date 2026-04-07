@@ -15,8 +15,8 @@ WHERE slug = 'andes';
 -- ── 2. Add text sections ────────────────────────────────────
 DELETE FROM adventure_sections WHERE adventure_slug = 'andes';
 
-INSERT INTO adventure_sections (adventure_slug, heading, paragraphs, link_url, link_label, sort_order) VALUES
-  ('andes', NULL,
+INSERT INTO adventure_sections (adventure_slug, slug, heading, paragraphs, link_url, link_label, sort_order) VALUES
+  ('andes', 'intro', NULL,
    '[
      "My only intention is to head south through the Andes, on foot as much as possible, chasing joy, doing epic things.",
      "I would like to \"find a nice way,\" as Kilian Jornet says.",

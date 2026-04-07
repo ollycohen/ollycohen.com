@@ -41,18 +41,18 @@ ollycohen.com/
 - **JetBrains Mono** — labels, tags, monospace accents
 
 ### Colors (CSS custom properties in `:root` of `style.css`)
-- `--c-bg: #0c0f0a` — deep dark green-black
-- `--c-bg-alt: #141912` — slightly lighter for alternating sections
-- `--c-bg-card: #1a1f16` — card backgrounds
-- `--c-text: #e8e4dc` — warm off-white
-- `--c-text-muted: #9a9588` — secondary text
-- `--c-accent: #7db87d` — green accent (links, labels, highlights)
-- `--c-accent-bright: #a3d9a3` — brighter green for emphasis
-- `--c-warm: #d4a574` — warm gold (stats, terminal prompt)
-- `--c-warm-bright: #e8c9a0` — brighter gold
+- `--c-bg: #0e0e0d` — deep neutral black
+- `--c-bg-alt: #151514` — slightly lighter for alternating sections
+- `--c-bg-card: #1c1c1a` — card backgrounds
+- `--c-text: #e8e6e1` — warm off-white
+- `--c-text-muted: #908e88` — secondary text
+- `--c-accent: #80a5d9` — steel blue accent (links, labels, highlights)
+- `--c-accent-bright: #a3c0e8` — brighter blue for emphasis
+- `--c-warm: #d6a678` — warm amber (stats, terminal prompt)
+- `--c-warm-bright: #e4be9a` — brighter amber
 
 ### Visual Identity
-- Dark earth-tone palette (forest, mountain, trail)
+- Dark neutral palette with steel blue and warm amber accents
 - CSS noise grain texture on hero
 - Gradient backgrounds (no images currently — placeholders for real photos)
 - Subtle scroll-reveal animations

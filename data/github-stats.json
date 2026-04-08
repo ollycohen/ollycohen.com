@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-04-07T07:53:38.490Z",
+  "generated_at": "2026-04-08T07:56:32.552Z",
   "username": "OllyCohen",
   "date_range": {
-    "start": "2025-04-07",
-    "end": "2026-04-07"
+    "start": "2025-04-08",
+    "end": "2026-04-08"
   },
   "repos_scanned": [
     "ollycohen/ollycohen.com",
@@ -11,23 +11,23 @@
     "ollycohen/olly-claude-config",
     "ollycohen/bigAltaTrainingPlan",
     "apm-apps/apm-steam-mobile",
-    "apm-apps/apm-steam-web",
     "apm-apps/apm-steam-azure-functions",
     "apm-apps/apm-steam-api",
+    "apm-apps/apm-steam-web",
     "apm-apps/apm-steam-claude-config"
   ],
   "summary": {
-    "total_commits": 543,
-    "total_additions": 157007,
-    "total_deletions": 93076,
-    "active_days": 114,
+    "total_commits": 723,
+    "total_additions": 197478,
+    "total_deletions": 100613,
+    "active_days": 121,
     "longest_streak": 6
   },
   "daily": {
     "2026-04-07": {
-      "commits": 24,
-      "additions": 19756,
-      "deletions": 1379,
+      "commits": 52,
+      "additions": 20553,
+      "deletions": 1666,
       "by_repo": {
         "ollycohen.com": {
           "commits": 12,
@@ -40,26 +40,31 @@
           "deletions": 56
         },
         "apm-steam-mobile": {
-          "commits": 2,
-          "additions": 16316,
-          "deletions": 604
+          "commits": 23,
+          "additions": 16945,
+          "deletions": 884
+        },
+        "apm-steam-azure-functions": {
+          "commits": 4,
+          "additions": 60,
+          "deletions": 1
+        },
+        "apm-steam-api": {
+          "commits": 5,
+          "additions": 430,
+          "deletions": 224
         },
         "apm-steam-web": {
           "commits": 4,
           "additions": 238,
           "deletions": 33
-        },
-        "apm-steam-api": {
-          "commits": 2,
-          "additions": 322,
-          "deletions": 218
         }
       }
     },
     "2026-04-06": {
-      "commits": 16,
-      "additions": 1009,
-      "deletions": 286,
+      "commits": 19,
+      "additions": 1016,
+      "deletions": 352,
       "by_repo": {
         "ollycohen.com": {
           "commits": 2,
@@ -70,6 +75,11 @@
           "commits": 8,
           "additions": 689,
           "deletions": 40
+        },
+        "apm-steam-mobile": {
+          "commits": 3,
+          "additions": 7,
+          "deletions": 66
         },
         "apm-steam-azure-functions": {
           "commits": 1,
@@ -89,9 +99,9 @@
       }
     },
     "2026-04-03": {
-      "commits": 4,
-      "additions": 809,
-      "deletions": 545,
+      "commits": 5,
+      "additions": 811,
+      "deletions": 547,
       "by_repo": {
         "ollycohen.com": {
           "commits": 3,
@@ -99,16 +109,16 @@
           "deletions": 431
         },
         "apm-steam-mobile": {
-          "commits": 1,
-          "additions": 130,
-          "deletions": 114
+          "commits": 2,
+          "additions": 132,
+          "deletions": 116
         }
       }
     },
     "2026-04-02": {
-      "commits": 17,
-      "additions": 2966,
-      "deletions": 409,
+      "commits": 20,
+      "additions": 3111,
+      "deletions": 473,
       "by_repo": {
         "ollycohen.com": {
           "commits": 3,
@@ -121,9 +131,9 @@
           "deletions": 0
         },
         "apm-steam-mobile": {
-          "commits": 6,
-          "additions": 208,
-          "deletions": 9
+          "commits": 9,
+          "additions": 353,
+          "deletions": 73
         },
         "apm-steam-claude-config": {
           "commits": 6,
@@ -179,9 +189,9 @@
       }
     },
     "2026-03-04": {
-      "commits": 11,
-      "additions": 3258,
-      "deletions": 19,
+      "commits": 21,
+      "additions": 16051,
+      "deletions": 494,
       "by_repo": {
         "ollycohen.com": {
           "commits": 3,
@@ -189,14 +199,9 @@
           "deletions": 0
         },
         "apm-steam-mobile": {
-          "commits": 1,
-          "additions": 2,
-          "deletions": 2
-        },
-        "apm-steam-web": {
-          "commits": 2,
-          "additions": 125,
-          "deletions": 7
+          "commits": 11,
+          "additions": 12795,
+          "deletions": 477
         },
         "apm-steam-azure-functions": {
           "commits": 4,
@@ -207,18 +212,28 @@
           "commits": 1,
           "additions": 163,
           "deletions": 1
+        },
+        "apm-steam-web": {
+          "commits": 2,
+          "additions": 125,
+          "deletions": 7
         }
       }
     },
     "2026-03-31": {
-      "commits": 11,
-      "additions": 289,
-      "deletions": 229,
+      "commits": 23,
+      "additions": 413,
+      "deletions": 330,
       "by_repo": {
         "andes-checklist": {
           "commits": 2,
           "additions": 50,
           "deletions": 20
+        },
+        "apm-steam-mobile": {
+          "commits": 12,
+          "additions": 124,
+          "deletions": 101
         },
         "apm-steam-api": {
           "commits": 9,
@@ -239,15 +254,521 @@
         }
       }
     },
-    "2026-02-11": {
+    "2026-04-01": {
       "commits": 1,
-      "additions": 347,
-      "deletions": 68,
+      "additions": 101,
+      "deletions": 13,
       "by_repo": {
         "apm-steam-mobile": {
           "commits": 1,
-          "additions": 347,
-          "deletions": 68
+          "additions": 101,
+          "deletions": 13
+        }
+      }
+    },
+    "2026-03-30": {
+      "commits": 9,
+      "additions": 401,
+      "deletions": 59,
+      "by_repo": {
+        "apm-steam-mobile": {
+          "commits": 5,
+          "additions": 169,
+          "deletions": 49
+        },
+        "apm-steam-azure-functions": {
+          "commits": 2,
+          "additions": 56,
+          "deletions": 4
+        },
+        "apm-steam-web": {
+          "commits": 2,
+          "additions": 176,
+          "deletions": 6
+        }
+      }
+    },
+    "2026-03-25": {
+      "commits": 17,
+      "additions": 5774,
+      "deletions": 410,
+      "by_repo": {
+        "apm-steam-mobile": {
+          "commits": 4,
+          "additions": 528,
+          "deletions": 8
+        },
+        "apm-steam-azure-functions": {
+          "commits": 6,
+          "additions": 333,
+          "deletions": 31
+        },
+        "apm-steam-web": {
+          "commits": 7,
+          "additions": 4913,
+          "deletions": 371
+        }
+      }
+    },
+    "2026-03-24": {
+      "commits": 29,
+      "additions": 5598,
+      "deletions": 2420,
+      "by_repo": {
+        "apm-steam-mobile": {
+          "commits": 7,
+          "additions": 157,
+          "deletions": 2150
+        },
+        "apm-steam-azure-functions": {
+          "commits": 10,
+          "additions": 1889,
+          "deletions": 43
+        },
+        "apm-steam-api": {
+          "commits": 4,
+          "additions": 269,
+          "deletions": 155
+        },
+        "apm-steam-web": {
+          "commits": 7,
+          "additions": 199,
+          "deletions": 72
+        },
+        "apm-steam-claude-config": {
+          "commits": 1,
+          "additions": 3084,
+          "deletions": 0
+        }
+      }
+    },
+    "2026-03-20": {
+      "commits": 7,
+      "additions": 151,
+      "deletions": 38,
+      "by_repo": {
+        "apm-steam-mobile": {
+          "commits": 1,
+          "additions": 25,
+          "deletions": 3
+        },
+        "apm-steam-api": {
+          "commits": 3,
+          "additions": 62,
+          "deletions": 25
+        },
+        "apm-steam-web": {
+          "commits": 3,
+          "additions": 64,
+          "deletions": 10
+        }
+      }
+    },
+    "2026-03-16": {
+      "commits": 4,
+      "additions": 206,
+      "deletions": 30,
+      "by_repo": {
+        "apm-steam-mobile": {
+          "commits": 2,
+          "additions": 117,
+          "deletions": 30
+        },
+        "apm-steam-azure-functions": {
+          "commits": 2,
+          "additions": 89,
+          "deletions": 0
+        }
+      }
+    },
+    "2026-03-14": {
+      "commits": 11,
+      "additions": 410,
+      "deletions": 1006,
+      "by_repo": {
+        "apm-steam-mobile": {
+          "commits": 2,
+          "additions": 42,
+          "deletions": 594
+        },
+        "apm-steam-azure-functions": {
+          "commits": 5,
+          "additions": 132,
+          "deletions": 236
+        },
+        "apm-steam-web": {
+          "commits": 4,
+          "additions": 236,
+          "deletions": 176
+        }
+      }
+    },
+    "2026-03-13": {
+      "commits": 4,
+      "additions": 930,
+      "deletions": 2,
+      "by_repo": {
+        "apm-steam-mobile": {
+          "commits": 1,
+          "additions": 852,
+          "deletions": 0
+        },
+        "apm-steam-azure-functions": {
+          "commits": 3,
+          "additions": 78,
+          "deletions": 2
+        }
+      }
+    },
+    "2026-03-11": {
+      "commits": 18,
+      "additions": 2557,
+      "deletions": 417,
+      "by_repo": {
+        "apm-steam-mobile": {
+          "commits": 7,
+          "additions": 902,
+          "deletions": 181
+        },
+        "apm-steam-azure-functions": {
+          "commits": 2,
+          "additions": 469,
+          "deletions": 64
+        },
+        "apm-steam-web": {
+          "commits": 9,
+          "additions": 1186,
+          "deletions": 172
+        }
+      }
+    },
+    "2026-03-07": {
+      "commits": 2,
+      "additions": 301,
+      "deletions": 160,
+      "by_repo": {
+        "apm-steam-mobile": {
+          "commits": 2,
+          "additions": 301,
+          "deletions": 160
+        }
+      }
+    },
+    "2026-03-06": {
+      "commits": 15,
+      "additions": 1145,
+      "deletions": 999,
+      "by_repo": {
+        "apm-steam-mobile": {
+          "commits": 9,
+          "additions": 641,
+          "deletions": 987
+        },
+        "apm-steam-azure-functions": {
+          "commits": 2,
+          "additions": 0,
+          "deletions": 0
+        },
+        "apm-steam-api": {
+          "commits": 4,
+          "additions": 504,
+          "deletions": 12
+        }
+      }
+    },
+    "2026-03-05": {
+      "commits": 22,
+      "additions": 3413,
+      "deletions": 427,
+      "by_repo": {
+        "apm-steam-mobile": {
+          "commits": 14,
+          "additions": 2560,
+          "deletions": 395
+        },
+        "apm-steam-azure-functions": {
+          "commits": 2,
+          "additions": 367,
+          "deletions": 3
+        },
+        "apm-steam-api": {
+          "commits": 4,
+          "additions": 361,
+          "deletions": 22
+        },
+        "apm-steam-web": {
+          "commits": 2,
+          "additions": 125,
+          "deletions": 7
+        }
+      }
+    },
+    "2026-03-03": {
+      "commits": 7,
+      "additions": 13481,
+      "deletions": 418,
+      "by_repo": {
+        "apm-steam-mobile": {
+          "commits": 7,
+          "additions": 13481,
+          "deletions": 418
+        }
+      }
+    },
+    "2026-03-02": {
+      "commits": 8,
+      "additions": 48,
+      "deletions": 37,
+      "by_repo": {
+        "apm-steam-mobile": {
+          "commits": 8,
+          "additions": 48,
+          "deletions": 37
+        }
+      }
+    },
+    "2026-02-27": {
+      "commits": 4,
+      "additions": 580,
+      "deletions": 640,
+      "by_repo": {
+        "apm-steam-mobile": {
+          "commits": 4,
+          "additions": 580,
+          "deletions": 640
+        }
+      }
+    },
+    "2026-02-25": {
+      "commits": 6,
+      "additions": 2375,
+      "deletions": 10,
+      "by_repo": {
+        "apm-steam-mobile": {
+          "commits": 3,
+          "additions": 2187,
+          "deletions": 2
+        },
+        "apm-steam-azure-functions": {
+          "commits": 3,
+          "additions": 188,
+          "deletions": 8
+        }
+      }
+    },
+    "2026-02-24": {
+      "commits": 13,
+      "additions": 1041,
+      "deletions": 100,
+      "by_repo": {
+        "apm-steam-mobile": {
+          "commits": 7,
+          "additions": 235,
+          "deletions": 93
+        },
+        "apm-steam-azure-functions": {
+          "commits": 4,
+          "additions": 524,
+          "deletions": 3
+        },
+        "apm-steam-web": {
+          "commits": 2,
+          "additions": 282,
+          "deletions": 4
+        }
+      }
+    },
+    "2026-02-23": {
+      "commits": 1,
+      "additions": 177,
+      "deletions": 14,
+      "by_repo": {
+        "apm-steam-mobile": {
+          "commits": 1,
+          "additions": 177,
+          "deletions": 14
+        }
+      }
+    },
+    "2026-02-19": {
+      "commits": 9,
+      "additions": 819,
+      "deletions": 84,
+      "by_repo": {
+        "apm-steam-mobile": {
+          "commits": 8,
+          "additions": 728,
+          "deletions": 61
+        },
+        "apm-steam-web": {
+          "commits": 1,
+          "additions": 91,
+          "deletions": 23
+        }
+      }
+    },
+    "2026-02-18": {
+      "commits": 8,
+      "additions": 170,
+      "deletions": 51,
+      "by_repo": {
+        "apm-steam-mobile": {
+          "commits": 4,
+          "additions": 79,
+          "deletions": 28
+        },
+        "apm-steam-web": {
+          "commits": 4,
+          "additions": 91,
+          "deletions": 23
+        }
+      }
+    },
+    "2026-02-17": {
+      "commits": 2,
+      "additions": 174,
+      "deletions": 20,
+      "by_repo": {
+        "apm-steam-mobile": {
+          "commits": 2,
+          "additions": 174,
+          "deletions": 20
+        }
+      }
+    },
+    "2026-02-13": {
+      "commits": 10,
+      "additions": 4002,
+      "deletions": 441,
+      "by_repo": {
+        "apm-steam-mobile": {
+          "commits": 2,
+          "additions": 138,
+          "deletions": 44
+        },
+        "apm-steam-azure-functions": {
+          "commits": 2,
+          "additions": 678,
+          "deletions": 25
+        },
+        "apm-steam-web": {
+          "commits": 6,
+          "additions": 3186,
+          "deletions": 372
+        }
+      }
+    },
+    "2026-02-11": {
+      "commits": 5,
+      "additions": 448,
+      "deletions": 174,
+      "by_repo": {
+        "apm-steam-mobile": {
+          "commits": 5,
+          "additions": 448,
+          "deletions": 174
+        }
+      }
+    },
+    "2026-02-03": {
+      "commits": 7,
+      "additions": 1828,
+      "deletions": 530,
+      "by_repo": {
+        "apm-steam-mobile": {
+          "commits": 3,
+          "additions": 1557,
+          "deletions": 358
+        },
+        "apm-steam-azure-functions": {
+          "commits": 1,
+          "additions": 151,
+          "deletions": 2
+        },
+        "apm-steam-api": {
+          "commits": 3,
+          "additions": 120,
+          "deletions": 170
+        }
+      }
+    },
+    "2026-01-30": {
+      "commits": 7,
+      "additions": 262,
+      "deletions": 91,
+      "by_repo": {
+        "apm-steam-mobile": {
+          "commits": 6,
+          "additions": 238,
+          "deletions": 76
+        },
+        "apm-steam-web": {
+          "commits": 1,
+          "additions": 24,
+          "deletions": 15
+        }
+      }
+    },
+    "2026-01-29": {
+      "commits": 6,
+      "additions": 2778,
+      "deletions": 1674,
+      "by_repo": {
+        "apm-steam-mobile": {
+          "commits": 4,
+          "additions": 842,
+          "deletions": 62
+        },
+        "apm-steam-azure-functions": {
+          "commits": 1,
+          "additions": 81,
+          "deletions": 0
+        },
+        "apm-steam-web": {
+          "commits": 1,
+          "additions": 1855,
+          "deletions": 1612
+        }
+      }
+    },
+    "2026-01-15": {
+      "commits": 6,
+      "additions": 1352,
+      "deletions": 50,
+      "by_repo": {
+        "apm-steam-mobile": {
+          "commits": 6,
+          "additions": 1352,
+          "deletions": 50
+        }
+      }
+    },
+    "2026-01-27": {
+      "commits": 2,
+      "additions": 44,
+      "deletions": 36,
+      "by_repo": {
+        "apm-steam-mobile": {
+          "commits": 2,
+          "additions": 44,
+          "deletions": 36
+        }
+      }
+    },
+    "2026-02-12": {
+      "commits": 6,
+      "additions": 234,
+      "deletions": 24,
+      "by_repo": {
+        "apm-steam-mobile": {
+          "commits": 3,
+          "additions": 185,
+          "deletions": 21
+        },
+        "apm-steam-api": {
+          "commits": 3,
+          "additions": 49,
+          "deletions": 3
         }
       }
     },
@@ -273,15 +794,15 @@
           "additions": 173,
           "deletions": 118
         },
-        "apm-steam-web": {
-          "commits": 1,
-          "additions": 187,
-          "deletions": 27
-        },
         "apm-steam-api": {
           "commits": 1,
           "additions": 39,
           "deletions": 2
+        },
+        "apm-steam-web": {
+          "commits": 1,
+          "additions": 187,
+          "deletions": 27
         }
       }
     },
@@ -316,40 +837,6 @@
           "commits": 3,
           "additions": 8,
           "deletions": 4
-        }
-      }
-    },
-    "2026-02-03": {
-      "commits": 5,
-      "additions": 898,
-      "deletions": 200,
-      "by_repo": {
-        "apm-steam-mobile": {
-          "commits": 1,
-          "additions": 627,
-          "deletions": 28
-        },
-        "apm-steam-azure-functions": {
-          "commits": 1,
-          "additions": 151,
-          "deletions": 2
-        },
-        "apm-steam-api": {
-          "commits": 3,
-          "additions": 120,
-          "deletions": 170
-        }
-      }
-    },
-    "2026-01-15": {
-      "commits": 4,
-      "additions": 1246,
-      "deletions": 50,
-      "by_repo": {
-        "apm-steam-mobile": {
-          "commits": 4,
-          "additions": 1246,
-          "deletions": 50
         }
       }
     },
@@ -455,11 +942,6 @@
           "additions": 387,
           "deletions": 263
         },
-        "apm-steam-web": {
-          "commits": 1,
-          "additions": 371,
-          "deletions": 48
-        },
         "apm-steam-azure-functions": {
           "commits": 3,
           "additions": 868,
@@ -469,6 +951,11 @@
           "commits": 6,
           "additions": 153,
           "deletions": 21
+        },
+        "apm-steam-web": {
+          "commits": 1,
+          "additions": 371,
+          "deletions": 48
         }
       }
     },
@@ -494,15 +981,15 @@
           "additions": 426,
           "deletions": 206
         },
-        "apm-steam-web": {
-          "commits": 2,
-          "additions": 20,
-          "deletions": 4
-        },
         "apm-steam-azure-functions": {
           "commits": 2,
           "additions": 303,
           "deletions": 47
+        },
+        "apm-steam-web": {
+          "commits": 2,
+          "additions": 20,
+          "deletions": 4
         }
       }
     },
@@ -516,11 +1003,6 @@
           "additions": 780,
           "deletions": 208
         },
-        "apm-steam-web": {
-          "commits": 3,
-          "additions": 743,
-          "deletions": 101
-        },
         "apm-steam-azure-functions": {
           "commits": 4,
           "additions": 1405,
@@ -530,6 +1012,11 @@
           "commits": 1,
           "additions": 120,
           "deletions": 0
+        },
+        "apm-steam-web": {
+          "commits": 3,
+          "additions": 743,
+          "deletions": 101
         }
       }
     },
@@ -731,15 +1218,15 @@
           "additions": 185,
           "deletions": 162
         },
-        "apm-steam-web": {
-          "commits": 4,
-          "additions": 718,
-          "deletions": 18
-        },
         "apm-steam-azure-functions": {
           "commits": 3,
           "additions": 6,
           "deletions": 12
+        },
+        "apm-steam-web": {
+          "commits": 4,
+          "additions": 718,
+          "deletions": 18
         }
       }
     },
@@ -1059,386 +1546,20 @@
         }
       }
     },
-    "2025-04-07": {
-      "commits": 1,
-      "additions": 65,
-      "deletions": 16,
-      "by_repo": {
-        "apm-steam-mobile": {
-          "commits": 1,
-          "additions": 65,
-          "deletions": 16
-        }
-      }
-    },
-    "2026-03-30": {
-      "commits": 4,
-      "additions": 232,
-      "deletions": 10,
-      "by_repo": {
-        "apm-steam-web": {
-          "commits": 2,
-          "additions": 176,
-          "deletions": 6
-        },
-        "apm-steam-azure-functions": {
-          "commits": 2,
-          "additions": 56,
-          "deletions": 4
-        }
-      }
-    },
-    "2026-03-25": {
-      "commits": 13,
-      "additions": 5246,
-      "deletions": 402,
-      "by_repo": {
-        "apm-steam-web": {
-          "commits": 7,
-          "additions": 4913,
-          "deletions": 371
-        },
-        "apm-steam-azure-functions": {
-          "commits": 6,
-          "additions": 333,
-          "deletions": 31
-        }
-      }
-    },
-    "2026-03-24": {
-      "commits": 22,
-      "additions": 5441,
-      "deletions": 270,
-      "by_repo": {
-        "apm-steam-web": {
-          "commits": 7,
-          "additions": 199,
-          "deletions": 72
-        },
-        "apm-steam-azure-functions": {
-          "commits": 10,
-          "additions": 1889,
-          "deletions": 43
-        },
-        "apm-steam-api": {
-          "commits": 4,
-          "additions": 269,
-          "deletions": 155
-        },
-        "apm-steam-claude-config": {
-          "commits": 1,
-          "additions": 3084,
-          "deletions": 0
-        }
-      }
-    },
-    "2026-03-20": {
-      "commits": 6,
-      "additions": 126,
-      "deletions": 35,
-      "by_repo": {
-        "apm-steam-web": {
-          "commits": 3,
-          "additions": 64,
-          "deletions": 10
-        },
-        "apm-steam-api": {
-          "commits": 3,
-          "additions": 62,
-          "deletions": 25
-        }
-      }
-    },
-    "2026-03-18": {
-      "commits": 3,
-      "additions": 360,
-      "deletions": 169,
-      "by_repo": {
-        "apm-steam-web": {
-          "commits": 2,
-          "additions": 215,
-          "deletions": 64
-        },
-        "apm-steam-api": {
-          "commits": 1,
-          "additions": 145,
-          "deletions": 105
-        }
-      }
-    },
-    "2026-03-17": {
-      "commits": 2,
-      "additions": 359,
-      "deletions": 168,
-      "by_repo": {
-        "apm-steam-web": {
-          "commits": 1,
-          "additions": 214,
-          "deletions": 63
-        },
-        "apm-steam-api": {
-          "commits": 1,
-          "additions": 145,
-          "deletions": 105
-        }
-      }
-    },
-    "2026-03-14": {
-      "commits": 9,
-      "additions": 368,
-      "deletions": 412,
-      "by_repo": {
-        "apm-steam-web": {
-          "commits": 4,
-          "additions": 236,
-          "deletions": 176
-        },
-        "apm-steam-azure-functions": {
-          "commits": 5,
-          "additions": 132,
-          "deletions": 236
-        }
-      }
-    },
     "2026-03-12": {
       "commits": 4,
       "additions": 865,
       "deletions": 626,
       "by_repo": {
-        "apm-steam-web": {
-          "commits": 1,
-          "additions": 234,
-          "deletions": 52
-        },
         "apm-steam-azure-functions": {
           "commits": 3,
           "additions": 631,
           "deletions": 574
-        }
-      }
-    },
-    "2026-03-11": {
-      "commits": 11,
-      "additions": 1655,
-      "deletions": 236,
-      "by_repo": {
-        "apm-steam-web": {
-          "commits": 9,
-          "additions": 1186,
-          "deletions": 172
         },
-        "apm-steam-azure-functions": {
-          "commits": 2,
-          "additions": 469,
-          "deletions": 64
-        }
-      }
-    },
-    "2026-03-05": {
-      "commits": 8,
-      "additions": 853,
-      "deletions": 32,
-      "by_repo": {
-        "apm-steam-web": {
-          "commits": 2,
-          "additions": 125,
-          "deletions": 7
-        },
-        "apm-steam-azure-functions": {
-          "commits": 2,
-          "additions": 367,
-          "deletions": 3
-        },
-        "apm-steam-api": {
-          "commits": 4,
-          "additions": 361,
-          "deletions": 22
-        }
-      }
-    },
-    "2026-02-24": {
-      "commits": 6,
-      "additions": 806,
-      "deletions": 7,
-      "by_repo": {
-        "apm-steam-web": {
-          "commits": 2,
-          "additions": 282,
-          "deletions": 4
-        },
-        "apm-steam-azure-functions": {
-          "commits": 4,
-          "additions": 524,
-          "deletions": 3
-        }
-      }
-    },
-    "2026-02-19": {
-      "commits": 1,
-      "additions": 91,
-      "deletions": 23,
-      "by_repo": {
         "apm-steam-web": {
           "commits": 1,
-          "additions": 91,
-          "deletions": 23
-        }
-      }
-    },
-    "2026-02-18": {
-      "commits": 4,
-      "additions": 91,
-      "deletions": 23,
-      "by_repo": {
-        "apm-steam-web": {
-          "commits": 4,
-          "additions": 91,
-          "deletions": 23
-        }
-      }
-    },
-    "2026-02-13": {
-      "commits": 8,
-      "additions": 3864,
-      "deletions": 397,
-      "by_repo": {
-        "apm-steam-web": {
-          "commits": 6,
-          "additions": 3186,
-          "deletions": 372
-        },
-        "apm-steam-azure-functions": {
-          "commits": 2,
-          "additions": 678,
-          "deletions": 25
-        }
-      }
-    },
-    "2026-01-30": {
-      "commits": 1,
-      "additions": 24,
-      "deletions": 15,
-      "by_repo": {
-        "apm-steam-web": {
-          "commits": 1,
-          "additions": 24,
-          "deletions": 15
-        }
-      }
-    },
-    "2026-01-29": {
-      "commits": 2,
-      "additions": 1936,
-      "deletions": 1612,
-      "by_repo": {
-        "apm-steam-web": {
-          "commits": 1,
-          "additions": 1855,
-          "deletions": 1612
-        },
-        "apm-steam-azure-functions": {
-          "commits": 1,
-          "additions": 81,
-          "deletions": 0
-        }
-      }
-    },
-    "2025-10-31": {
-      "commits": 5,
-      "additions": 5877,
-      "deletions": 6652,
-      "by_repo": {
-        "apm-steam-web": {
-          "commits": 5,
-          "additions": 5877,
-          "deletions": 6652
-        }
-      }
-    },
-    "2025-10-30": {
-      "commits": 7,
-      "additions": 935,
-      "deletions": 35,
-      "by_repo": {
-        "apm-steam-web": {
-          "commits": 6,
-          "additions": 780,
-          "deletions": 30
-        },
-        "apm-steam-azure-functions": {
-          "commits": 1,
-          "additions": 155,
-          "deletions": 5
-        }
-      }
-    },
-    "2025-10-23": {
-      "commits": 2,
-      "additions": 5307,
-      "deletions": 6653,
-      "by_repo": {
-        "apm-steam-web": {
-          "commits": 1,
-          "additions": 5194,
-          "deletions": 6653
-        },
-        "apm-steam-azure-functions": {
-          "commits": 1,
-          "additions": 113,
-          "deletions": 0
-        }
-      }
-    },
-    "2026-03-16": {
-      "commits": 2,
-      "additions": 89,
-      "deletions": 0,
-      "by_repo": {
-        "apm-steam-azure-functions": {
-          "commits": 2,
-          "additions": 89,
-          "deletions": 0
-        }
-      }
-    },
-    "2026-03-13": {
-      "commits": 3,
-      "additions": 78,
-      "deletions": 2,
-      "by_repo": {
-        "apm-steam-azure-functions": {
-          "commits": 3,
-          "additions": 78,
-          "deletions": 2
-        }
-      }
-    },
-    "2026-03-06": {
-      "commits": 6,
-      "additions": 504,
-      "deletions": 12,
-      "by_repo": {
-        "apm-steam-azure-functions": {
-          "commits": 2,
-          "additions": 0,
-          "deletions": 0
-        },
-        "apm-steam-api": {
-          "commits": 4,
-          "additions": 504,
-          "deletions": 12
-        }
-      }
-    },
-    "2026-02-25": {
-      "commits": 3,
-      "additions": 188,
-      "deletions": 8,
-      "by_repo": {
-        "apm-steam-azure-functions": {
-          "commits": 3,
-          "additions": 188,
-          "deletions": 8
+          "additions": 234,
+          "deletions": 52
         }
       }
     },
@@ -1483,6 +1604,23 @@
         }
       }
     },
+    "2025-10-30": {
+      "commits": 7,
+      "additions": 935,
+      "deletions": 35,
+      "by_repo": {
+        "apm-steam-azure-functions": {
+          "commits": 1,
+          "additions": 155,
+          "deletions": 5
+        },
+        "apm-steam-web": {
+          "commits": 6,
+          "additions": 780,
+          "deletions": 30
+        }
+      }
+    },
     "2025-10-29": {
       "commits": 1,
       "additions": 2,
@@ -1492,6 +1630,23 @@
           "commits": 1,
           "additions": 2,
           "deletions": 2
+        }
+      }
+    },
+    "2025-10-23": {
+      "commits": 2,
+      "additions": 5307,
+      "deletions": 6653,
+      "by_repo": {
+        "apm-steam-azure-functions": {
+          "commits": 1,
+          "additions": 113,
+          "deletions": 0
+        },
+        "apm-steam-web": {
+          "commits": 1,
+          "additions": 5194,
+          "deletions": 6653
         }
       }
     },
@@ -1543,15 +1698,37 @@
         }
       }
     },
-    "2026-02-12": {
+    "2026-03-18": {
       "commits": 3,
-      "additions": 49,
-      "deletions": 3,
+      "additions": 360,
+      "deletions": 169,
       "by_repo": {
         "apm-steam-api": {
-          "commits": 3,
-          "additions": 49,
-          "deletions": 3
+          "commits": 1,
+          "additions": 145,
+          "deletions": 105
+        },
+        "apm-steam-web": {
+          "commits": 2,
+          "additions": 215,
+          "deletions": 64
+        }
+      }
+    },
+    "2026-03-17": {
+      "commits": 2,
+      "additions": 359,
+      "deletions": 168,
+      "by_repo": {
+        "apm-steam-api": {
+          "commits": 1,
+          "additions": 145,
+          "deletions": 105
+        },
+        "apm-steam-web": {
+          "commits": 1,
+          "additions": 214,
+          "deletions": 63
         }
       }
     },
@@ -1746,6 +1923,18 @@
           "deletions": 3
         }
       }
+    },
+    "2025-10-31": {
+      "commits": 5,
+      "additions": 5877,
+      "deletions": 6652,
+      "by_repo": {
+        "apm-steam-web": {
+          "commits": 5,
+          "additions": 5877,
+          "deletions": 6652
+        }
+      }
     }
   },
   "by_repo": {
@@ -1770,24 +1959,24 @@
       "deletions": 0
     },
     "apm-steam-mobile": {
-      "commits": 176,
-      "additions": 45371,
-      "deletions": 23527
+      "commits": 349,
+      "additions": 85674,
+      "deletions": 31057
+    },
+    "apm-steam-azure-functions": {
+      "commits": 102,
+      "additions": 12489,
+      "deletions": 1612
+    },
+    "apm-steam-api": {
+      "commits": 108,
+      "additions": 50200,
+      "deletions": 46882
     },
     "apm-steam-web": {
       "commits": 82,
       "additions": 27344,
       "deletions": 16615
-    },
-    "apm-steam-azure-functions": {
-      "commits": 98,
-      "additions": 12429,
-      "deletions": 1611
-    },
-    "apm-steam-api": {
-      "commits": 105,
-      "additions": 50092,
-      "deletions": 46876
     },
     "apm-steam-claude-config": {
       "commits": 11,

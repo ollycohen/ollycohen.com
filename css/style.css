@@ -209,7 +209,7 @@ a:focus-visible, .btn:focus-visible {
   animation: fadeSlideUp 1s cubic-bezier(0.22, 1, 0.36, 1) forwards 0.5s;
 }
 .hero__line--2 {
-  font-size: clamp(2.8rem, 7vw, 6.5rem);
+  font-size: clamp(3.5rem, 9vw, 8rem);
   color: var(--c-accent-bright);
   opacity: 0;
   animation: fadeSlideUp 1s cubic-bezier(0.22, 1, 0.36, 1) forwards 0.7s;
@@ -1318,7 +1318,7 @@ a:focus-visible, .btn:focus-visible {
   .gallery__grid { grid-template-columns: 1fr; }
 
   .hero__line--1 { font-size: clamp(2.8rem, 12vw, 4.5rem); }
-  .hero__line--2 { font-size: clamp(2.2rem, 10vw, 3.8rem); }
+  .hero__line--2 { font-size: clamp(2.8rem, 12vw, 4.5rem); }
   .hero__subtitle { font-size: 0.8rem; letter-spacing: 0.1em; }
 
   .section__label::before { width: 16px; }

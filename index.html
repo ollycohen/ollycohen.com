@@ -49,7 +49,7 @@
       <p class="hero__subtitle">Writer. Adventurer. Engineer.</p>
       <div class="hero__cta">
         <a href="/andes/" class="btn btn--primary">South America 2026 →</a>
-        <a href="/adventures/" class="btn btn--ghost">Past Adventures</a>
+        <a href="/adventures/" class="btn btn--ghost">All Adventures</a>
       </div>
     </div>
   </header>
@@ -57,8 +57,7 @@
   <!-- ADVENTURES PREVIEW -->
   <section class="section adventures-preview">
     <div class="container">
-      <span class="section__label">Adventures</span>
-      <h2 class="section__heading">Continents traversed</h2>
+      <span class="section__label">All Adventures</span>
       <div class="adventures__grid" id="adventuresGrid">
         <p id="adventuresLoading" style="color:var(--c-text-muted);font-family:var(--f-mono);font-size:0.85rem;">Loading adventures…</p>
       </div>
@@ -83,14 +82,23 @@
               <span class="terminal__dot terminal__dot--red"></span>
               <span class="terminal__dot terminal__dot--yellow"></span>
               <span class="terminal__dot terminal__dot--green"></span>
-              <span class="terminal__title">olly@claude ~</span>
+              <span class="terminal__title">claude code</span>
             </div>
             <div class="terminal__body">
-              <div class="terminal__line"><span class="terminal__prompt">$</span> <span class="terminal__cmd">claude</span> <span class="terminal__arg">"trace the bug across both repos"</span></div>
-              <div class="terminal__line terminal__line--output">→ Fix touched 3 files in 2 repositories</div>
-              <div class="terminal__line terminal__line--output">→ No specialist would have written this alone</div>
-              <div class="terminal__line"><span class="terminal__prompt">$</span> <span class="terminal__cmd">echo</span> <span class="terminal__arg">"All engineers are full-stack now"</span></div>
-              <div class="terminal__line terminal__line--cursor"><span class="terminal__prompt">$</span> <span class="terminal__cursor">▊</span></div>
+              <div class="terminal__line"><span class="terminal__prompt">&gt;</span> <span class="terminal__arg">add the adventures section to the homepage</span></div>
+              <div class="terminal__line terminal__line--output"></div>
+              <div class="terminal__line terminal__line--output">I'll fetch the adventures from Supabase and</div>
+              <div class="terminal__line terminal__line--output">render them as cards on the homepage.</div>
+              <div class="terminal__line terminal__line--output"></div>
+              <div class="terminal__line terminal__line--output"><span class="terminal__cmd">Edit</span> index.html +58</div>
+              <div class="terminal__line terminal__line--output"><span class="terminal__cmd">Edit</span> css/style.css +412</div>
+              <div class="terminal__line terminal__line--output"></div>
+              <div class="terminal__line terminal__line--output">Verifying in the browser preview...</div>
+              <div class="terminal__line terminal__line--output">✓ 4 adventure cards rendered</div>
+              <div class="terminal__line terminal__line--output">✓ Responsive grid at mobile breakpoint</div>
+              <div class="terminal__line terminal__line--output">✓ No console errors</div>
+              <div class="terminal__line terminal__line--output"></div>
+              <div class="terminal__line terminal__line--cursor"><span class="terminal__prompt">&gt;</span> <span class="terminal__cursor">▊</span></div>
             </div>
           </div>
         </div>
@@ -172,15 +180,6 @@
     function fmtDate(ds) {
       const [y, m] = ds.split('-');
       return ['January','February','March','April','May','June','July','August','September','October','November','December'][parseInt(m) - 1] + ' ' + y;
-    }
-    function animateCounter(el, target) {
-      const dur = 2000, t0 = performance.now();
-      const fmt = n => n >= 1000 ? n.toLocaleString() : String(n);
-      (function step(t) {
-        const p = Math.min((t - t0) / dur, 1);
-        el.textContent = fmt(Math.floor((1 - Math.pow(1 - p, 3)) * target));
-        if (p < 1) requestAnimationFrame(step);
-      })(t0);
     }
 
     try {

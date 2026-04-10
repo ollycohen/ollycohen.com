@@ -21,7 +21,7 @@ ollycohen.com/
 │   └── main.js             # Nav scroll, mobile menu, scroll reveal, counter animation
 ├── pages/
 │   ├── adventures.html     # Timeline of all continent runs
-│   ├── andes.html          # Andes FKT dedicated page (stats, route, FAQ)
+│   ├── andes.html          # Andes dedicated page (stats, route, FAQ)
 │   ├── engineering.html    # Software engineering philosophy + background
 │   ├── blog.html           # Blog archive with category filter (links to Substack)
 │   ├── impact.html         # Press coverage + philanthropy
@@ -79,32 +79,70 @@ ollycohen.com/
 - IntersectionObserver for scroll reveals and counter animations
 - Mobile nav toggle
 
+## Content lives in Supabase
+
+**All website content changes go through Supabase.** Do not hard-code new content into HTML files.
+
+- If a content change is requested and the target already reads from Supabase: update the relevant table directly.
+- If a content change is requested and the target is still hard-coded in HTML: (1) insert/update the content in Supabase, (2) refactor that section of the site to fetch from Supabase via the anon client in `js/config.js`, (3) remove the hard-coded copy.
+- Schema and seed SQL live in `supabase/`. When you change the schema or add a table, add a new `.sql` file there so the change is tracked in the repo.
+- The frontend uses the anon key (read-only via RLS). Writes require `SUPABASE_SERVICE_KEY` — see the Supabase project `upocwcjkyyhufaaalblz`.
+
+### How Claude writes to Supabase
+
+The service key lives in `.env.local` (gitignored, chmod 600). Source it once per Bash call, then hit the REST API directly:
+
+```bash
+set -a && . ./.env.local && set +a
+BASE="https://upocwcjkyyhufaaalblz.supabase.co/rest/v1"
+HDR=(-H "apikey:$SUPABASE_SERVICE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_KEY")
+
+# Read
+curl -s "$BASE/blog_posts?select=id,title&order=date.desc&limit=5" "${HDR[@]}"
+
+# Insert
+curl -s -X POST "$BASE/blog_posts" "${HDR[@]}" \
+  -H "Content-Type: application/json" -H "Prefer: return=representation" \
+  -d '{"title":"...","url":"...","category":"tech","tag":"Tech","date":"2026-04-09"}'
+
+# Update
+curl -s -X PATCH "$BASE/blog_posts?id=eq.<uuid>" "${HDR[@]}" \
+  -H "Content-Type: application/json" -H "Prefer: return=representation" \
+  -d '{"featured":true}'
+```
+
+Tables: `about`, `adventures`, `adventure_sections`, `adventure_media`, `andes_sections`, `andes_stats`, `andes_faqs`, `blog_posts`, `engineering_sections`, `fundraisers`, `press_items`, `sponsors`, `stats`.
+
+For schema/DDL changes (CREATE TABLE, ALTER, etc.), write a migration to `supabase/<name>.sql` and ask the user to run it in the Supabase SQL editor — the REST API can't run arbitrary SQL.
+
 ## Common Tasks
 
-### Add a new blog post to the archive
-Edit `pages/blog.html`. Add an `<a>` inside the `#blogList` div:
-```html
-<a href="SUBSTACK_URL" target="_blank" class="blog-list__item" data-cat="CATEGORY">
-  <span class="blog-list__tag">DISPLAY_TAG</span>
-  <span class="blog-list__title">POST_TITLE</span>
-  <span class="blog-list__date">Mon YYYY</span>
-</a>
+### Add a new blog post
+Insert a row into `blog_posts` via the REST API:
+```bash
+curl -s -X POST "$BASE/blog_posts" "${HDR[@]}" \
+  -H "Content-Type: application/json" -H "Prefer: return=representation" \
+  -d '{"title":"...","url":"https://irunearth.substack.com/p/...","category":"tech","tag":"Tech","date":"2026-04-10"}'
 ```
-Insert in reverse chronological order (newest first). Valid categories: `tech`, `north-america`, `africa`, `asia`, `personal`.
-
-Also update the blog preview on `index.html` if the post is noteworthy (the 4-card grid in the `blog-preview` section).
+Valid categories: `tech`, `north-america`, `africa`, `asia`, `personal`. Set `featured: true` if it should appear in the homepage blog preview.
 
 ### Add a new press/media item
-Edit `pages/impact.html`. Add a `.blog-list__item` link in the press section.
+Insert a row into `press_items`.
 
 ### Add a new sponsor
-Edit `pages/sponsors.html`. Add a `.sponsor-card` div. Also update `index.html` footer or Andes teaser if the sponsor should appear on the homepage.
+Insert a row into `sponsors`.
+
+### Update adventure content
+Update rows in `adventures`, `adventure_sections`, or `adventure_media`.
 
 ### Add real photos
-Replace `background: linear-gradient(...)` on `.adventure-card__img` elements with `background-image: url('/images/FILENAME.jpg'); background-size: cover; background-position: center;`. Place images in `/images/`.
+Place images in `/images/`. For adventure cards, update the relevant `adventure_media` row or replace the CSS gradient in the HTML with `background-image: url('/images/FILENAME.jpg')`.
 
 ### Update nav across all pages
-The nav is duplicated in every HTML file. When changing nav links, update all 8 files: `index.html`, `404.html`, and all 6 files in `pages/`.
+The nav is duplicated in every HTML file. When changing nav links, update all 8 files: `index.html`, `404.html`, and all files in `pages/`.
+
+### Refactor hard-coded content to Supabase
+When a content change targets something still hard-coded in HTML: (1) ensure the data exists in the appropriate Supabase table, (2) add JS to fetch from Supabase and render it, (3) remove the hard-coded HTML.
 
 ## Deployment
 
@@ -120,8 +158,5 @@ After completing changes, always deploy by default: commit and push to `main`. G
 
 - **Owner:** Olly Cohen (@ollycohen on Instagram, olly.k.cohen@gmail.com)
 - **Brand:** I Run Earth (irunearth.substack.com)
-- **Sponsors:** Norda (trail shoes), Black Diamond (mountain gear)
-- **Charity:** Kilimanjaro Aid Project (Andes FKT), Rise Against Hunger (Asia), GiveDirectly (Africa)
-- **Departure:** May 17, 2026 — Andes FKT begins with Pico Cristóbal Colón climb in Colombia
 - **Audience:** potential sponsors, potential employers, press, adventure/running community, tech community
 - **This site was built with Claude** — that's part of the story and noted in the footer

@@ -185,23 +185,29 @@
     try {
       const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-      const [advRes, blogRes, andesTeaserAdv, andesStatsRes, engPhilosophyRes] = await Promise.all([
-        sb.from('adventures').select('continent,title,description,badge,gradient,card_href,card_year').order('sort_order').limit(4),
+      const [advRes, coverRes, blogRes, andesTeaserAdv, andesStatsRes, engPhilosophyRes] = await Promise.all([
+        sb.from('adventures').select('slug,continent,title,description,badge,gradient,card_href,card_year').order('sort_order').limit(4),
+        sb.from('adventure_media').select('adventure_slug,thumbnail_path').eq('title', 'Cover').eq('type', 'image'),
         sb.from('blog_posts').select('title,url,tag,excerpt,date').eq('featured', true).order('sort_order').limit(4),
-        sb.from('adventures').select('teaser_title,teaser_subtitle,description').eq('slug', 'andes-fkt').single(),
+        sb.from('adventures').select('teaser_title,teaser_subtitle,description').eq('slug', 'andes').single(),
         sb.from('andes_stats').select('value,label').eq('show_on_homepage', true).order('sort_order'),
         sb.from('engineering_sections').select('paragraphs').eq('slug', 'philosophy').single()
       ]);
 
       // ── ADVENTURE CARDS ────────────────────────────────────
+      const covers = {};
+      (coverRes.data || []).forEach(m => { covers[m.adventure_slug] = m.thumbnail_path; });
+
       const advGrid = document.getElementById('adventuresGrid');
       document.getElementById('adventuresLoading')?.remove();
       (advRes.data || []).forEach((adv, i) => {
         const a = document.createElement('a');
         a.href = adv.card_href || '/adventures/';
         a.className = 'adventure-card' + (i === 0 ? ' adventure-card--featured' : '');
-        const grad = adv.gradient || 'linear-gradient(135deg, #1a2a1a, #2d3d2d, #1a2a1a)';
-        const imgStyle = 'background:' + esc(grad) + ';';
+        const coverPath = covers[adv.slug];
+        const imgStyle = coverPath
+          ? "background-image:url('" + esc(coverPath) + "');background-size:cover;background-position:center;"
+          : 'background:' + esc(adv.gradient || 'linear-gradient(135deg, #1a2a1a, #2d3d2d, #1a2a1a)') + ';';
         a.innerHTML =
           (adv.badge ? '<div class="adventure-card__badge">' + esc(adv.badge) + '</div>' : '') +
           '<div class="adventure-card__img" style="' + imgStyle + '">' +

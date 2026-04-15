@@ -8,3 +8,9 @@ Thumbs.db
 .env
 .env.local
 .env.*.local
+
+# Claude Code local config (machine-specific)
+.claude/
+
+# Old Webflow CSV exports (kept locally for reference)
+webflowExport/

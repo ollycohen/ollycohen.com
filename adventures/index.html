@@ -71,22 +71,29 @@
 
     try {
       const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      const { data, error } = await sb.from('adventures')
-        .select('*')
-        .order('sort_order');
+      // Fetch adventures + cover images in parallel. Covers are stored in
+      // adventure_media with title='Cover' (convention, keeps schema flat).
+      const [advRes, coverRes] = await Promise.all([
+        sb.from('adventures').select('*').order('sort_order'),
+        sb.from('adventure_media').select('adventure_slug,thumbnail_path').eq('title', 'Cover').eq('type', 'image')
+      ]);
 
-      if (error) throw error;
+      if (advRes.error) throw advRes.error;
+
+      const covers = {};
+      (coverRes.data || []).forEach(m => { covers[m.adventure_slug] = m.thumbnail_path; });
 
       const timeline = document.getElementById('timeline');
       document.getElementById('timelineLoading')?.remove();
 
-      (data || []).forEach((adv, i) => {
+      (advRes.data || []).forEach((adv, i) => {
         const div = document.createElement('div');
         div.className = 'timeline__item';
         if (adv.section_id) div.id = adv.section_id;
 
-        const imgHtml = adv.image_url
-          ? '<img class="timeline__image" src="' + esc(adv.image_url) + '" alt="' + esc(adv.continent) + '" loading="lazy">'
+        const coverPath = covers[adv.slug];
+        const imgHtml = coverPath
+          ? '<img class="timeline__image" src="' + esc(coverPath) + '" alt="' + esc(adv.continent) + '" loading="lazy">'
           : '';
 
         div.innerHTML =

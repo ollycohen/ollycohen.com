@@ -35,16 +35,19 @@
     </div>
   </header>
 
+  <!-- Cover image -->
+  <div class="adventure-cover" id="adventureCover" style="display: none;">
+    <img id="adventureCoverImg" alt="" loading="eager">
+  </div>
+
   <!-- Text sections + Map -->
   <section class="page-content" id="adventureContent" style="padding-bottom: var(--space-xl); display: none;">
     <div class="container">
       <div class="adventure-layout">
         <div class="adventure-layout__text" id="adventureText"></div>
-        <div class="adventure-layout__map" id="adventureMap" style="display: none;">
+        <div id="adventureMapContainer" style="display: none;">
           <h2 style="font-family: var(--f-display); font-size: 1.5rem; margin-bottom: var(--space-md);">Route Map</h2>
-          <div style="border-radius: var(--radius-lg); overflow: hidden;">
-            <iframe id="adventureMapIframe" width="100%" height="600" style="display: block; border: none;"></iframe>
-          </div>
+          <div class="adventure-maps" id="adventureMaps"></div>
         </div>
       </div>
     </div>
@@ -88,9 +91,10 @@
         return;
       }
 
-      // Sections + media are optional (tables may not exist yet)
+      // Sections, media, and maps are optional (tables may not exist yet)
       var sectRes = { data: [] };
       var mediaRes = { data: [] };
+      var mapsRes = { data: [] };
       try {
         var results = await Promise.all([
           sb.from('adventure_sections')
@@ -100,10 +104,15 @@
           sb.from('adventure_media')
             .select('type,title,thumbnail_path,youtube_id,taken_date')
             .eq('adventure_slug', slug)
-            .order('taken_date', { ascending: false })
+            .order('taken_date', { ascending: false }),
+          sb.from('adventure_maps')
+            .select('label,map_url')
+            .eq('adventure_slug', slug)
+            .order('sort_order')
         ]);
         if (!results[0].error) sectRes = results[0];
         if (!results[1].error) mediaRes = results[1];
+        if (!results[2].error) mapsRes = results[2];
       } catch (e) { /* tables may not exist yet */ }
 
       var adv = advRes.data;
@@ -118,9 +127,34 @@
       document.getElementById('adventureTitle').textContent = adv.continent + ': ' + adv.title;
       document.getElementById('adventureDesc').textContent = adv.subtitle || adv.description;
 
-      // Sections + Map
+      // Split media into cover + gallery. Cover is a row with title='Cover'
+      // (convention — keeps schema flat, no extra column needed).
+      var allMedia = mediaRes.data || [];
+      var coverItem = null;
+      var media = [];
+      allMedia.forEach(function (item) {
+        if (!coverItem && item.type === 'image' && item.title === 'Cover') {
+          coverItem = item;
+        } else {
+          media.push(item);
+        }
+      });
+
+      // Cover image
+      if (coverItem) {
+        document.getElementById('adventureCoverImg').src = coverItem.thumbnail_path;
+        document.getElementById('adventureCoverImg').alt = adv.continent + ' — ' + adv.title;
+        document.getElementById('adventureCover').style.display = '';
+      }
+
+      // Sections + Maps
       var sections = sectRes.data || [];
-      var hasContent = sections.length > 0 || adv.map_url;
+      var maps = mapsRes.data || [];
+      // Fallback: if adventure_maps table has no rows, use map_url from adventures
+      if (maps.length === 0 && adv.map_url) {
+        maps = [{ label: 'Route Map', map_url: adv.map_url }];
+      }
+      var hasContent = sections.length > 0 || maps.length > 0;
 
       if (hasContent) {
         document.getElementById('adventureContent').style.display = '';
@@ -156,15 +190,30 @@
           }
         });
 
-        // Map
-        if (adv.map_url) {
-          document.getElementById('adventureMap').style.display = '';
-          document.getElementById('adventureMapIframe').src = adv.map_url;
+        // Maps
+        if (maps.length > 0) {
+          document.getElementById('adventureMapContainer').style.display = '';
+          var mapsGrid = document.getElementById('adventureMaps');
+          maps.forEach(function (m) {
+            var wrapper = document.createElement('div');
+            if (maps.length > 1) {
+              var label = document.createElement('p');
+              label.className = 'adventure-maps__label';
+              label.textContent = m.label;
+              wrapper.appendChild(label);
+            }
+            var iframe = document.createElement('iframe');
+            iframe.src = m.map_url;
+            iframe.width = '100%';
+            iframe.height = '600';
+            iframe.setAttribute('loading', 'lazy');
+            wrapper.appendChild(iframe);
+            mapsGrid.appendChild(wrapper);
+          });
         }
       }
 
-      // Gallery
-      var media = mediaRes.data || [];
+      // Gallery (cover already filtered out above)
       if (media.length > 0) {
         document.getElementById('gallerySection').style.display = '';
         var grid = document.getElementById('galleryGrid');

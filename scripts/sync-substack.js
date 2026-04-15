@@ -39,22 +39,50 @@ if (!SUPABASE_SERVICE_KEY) {
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
+// Use a realistic desktop Chrome User-Agent + full set of browser headers.
+// Substack is behind Cloudflare, and Cloudflare's bot challenge is partly
+// driven by User-Agent heuristics — a bare "compatible; myscript/1.0" UA is
+// flagged as a bot and served a 403 "Just a moment..." page, especially from
+// datacenter IP ranges (which is every GitHub Actions runner).
+const BROWSER_HEADERS = {
+  'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+  'Accept-Language': 'en-US,en;q=0.9',
+  'Accept-Encoding': 'identity', // avoid gzip so we can read the body directly
+  'Cache-Control': 'no-cache',
+  'Pragma': 'no-cache',
+  'Sec-Ch-Ua': '"Chromium";v="131", "Not_A Brand";v="24"',
+  'Sec-Ch-Ua-Mobile': '?0',
+  'Sec-Ch-Ua-Platform': '"macOS"',
+  'Sec-Fetch-Dest': 'document',
+  'Sec-Fetch-Mode': 'navigate',
+  'Sec-Fetch-Site': 'none',
+  'Sec-Fetch-User': '?1',
+  'Upgrade-Insecure-Requests': '1',
+};
+
 function httpsGet(url) {
   return new Promise((resolve, reject) => {
     const parsed = new URL(url);
     const opts = {
       hostname: parsed.hostname,
       path: parsed.pathname + parsed.search,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; ollycohen-blog-sync/1.0)',
-        'Accept': 'application/rss+xml, application/xml, text/xml, */*',
-      },
+      headers: BROWSER_HEADERS,
     };
     https.get(opts, (res) => {
       let body = '';
       res.on('data', (chunk) => { body += chunk; });
       res.on('end', () => {
-        if (res.statusCode !== 200) return reject(new Error(`HTTP ${res.statusCode}: ${body.slice(0, 200)}`));
+        if (res.statusCode !== 200) {
+          const cfRay = res.headers['cf-ray'] || '(none)';
+          const server = res.headers['server'] || '(none)';
+          const mitigated = res.headers['cf-mitigated'] || '(none)';
+          return reject(new Error(
+            `HTTP ${res.statusCode} for ${url}\n` +
+            `  server: ${server}  cf-ray: ${cfRay}  cf-mitigated: ${mitigated}\n` +
+            `  body (first 300 chars): ${body.slice(0, 300).replace(/\s+/g, ' ')}`
+          ));
+        }
         resolve(body);
       });
     }).on('error', reject);

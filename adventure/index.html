@@ -104,7 +104,7 @@
             .eq('adventure_slug', slug)
             .order('taken_date', { ascending: false }),
           sb.from('adventure_maps')
-            .select('label,map_url')
+            .select('label,map_url,start_date,end_date')
             .eq('adventure_slug', slug)
             .order('sort_order')
         ]);
@@ -192,6 +192,18 @@
         if (maps.length > 0) {
           document.getElementById('adventureMapContainer').style.display = '';
           var mapsGrid = document.getElementById('adventureMaps');
+          var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+          function fmtDateRange(startStr, endStr) {
+            // Both YYYY-MM-DD strings from a Postgres `date` column.
+            if (!startStr || !endStr) return '';
+            var s = startStr.split('-'), e = endStr.split('-');
+            var sY = parseInt(s[0], 10), sM = MONTHS[parseInt(s[1], 10) - 1], sD = parseInt(s[2], 10);
+            var eY = parseInt(e[0], 10), eM = MONTHS[parseInt(e[1], 10) - 1], eD = parseInt(e[2], 10);
+            if (sY === eY) {
+              return sM + ' ' + sD + ' — ' + eM + ' ' + eD + ', ' + eY;
+            }
+            return sM + ' ' + sD + ', ' + sY + ' — ' + eM + ' ' + eD + ', ' + eY;
+          }
           maps.forEach(function (m) {
             var wrapper = document.createElement('div');
             if (maps.length > 1) {
@@ -199,6 +211,13 @@
               label.className = 'adventure-maps__label';
               label.textContent = m.label;
               wrapper.appendChild(label);
+            }
+            var dateText = fmtDateRange(m.start_date, m.end_date);
+            if (dateText) {
+              var dateEl = document.createElement('p');
+              dateEl.className = 'adventure-maps__date';
+              dateEl.textContent = dateText;
+              wrapper.appendChild(dateEl);
             }
             var iframe = document.createElement('iframe');
             iframe.src = m.map_url;

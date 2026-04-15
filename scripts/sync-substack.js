@@ -16,13 +16,30 @@ const path = require('path');
 // ── Config ───────────────────────────────────────────────────────────────────
 const SUBSTACK_HOST = 'irunearth.substack.com';
 
-// Map Substack tag slugs to blog_posts category + display tag.
-// Each entry fetches https://irunearth.substack.com/feed?tag=<slug>
-// Add new entries here to auto-sync additional sections.
+// The main feed (https://irunearth.substack.com/feed) is the source of truth
+// for which posts exist. We additionally fetch one tag-filtered feed per
+// TAG_MAP entry only to discover which posts belong to that category.
+//
+// Priority: TAG_MAP iteration order. If a post is tagged with both 'ai' and
+// 'washington', the first key in TAG_MAP wins. Order entries from most-
+// specific to most-general.
+//
+// Anything in the main feed that doesn't appear in any tag feed is inserted
+// with DEFAULT_MAPPING below.
+//
+// The sync is INSERT-ONLY (see insertNewPosts), so any category fix you make
+// later in Supabase is permanent — re-running the sync will never overwrite
+// an existing row. Add new tag mappings here as you start using new tags on
+// Substack and they'll auto-categorize on first publish.
 const TAG_MAP = {
-  'ai': { category: 'tech', tag: 'Tech' },
-  // 'diary': { category: 'personal', tag: 'Personal' },  // uncomment to auto-sync diary posts
+  // Tech / engineering posts
+  'ai':         { category: 'tech',          tag: 'Tech' },
+
+  // Adventure regions — keyed by Substack tags Olly actually uses.
+  // Add more state/country tags as they appear on new posts.
+  'washington': { category: 'north-america', tag: 'North America' },
 };
+const DEFAULT_MAPPING = { category: 'personal', tag: 'Personal' };
 
 // ── Read Supabase config ─────────────────────────────────────────────────────
 const repoRoot = path.resolve(__dirname, '..');
@@ -167,62 +184,87 @@ async function fetchFeedItems(feedUrl) {
 
 // ── Fetch posts from RSS feeds ───────────────────────────────────────────────
 async function fetchPostsFromRss() {
-  const allPosts = [];
-  for (const [tagSlug, mapping] of Object.entries(TAG_MAP)) {
-    const feedUrl = `https://${SUBSTACK_HOST}/feed?tag=${tagSlug}`;
-    console.log(`Fetching RSS feed: ${feedUrl}`);
-    const { items, via } = await fetchFeedItems(feedUrl);
-    console.log(`  Found ${items.length} posts for tag "${tagSlug}" (via ${via})`);
+  // 1. Main feed = source of truth for which posts exist on Substack.
+  //    Fetched first so a failure here aborts before we waste tag requests.
+  const mainFeedUrl = `https://${SUBSTACK_HOST}/feed`;
+  console.log(`Fetching main feed: ${mainFeedUrl}`);
+  const main = await fetchFeedItems(mainFeedUrl);
+  console.log(`  Found ${main.items.length} posts in main feed (via ${main.via})`);
 
-    for (const item of items) {
-      const date = new Date(item.pubDate).toISOString().split('T')[0];
-      allPosts.push({
-        title: item.title,
-        url: item.link,
-        category: mapping.category,
-        tag: mapping.tag,
-        excerpt: item.description || null,
-        date: date,
-        sort_order: 0,
-      });
+  // 2. For each tag in TAG_MAP, fetch the tag-filtered feed and remember
+  //    which post URLs belong to that category. First key in TAG_MAP wins
+  //    when a post matches multiple tags.
+  const urlToMapping = new Map();
+  for (const [tagSlug, mapping] of Object.entries(TAG_MAP)) {
+    const tagFeedUrl = `https://${SUBSTACK_HOST}/feed?tag=${tagSlug}`;
+    console.log(`Fetching tag feed: ${tagFeedUrl}`);
+    const tag = await fetchFeedItems(tagFeedUrl);
+    console.log(`  Found ${tag.items.length} posts for tag "${tagSlug}" → ${mapping.category} (via ${tag.via})`);
+    for (const item of tag.items) {
+      if (!urlToMapping.has(item.link)) urlToMapping.set(item.link, mapping);
     }
   }
-  console.log(`Total: ${allPosts.length} posts to sync`);
+
+  // 3. Build the post objects from the main feed, applying tag → category
+  //    mapping where we found one and DEFAULT_MAPPING otherwise.
+  const allPosts = main.items.map((item) => {
+    const mapping = urlToMapping.get(item.link) || DEFAULT_MAPPING;
+    return {
+      title: item.title,
+      url: item.link,
+      category: mapping.category,
+      tag: mapping.tag,
+      excerpt: item.description || null,
+      date: new Date(item.pubDate).toISOString().split('T')[0],
+      sort_order: 0,
+    };
+  });
+  console.log(`Total: ${allPosts.length} posts to sync (new ones will be inserted; existing rows are left alone)`);
   return allPosts;
 }
 
-// ── Upsert into Supabase ─────────────────────────────────────────────────────
-async function upsertPosts(posts) {
-  if (posts.length === 0) { console.log('No posts to upsert'); return; }
+// ── Insert new posts into Supabase (insert-only, preserves existing rows) ───
+async function insertNewPosts(posts) {
+  if (posts.length === 0) { console.log('No posts to insert'); return; }
 
+  // resolution=ignore-duplicates makes PostgREST skip rows whose URL already
+  // exists, so any manual category/tag fix you've made in Supabase is never
+  // overwritten. With return=representation, the response body contains only
+  // the rows that were actually inserted (duplicates are silently dropped).
   const url = `${SUPABASE_URL}/rest/v1/blog_posts?on_conflict=url`;
   const headers = {
     'apikey': SUPABASE_SERVICE_KEY,
     'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
     'Content-Type': 'application/json',
-    'Prefer': 'resolution=merge-duplicates',
+    'Prefer': 'resolution=ignore-duplicates,return=representation',
   };
 
-  // Upsert in batches of 20
   const BATCH_SIZE = 20;
-  let total = 0;
+  let totalInserted = 0;
   for (let i = 0; i < posts.length; i += BATCH_SIZE) {
     const batch = posts.slice(i, i + BATCH_SIZE);
     const res = await httpsRequest('POST', url, headers, JSON.stringify(batch));
     if (res.status >= 400) {
-      console.error(`ERROR: Supabase upsert failed (HTTP ${res.status}): ${res.body}`);
+      console.error(`ERROR: Supabase insert failed (HTTP ${res.status}): ${res.body}`);
       process.exit(1);
     }
-    total += batch.length;
-    console.log(`Upserted batch ${Math.floor(i / BATCH_SIZE) + 1} (${total}/${posts.length} posts)`);
+    let inserted = [];
+    try { inserted = res.body ? JSON.parse(res.body) : []; }
+    catch (e) { /* empty 201 is fine */ }
+    totalInserted += inserted.length;
+    const skipped = batch.length - inserted.length;
+    console.log(`Batch ${Math.floor(i / BATCH_SIZE) + 1}: ${inserted.length} new, ${skipped} already in DB`);
+    for (const p of inserted) {
+      console.log(`  + ${p.date}  [${p.category}]  ${p.title}`);
+    }
   }
-  console.log(`Done. Upserted ${total} posts into blog_posts`);
+  console.log(`Done. ${totalInserted} new posts inserted into blog_posts`);
 }
 
 // ── Main ─────────────────────────────────────────────────────────────────────
 async function main() {
   const posts = await fetchPostsFromRss();
-  await upsertPosts(posts);
+  await insertNewPosts(posts);
 }
 
 main().catch(err => { console.error('ERROR:', err.message); process.exit(1); });

@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-04-14T08:09:11.372Z",
+  "generated_at": "2026-04-15T04:26:16.344Z",
   "username": "OllyCohen",
   "date_range": {
-    "start": "2025-04-14",
-    "end": "2026-04-14"
+    "start": "2025-04-15",
+    "end": "2026-04-15"
   },
   "repos_scanned": [
     "ollycohen/ollycohen.com",
@@ -17,13 +17,25 @@
     "apm-apps/apm-steam-azure-functions"
   ],
   "summary": {
-    "total_commits": 741,
-    "total_additions": 198848,
-    "total_deletions": 100969,
-    "active_days": 122,
+    "total_commits": 749,
+    "total_additions": 199224,
+    "total_deletions": 101034,
+    "active_days": 123,
     "longest_streak": 6
   },
   "daily": {
+    "2026-04-15": {
+      "commits": 8,
+      "additions": 376,
+      "deletions": 65,
+      "by_repo": {
+        "ollycohen.com": {
+          "commits": 8,
+          "additions": 376,
+          "deletions": 65
+        }
+      }
+    },
     "2026-04-10": {
       "commits": 11,
       "additions": 546,
@@ -1981,9 +1993,9 @@
   },
   "by_repo": {
     "ollycohen.com": {
-      "commits": 44,
-      "additions": 13967,
-      "deletions": 4162
+      "commits": 52,
+      "additions": 14343,
+      "deletions": 4227
     },
     "andes-checklist": {
       "commits": 27,

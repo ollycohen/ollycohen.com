@@ -35,14 +35,12 @@
     </div>
   </header>
 
-  <!-- Cover image -->
-  <div class="adventure-cover" id="adventureCover" style="display: none;">
-    <img id="adventureCoverImg" alt="" loading="eager">
-  </div>
-
-  <!-- Text sections + Map -->
+  <!-- Text sections + Map (cover image renders at the top of the container) -->
   <section class="page-content" id="adventureContent" style="padding-bottom: var(--space-xl); display: none;">
     <div class="container">
+      <figure class="adventure-cover" id="adventureCover" style="display: none;">
+        <img id="adventureCoverImg" alt="" loading="eager">
+      </figure>
       <div class="adventure-layout">
         <div class="adventure-layout__text" id="adventureText"></div>
         <div id="adventureMapContainer" style="display: none;">
@@ -154,7 +152,7 @@
       if (maps.length === 0 && adv.map_url) {
         maps = [{ label: 'Route Map', map_url: adv.map_url }];
       }
-      var hasContent = sections.length > 0 || maps.length > 0;
+      var hasContent = sections.length > 0 || maps.length > 0 || coverItem;
 
       if (hasContent) {
         document.getElementById('adventureContent').style.display = '';

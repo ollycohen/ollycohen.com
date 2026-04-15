@@ -132,15 +132,47 @@ function parseRssItems(xml) {
   return items;
 }
 
+// ── Fetch one feed (direct first, rss2json fallback on CF block) ─────────────
+// When run locally from Olly's Mac, the direct path works (home IP isn't
+// blocked). When run on GitHub Actions, Cloudflare issues a "managed challenge"
+// to every datacenter IP and we get HTTP 403. In that case we transparently
+// fall back to the free rss2json.com API, which fetches on our behalf from a
+// non-blocked IP and returns already-parsed JSON (so we skip our XML parser).
+async function fetchFeedItems(feedUrl) {
+  try {
+    const xml = await httpsGet(feedUrl);
+    return { items: parseRssItems(xml), via: 'direct' };
+  } catch (err) {
+    if (!/HTTP 403/.test(err.message)) throw err;
+    console.log(`  Direct fetch 403'd (Cloudflare); falling back to rss2json.com`);
+    const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`;
+    const body = await httpsGet(proxyUrl);
+    let parsed;
+    try { parsed = JSON.parse(body); }
+    catch (e) { throw new Error(`rss2json returned non-JSON: ${body.slice(0, 300)}`); }
+    if (parsed.status !== 'ok') {
+      throw new Error(`rss2json status=${parsed.status}: ${parsed.message || '(no message)'}`);
+    }
+    // rss2json items are already parsed; normalize to the same shape
+    // parseRssItems produces (title/link/pubDate/description).
+    const items = (parsed.items || []).map((it) => ({
+      title: it.title,
+      link: it.link,
+      pubDate: it.pubDate, // "YYYY-MM-DD HH:MM:SS" — new Date() handles it
+      description: it.description || null,
+    }));
+    return { items, via: 'rss2json' };
+  }
+}
+
 // ── Fetch posts from RSS feeds ───────────────────────────────────────────────
 async function fetchPostsFromRss() {
   const allPosts = [];
   for (const [tagSlug, mapping] of Object.entries(TAG_MAP)) {
     const feedUrl = `https://${SUBSTACK_HOST}/feed?tag=${tagSlug}`;
     console.log(`Fetching RSS feed: ${feedUrl}`);
-    const xml = await httpsGet(feedUrl);
-    const items = parseRssItems(xml);
-    console.log(`  Found ${items.length} posts for tag "${tagSlug}"`);
+    const { items, via } = await fetchFeedItems(feedUrl);
+    console.log(`  Found ${items.length} posts for tag "${tagSlug}" (via ${via})`);
 
     for (const item of items) {
       const date = new Date(item.pubDate).toISOString().split('T')[0];

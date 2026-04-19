@@ -55,7 +55,7 @@
       font-size: 0.8rem;
       color: var(--c-text-muted);
       white-space: nowrap;
-      width: 90px;
+      width: 115px;
       flex-shrink: 0;
     }
     .blog-table__title {
@@ -1731,11 +1731,11 @@ let BLOG_POSTS = [
       'personal': 'Life and Writing'
     };
 
-    // Format a date string (YYYY-MM-DD) as "Mon YYYY"
+    // Format a date string (YYYY-MM-DD) as "Mon D, YYYY"
     function formatDate(dateStr) {
       const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
       const parts = dateStr.split('-');
-      return months[parseInt(parts[1], 10) - 1] + ' ' + parts[0];
+      return months[parseInt(parts[1], 10) - 1] + ' ' + parseInt(parts[2], 10) + ', ' + parts[0];
     }
 
     // Render posts into #blogList (sorted by date descending)

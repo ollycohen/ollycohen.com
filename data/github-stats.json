@@ -1,26 +1,26 @@
 {
-  "generated_at": "2026-04-20T08:31:29.046Z",
+  "generated_at": "2026-04-21T08:13:37.306Z",
   "username": "OllyCohen",
   "date_range": {
-    "start": "2025-04-20",
-    "end": "2026-04-20"
+    "start": "2025-04-21",
+    "end": "2026-04-21"
   },
   "repos_scanned": [
     "ollycohen/ollycohen.com",
     "ollycohen/andes-checklist",
     "ollycohen/olly-claude-config",
     "ollycohen/bigAltaTrainingPlan",
-    "apm-apps/apm-steam-claude-config",
     "apm-apps/apm-steam-api",
+    "apm-apps/apm-steam-claude-config",
     "apm-apps/apm-steam-mobile",
     "apm-apps/apm-steam-azure-functions",
     "apm-apps/apm-steam-web"
   ],
   "summary": {
-    "total_commits": 770,
-    "total_additions": 202134,
-    "total_deletions": 101330,
-    "active_days": 123,
+    "total_commits": 773,
+    "total_additions": 203463,
+    "total_deletions": 101431,
+    "active_days": 124,
     "longest_streak": 6
   },
   "daily": {
@@ -66,15 +66,15 @@
           "additions": 148,
           "deletions": 14
         },
-        "apm-steam-claude-config": {
-          "commits": 2,
-          "additions": 175,
-          "deletions": 1
-        },
         "apm-steam-api": {
           "commits": 4,
           "additions": 65,
           "deletions": 89
+        },
+        "apm-steam-claude-config": {
+          "commits": 2,
+          "additions": 175,
+          "deletions": 1
         },
         "apm-steam-web": {
           "commits": 2,
@@ -135,15 +135,15 @@
           "additions": 689,
           "deletions": 40
         },
-        "apm-steam-claude-config": {
-          "commits": 4,
-          "additions": 72,
-          "deletions": 11
-        },
         "apm-steam-api": {
           "commits": 1,
           "additions": 105,
           "deletions": 145
+        },
+        "apm-steam-claude-config": {
+          "commits": 4,
+          "additions": 72,
+          "deletions": 11
         },
         "apm-steam-mobile": {
           "commits": 3,
@@ -313,32 +313,32 @@
         }
       }
     },
-    "2026-04-18": {
-      "commits": 6,
-      "additions": 334,
-      "deletions": 19,
+    "2026-04-20": {
+      "commits": 2,
+      "additions": 915,
+      "deletions": 77,
       "by_repo": {
+        "apm-steam-api": {
+          "commits": 2,
+          "additions": 915,
+          "deletions": 77
+        }
+      }
+    },
+    "2026-04-18": {
+      "commits": 9,
+      "additions": 820,
+      "deletions": 65,
+      "by_repo": {
+        "apm-steam-api": {
+          "commits": 6,
+          "additions": 684,
+          "deletions": 52
+        },
         "apm-steam-claude-config": {
           "commits": 3,
           "additions": 136,
           "deletions": 13
-        },
-        "apm-steam-api": {
-          "commits": 3,
-          "additions": 198,
-          "deletions": 6
-        }
-      }
-    },
-    "2026-04-17": {
-      "commits": 2,
-      "additions": 390,
-      "deletions": 39,
-      "by_repo": {
-        "apm-steam-claude-config": {
-          "commits": 2,
-          "additions": 390,
-          "deletions": 39
         }
       }
     },
@@ -347,15 +347,15 @@
       "additions": 831,
       "deletions": 187,
       "by_repo": {
-        "apm-steam-claude-config": {
-          "commits": 1,
-          "additions": 1,
-          "deletions": 0
-        },
         "apm-steam-api": {
           "commits": 4,
           "additions": 654,
           "deletions": 35
+        },
+        "apm-steam-claude-config": {
+          "commits": 1,
+          "additions": 1,
+          "deletions": 0
         },
         "apm-steam-web": {
           "commits": 3,
@@ -369,15 +369,15 @@
       "additions": 5598,
       "deletions": 2420,
       "by_repo": {
-        "apm-steam-claude-config": {
-          "commits": 1,
-          "additions": 3084,
-          "deletions": 0
-        },
         "apm-steam-api": {
           "commits": 4,
           "additions": 269,
           "deletions": 155
+        },
+        "apm-steam-claude-config": {
+          "commits": 1,
+          "additions": 3084,
+          "deletions": 0
         },
         "apm-steam-mobile": {
           "commits": 7,
@@ -1024,6 +1024,18 @@
           "commits": 1,
           "additions": 162,
           "deletions": 0
+        }
+      }
+    },
+    "2026-04-17": {
+      "commits": 2,
+      "additions": 390,
+      "deletions": 39,
+      "by_repo": {
+        "apm-steam-claude-config": {
+          "commits": 2,
+          "additions": 390,
+          "deletions": 39
         }
       }
     },
@@ -1840,14 +1852,14 @@
       }
     },
     "2025-04-21": {
-      "commits": 5,
-      "additions": 188,
-      "deletions": 50,
+      "commits": 3,
+      "additions": 116,
+      "deletions": 28,
       "by_repo": {
         "apm-steam-mobile": {
-          "commits": 5,
-          "additions": 188,
-          "deletions": 50
+          "commits": 3,
+          "additions": 116,
+          "deletions": 28
         }
       }
     },
@@ -2037,20 +2049,20 @@
       "additions": 2497,
       "deletions": 0
     },
+    "apm-steam-api": {
+      "commits": 117,
+      "additions": 52443,
+      "deletions": 47093
+    },
     "apm-steam-claude-config": {
       "commits": 27,
       "additions": 4056,
       "deletions": 188
     },
-    "apm-steam-api": {
-      "commits": 112,
-      "additions": 51042,
-      "deletions": 46970
-    },
     "apm-steam-mobile": {
-      "commits": 348,
-      "additions": 85667,
-      "deletions": 31051
+      "commits": 346,
+      "additions": 85595,
+      "deletions": 31029
     },
     "apm-steam-azure-functions": {
       "commits": 104,

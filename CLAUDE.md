@@ -78,6 +78,46 @@ ollycohen.com/
 - Vanilla JS, no libraries
 - IntersectionObserver for scroll reveals and counter animations
 - Mobile nav toggle
+- `js/img.js` — responsive image helper for Cloudinary-hosted assets (see "Images" below)
+
+## Images
+
+Photos are hosted on **Cloudinary** (free tier — 25 GB storage + 25 GB bandwidth/mo). Cloud name: `dhrlrjvax`. Originals are uploaded once at full resolution; the site fetches per-request transformations (AVIF/WebP auto-negotiation, width-resized) via URL parameters.
+
+### How URLs work
+
+Supabase tables (`adventure_media.thumbnail_path`, `sponsors.logo_url`, etc.) store the raw Cloudinary delivery URL, e.g.:
+
+```
+https://res.cloudinary.com/<cloud>/image/upload/v1/adventures/africa/cover.jpg
+```
+
+`js/img.js` injects `f_auto,q_auto,w_<n>` after `/upload/` to produce a `srcset` at five widths (480, 768, 1200, 1920, 2880). Non-Cloudinary URLs (legacy `/images/...` paths) pass through unchanged, so migration can be incremental.
+
+Use `window.imgTag({ url, alt, className, sizes })` to build a responsive `<img>` string in inline scripts. Pass a `sizes` value that matches the rendered width (e.g. timeline image is `max-width: 400px` so use `(max-width: 768px) 100vw, 400px`).
+
+### Uploading a photo
+
+**Preferred: drop into local folder + run the script.**
+
+1. Drop the original into the matching local folder: `images/adventures/<continent>/...`, `images/sponsors/<Name>/...`. Folder structure under `images/` becomes the Cloudinary public_id.
+2. Run `./scripts/upload-images.sh <path>` — accepts a single file or a directory (recursive).
+3. The script signs the upload, prints the resulting `secure_url`, and (if needed) auto-compresses anything > 9 MB to a quality-92 JPEG before upload (Cloudinary free tier rejects > 10 MB).
+4. Paste the URL(s) into the relevant Supabase row, or hand them to Claude with context ("this is the Africa cover").
+
+Examples:
+
+```bash
+# Single file
+./scripts/upload-images.sh images/adventures/africa/cover.jpg
+
+# Whole folder, recursive
+./scripts/upload-images.sh images/sponsors/Norda/
+```
+
+Path → public_id mapping is automatic: `images/sponsors/Black Diamond/logo/blackDiamond.png` becomes public_id `sponsors/black-diamond/logo/blackdiamond` (lowercased, spaces → dashes). Re-uploading the same file overwrites in place at Cloudinary, but the URL gets a new `v<timestamp>` segment — paste the latest into Supabase if you re-upload.
+
+**Fallback: dashboard upload.** If the script isn't handy (e.g. you're on mobile and can't run shell): drag into the Media Library at https://console.cloudinary.com/, copy the delivery URL, paste into Supabase.
 
 ## Content lives in Supabase
 
@@ -113,7 +153,7 @@ curl -s -X PATCH "$BASE/blog_posts?id=eq.<uuid>" "${HDR[@]}" \
 
 Tables: `about`, `adventures`, `adventure_sections`, `adventure_media`, `andes_sections`, `andes_stats`, `andes_faqs`, `blog_posts`, `engineering_sections`, `fundraisers`, `press_items`, `sponsors`, `stats`.
 
-For schema/DDL changes (CREATE TABLE, ALTER, etc.), write a migration to `supabase/<name>.sql` and ask the user to run it in the Supabase SQL editor — the REST API can't run arbitrary SQL.
+For schema/DDL changes (CREATE TABLE, ALTER, etc.), write a migration to `supabase/<name>.sql` and run it directly.
 
 ## Common Tasks
 

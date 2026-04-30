@@ -14,3 +14,9 @@ Thumbs.db
 
 # Old Webflow CSV exports (kept locally for reference)
 webflowExport/
+
+# High-res photo originals — uploaded to Cloudinary, not tracked in git.
+# Logos under images/**/logo/ stay tracked since they're small and version-stable.
+images/**/cover/
+images/**/gallery/
+images/**/originals/

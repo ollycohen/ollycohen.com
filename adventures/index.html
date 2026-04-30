@@ -64,6 +64,7 @@
   </footer>
   <script src="/js/main.js"></script>
   <script src="/js/config.js"></script>
+  <script src="/js/img.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script>
   (async function () {
@@ -92,9 +93,12 @@
         if (adv.section_id) div.id = adv.section_id;
 
         const coverPath = covers[adv.slug];
-        const imgHtml = coverPath
-          ? '<img class="timeline__image" src="' + esc(coverPath) + '" alt="' + esc(adv.continent) + '" loading="lazy">'
-          : '';
+        const imgHtml = window.imgTag({
+          url: coverPath,
+          alt: adv.continent,
+          className: 'timeline__image',
+          sizes: '(max-width: 768px) 100vw, 400px'
+        });
 
         div.innerHTML =
           imgHtml +

@@ -59,6 +59,7 @@
   </footer>
   <script src="/js/main.js"></script>
   <script src="/js/config.js"></script>
+  <script src="/js/img.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script>
     (async function () {
@@ -75,7 +76,7 @@
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         const { data: sponsors, error } = await supabase
           .from('sponsors')
-          .select('name, url, description, logo_url')
+          .select('name, url, description, logo_url, cover_url')
           .eq('active', true)
           .order('sort_order');
 
@@ -88,15 +89,30 @@
           a.target = '_blank';
           a.className = 'sponsor-card';
 
-          let logoHtml = '';
-          if (s.logo_url) {
-            logoHtml = '<img class="sponsor-card__logo" src="' + escapeHtml(s.logo_url) + '" alt="' + escapeHtml(s.name) + ' logo">';
-          }
+          const coverHtml = s.cover_url
+            ? '<div class="sponsor-card__cover">' + window.imgTag({
+                url: s.cover_url,
+                alt: s.name,
+                sizes: '(max-width: 768px) 100vw, 33vw'
+              }) + '</div>'
+            : '';
+
+          const logoHtml = s.logo_url
+            ? window.imgTag({
+                url: s.logo_url,
+                alt: s.name + ' logo',
+                className: 'sponsor-card__logo',
+                sizes: '180px'
+              })
+            : '';
 
           a.innerHTML =
-            logoHtml +
-            '<h3 class="sponsor-card__name">' + escapeHtml(s.name) + '</h3>' +
-            '<p class="sponsor-card__desc">' + escapeHtml(s.description) + '</p>';
+            coverHtml +
+            '<div class="sponsor-card__body">' +
+              logoHtml +
+              '<h3 class="sponsor-card__name">' + escapeHtml(s.name) + '</h3>' +
+              '<p class="sponsor-card__desc">' + escapeHtml(s.description) + '</p>' +
+            '</div>';
 
           grid.appendChild(a);
         });

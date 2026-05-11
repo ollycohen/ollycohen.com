@@ -115,6 +115,22 @@
             '</div>';
 
           grid.appendChild(a);
+
+          if (s.cover_url) {
+            const coverDiv = a.querySelector('.sponsor-card__cover');
+            const coverImg = coverDiv && coverDiv.querySelector('img');
+            if (coverImg) {
+              const flagIfTall = () => {
+                const w = coverImg.naturalWidth, h = coverImg.naturalHeight;
+                if (w && h && h / w > 0.75) {
+                  coverDiv.classList.add('sponsor-card__cover--tall');
+                  coverDiv.style.setProperty('--cover-natural-ratio', (h / w).toFixed(4));
+                }
+              };
+              if (coverImg.complete) flagIfTall();
+              else coverImg.addEventListener('load', flagIfTall);
+            }
+          }
         });
       } catch (err) {
         console.error('Failed to load sponsors:', err);

@@ -996,6 +996,31 @@ a:focus-visible, .btn:focus-visible {
 .sponsor-card:hover .sponsor-card__cover img {
   transform: scale(1.03);
 }
+/* Tall cover images: crop top by default, reveal full image on hover.
+   --cover-natural-ratio is set in JS from the image's natural h/w. */
+.sponsor-card__cover--tall {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 67.66%;
+  overflow: hidden;
+  transition: padding-bottom 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.sponsor-card__cover--tall img {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: auto;
+  transform: none;
+  transition: none;
+}
+.sponsor-card:hover .sponsor-card__cover--tall {
+  padding-bottom: calc(var(--cover-natural-ratio, 1) * 100%);
+}
+.sponsor-card:hover .sponsor-card__cover--tall img {
+  transform: none;
+}
 .sponsor-card__body {
   padding: var(--space-lg) var(--space-md);
 }

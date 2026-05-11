@@ -2,7 +2,7 @@
 // IMAGE HELPER — ollycohen.com
 // ==========================================
 // Builds responsive srcset URLs for images hosted on Cloudinary.
-// Cloudinary URLs get f_auto,q_auto,w_<n> transforms injected after /upload/.
+// Cloudinary URLs get f_auto,q_auto:best,w_<n> transforms injected after /upload/.
 // Non-Cloudinary URLs (e.g. legacy /images/... paths) pass through unchanged
 // so the site keeps working during migration.
 
@@ -15,7 +15,7 @@
   }
 
   function transform(url, width) {
-    return url.replace('/upload/', '/upload/f_auto,q_auto,w_' + width + '/');
+    return url.replace('/upload/', '/upload/f_auto,q_auto:best,w_' + width + '/');
   }
 
   function buildSrcset(url) {

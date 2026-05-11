@@ -50,20 +50,22 @@ upload_one() {
   pid=$(echo "$pid" | tr ' ' '-' | tr '[:upper:]' '[:lower:]')
 
   # Cloudinary free tier caps uploads at 10 MB. Raw camera photos (PNG/HEIC,
-  # often 12–25 MB) will fail unless we shrink them first. Convert anything
-  # above 9 MB to a quality-92 JPEG via sips before upload — Cloudinary still
-  # negotiates AVIF/WebP at delivery, so format here doesn't matter for users.
+  # often 12–25 MB) will fail unless we shrink them first. For files above 9 MB,
+  # resize the longest side to 3500 px (we serve up to 2880 px in srcset, so
+  # this leaves headroom) and re-encode as JPEG quality 92 via sips. Cloudinary
+  # still negotiates AVIF/WebP at delivery, so format here doesn't matter for
+  # the user — only that we stay under the upload cap with maximum source detail.
   local upload_path="$file"
   local tmp=""
   local size
   size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file")
   if [ "$size" -gt 9000000 ]; then
     tmp=$(mktemp -t cloudinary-upload).jpg
-    if sips -s format jpeg -s formatOptions 92 "$file" --out "$tmp" >/dev/null 2>&1; then
+    if sips -s format jpeg -s formatOptions 92 -Z 3500 "$file" --out "$tmp" >/dev/null 2>&1; then
       upload_path="$tmp"
       local new_size
       new_size=$(stat -f%z "$tmp" 2>/dev/null || stat -c%s "$tmp")
-      printf '  (compressed %s → %s for upload)\n' \
+      printf '  (resized + compressed %s → %s for upload)\n' \
         "$(awk -v b=$size 'BEGIN{printf "%.1fMB", b/1048576}')" \
         "$(awk -v b=$new_size 'BEGIN{printf "%.1fMB", b/1048576}')" >&2
     else

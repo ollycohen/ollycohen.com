@@ -92,7 +92,7 @@ Supabase tables (`adventure_media.thumbnail_path`, `sponsors.logo_url`, etc.) st
 https://res.cloudinary.com/<cloud>/image/upload/v1/adventures/africa/cover.jpg
 ```
 
-`js/img.js` injects `f_auto,q_auto,w_<n>` after `/upload/` to produce a `srcset` at five widths (480, 768, 1200, 1920, 2880). Non-Cloudinary URLs (legacy `/images/...` paths) pass through unchanged, so migration can be incremental.
+`js/img.js` injects `f_auto,q_auto:best,w_<n>` after `/upload/` to produce a `srcset` at five widths (480, 768, 1200, 1920, 2880). `q_auto:best` keeps fine detail (skies/snow/skin) and is the high end of Cloudinary's smart-quality range — ~40% bigger than `q_auto`, still well within the free tier's 25 GB/mo bandwidth at our traffic. Non-Cloudinary URLs (legacy `/images/...` paths) pass through unchanged, so migration can be incremental.
 
 Use `window.imgTag({ url, alt, className, sizes })` to build a responsive `<img>` string in inline scripts. Pass a `sizes` value that matches the rendered width (e.g. timeline image is `max-width: 400px` so use `(max-width: 768px) 100vw, 400px`).
 
@@ -102,7 +102,7 @@ Use `window.imgTag({ url, alt, className, sizes })` to build a responsive `<img>
 
 1. Drop the original into the matching local folder: `images/adventures/<continent>/...`, `images/sponsors/<Name>/...`. Folder structure under `images/` becomes the Cloudinary public_id.
 2. Run `./scripts/upload-images.sh <path>` — accepts a single file or a directory (recursive).
-3. The script signs the upload, prints the resulting `secure_url`, and (if needed) auto-compresses anything > 9 MB to a quality-92 JPEG before upload (Cloudinary free tier rejects > 10 MB).
+3. The script signs the upload and prints the resulting `secure_url`. Files > 9 MB are resized to max 3500 px on the longest side and re-encoded as JPEG quality 92 before upload (Cloudinary free tier rejects > 10 MB; 3500 px leaves headroom above our 2880 px max srcset width).
 4. Paste the URL(s) into the relevant Supabase row, or hand them to Claude with context ("this is the Africa cover").
 
 Examples:

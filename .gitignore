@@ -9,8 +9,10 @@ Thumbs.db
 .env.local
 .env.*.local
 
-# Claude Code local config (machine-specific)
-.claude/
+# Claude Code config — track shared hooks + settings, ignore per-user state
+.claude/*
+!.claude/hooks/
+!.claude/settings.json
 
 # Old Webflow CSV exports (kept locally for reference)
 webflowExport/

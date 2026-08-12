@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-08-11T07:43:25.671Z",
+  "generated_at": "2026-08-12T07:56:55.612Z",
   "username": "OllyCohen",
   "date_range": {
-    "start": "2025-08-11",
-    "end": "2026-08-11"
+    "start": "2025-08-12",
+    "end": "2026-08-12"
   },
   "repos_scanned": [
     "ollycohen/ollycohen.com",
@@ -17,10 +17,10 @@
     "apm-apps/apm-steam-azure-functions"
   ],
   "summary": {
-    "total_commits": 1036,
-    "total_additions": 266020,
-    "total_deletions": 107660,
-    "active_days": 132,
+    "total_commits": 1034,
+    "total_additions": 238853,
+    "total_deletions": 78843,
+    "active_days": 131,
     "longest_streak": 6
   },
   "daily": {
@@ -1969,23 +1969,6 @@
         }
       }
     },
-    "2025-08-11": {
-      "commits": 2,
-      "additions": 27167,
-      "deletions": 28817,
-      "by_repo": {
-        "apm-steam-mobile": {
-          "commits": 1,
-          "additions": 6585,
-          "deletions": 7739
-        },
-        "apm-steam-api": {
-          "commits": 1,
-          "additions": 20582,
-          "deletions": 21078
-        }
-      }
-    },
     "2026-04-16": {
       "commits": 5,
       "additions": 779,
@@ -2361,9 +2344,9 @@
       "deletions": 1621
     },
     "apm-steam-mobile": {
-      "commits": 421,
-      "additions": 115787,
-      "deletions": 33261
+      "commits": 420,
+      "additions": 109202,
+      "deletions": 25522
     },
     "apm-steam-web": {
       "commits": 123,
@@ -2371,9 +2354,9 @@
       "deletions": 18108
     },
     "apm-steam-api": {
-      "commits": 153,
-      "additions": 60170,
-      "deletions": 47890
+      "commits": 152,
+      "additions": 39588,
+      "deletions": 26812
     },
     "apm-steam-azure-functions": {
       "commits": 137,

@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-08-12T07:56:55.612Z",
+  "generated_at": "2026-08-13T07:58:56.586Z",
   "username": "OllyCohen",
   "date_range": {
-    "start": "2025-08-12",
-    "end": "2026-08-12"
+    "start": "2025-08-13",
+    "end": "2026-08-13"
   },
   "repos_scanned": [
     "ollycohen/ollycohen.com",
@@ -20,7 +20,7 @@
     "total_commits": 1034,
     "total_additions": 238853,
     "total_deletions": 78843,
-    "active_days": 131,
+    "active_days": 130,
     "longest_streak": 6
   },
   "daily": {

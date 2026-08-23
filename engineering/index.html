@@ -72,10 +72,9 @@
 
   <!-- This Website -->
   <section class="page-content">
-    <div class="container">
+    <div class="container" id="thisWebsiteSection">
       <h3>This Website</h3>
-      <p>This website was built entirely with Claude. It's a static site — no frameworks, no build tools, no dependencies. HTML, CSS, JavaScript. It loads fast, it's accessible, and it's deployable anywhere. The source code is on <a href="https://github.com/ollycohen/ollycohen.com" target="_blank">GitHub</a>.</p>
-      <p>If you're interested in working together, email <a href="mailto:olly.k.cohen@gmail.com">olly.k.cohen@gmail.com</a>.</p>
+      <p style="color: var(--c-text-muted); font-family: var(--f-mono); font-size: 0.85rem;">Loading…</p>
     </div>
   </section>
 
@@ -107,8 +106,9 @@
         return div.innerHTML;
       }
 
+      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
       try {
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         const { data: posts, error } = await supabase
           .from('blog_posts')
           .select('title, url, tag, date')
@@ -132,6 +132,39 @@
       } catch (err) {
         console.error('Failed to load tech posts:', err);
         if (loading) loading.textContent = 'Failed to load posts.';
+      }
+
+      // Load "This Website" section from engineering_sections.
+      // Table columns are (slug, heading, paragraphs) — paragraphs is a
+      // jsonb array of plain-text strings. Linkify known references so the
+      // GitHub repo and email stay clickable without storing HTML in the DB.
+      try {
+        const { data: section, error: secErr } = await supabase
+          .from('engineering_sections')
+          .select('heading, paragraphs')
+          .eq('slug', 'website')
+          .single();
+
+        if (secErr) throw secErr;
+
+        function linkify(text) {
+          return escapeHtml(text)
+            .replace(/GitHub/g, '<a href="https://github.com/ollycohen/ollycohen.com" target="_blank">GitHub</a>')
+            .replace(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g, '<a href="mailto:$1">$1</a>');
+        }
+
+        const container = document.getElementById('thisWebsiteSection');
+        container.innerHTML =
+          '<h3>' + escapeHtml(section.heading || 'This Website') + '</h3>' +
+          (section.paragraphs || []).map(function (p) { return '<p>' + linkify(p) + '</p>'; }).join('');
+      } catch (err) {
+        // Fall back to static copy so the section never renders as "Loading…".
+        console.error('Failed to load This Website section:', err);
+        const container = document.getElementById('thisWebsiteSection');
+        container.innerHTML =
+          '<h3>This Website</h3>' +
+          '<p>This website was built entirely with Claude. It\'s a static site — no frameworks, no build tools, no dependencies. HTML, CSS, JavaScript. It loads fast, it\'s accessible, and it\'s deployable anywhere. The source code is on <a href="https://github.com/ollycohen/ollycohen.com" target="_blank">GitHub</a>.</p>' +
+          '<p>If you\'re interested in working together, email <a href="mailto:olly.k.cohen@gmail.com">olly.k.cohen@gmail.com</a>.</p>';
       }
     })();
   </script>

@@ -103,13 +103,14 @@
           className: 'timeline__image',
           sizes: '(max-width: 768px) 100vw, 400px'
         });
+        const href = '/adventure/?slug=' + esc(adv.slug);
 
         div.innerHTML =
-          imgHtml +
+          '<a href="' + href + '" class="timeline__image-link" aria-label="' + esc(adv.continent) + ': ' + esc(adv.title) + '">' + imgHtml + '</a>' +
           '<span class="timeline__year">' + esc(adv.date_range) + '</span>' +
-          '<h3 class="timeline__title">' + esc(adv.continent) + ': ' + esc(adv.title) + '</h3>' +
+          '<h3 class="timeline__title"><a href="' + href + '" class="timeline__title-link">' + esc(adv.continent) + ': ' + esc(adv.title) + '</a></h3>' +
           '<p class="timeline__desc">' + esc(adv.description) + '</p>' +
-          '<a href="/adventure/?slug=' + esc(adv.slug) + '" class="btn btn--primary" style="margin-top: 1rem;">Explore →</a>';
+          '<a href="' + href + '" class="btn btn--primary">Explore →</a>';
 
         timeline.appendChild(div);
         // Animate in with stagger delay

@@ -2,6 +2,8 @@
 /**
  * Fetch GitHub contribution stats for a user across ALL accessible repos.
  * Discovers repos from personal account + org, fetches commits + LOC.
+ * Repos that were scanned previously but are no longer accessible keep their
+ * history from the last successful run (see loadPrevious).
  * Outputs data/github-stats.json for the static site.
  *
  * Usage: GITHUB_TOKEN=ghp_xxx node scripts/fetch-github-stats.js
@@ -102,6 +104,18 @@ async function batchFetch(items, fn) {
 
 function toDateStr(date) {
   return date.toISOString().split('T')[0];
+}
+
+const OUT_PATH = path.join(__dirname, '..', 'data', 'github-stats.json');
+
+// Previous run's output. Used to carry forward history for repos the token
+// can no longer see (e.g. after leaving an org) so totals don't silently drop.
+function loadPrevious() {
+  try {
+    return JSON.parse(fs.readFileSync(OUT_PATH, 'utf8'));
+  } catch {
+    return null;
+  }
 }
 
 async function discoverRepos(since) {
@@ -224,6 +238,57 @@ async function main() {
     );
   }
 
+  // Carry forward history for previously-scanned repos that are no longer
+  // accessible. Only days inside the current window are kept, so this data
+  // ages out naturally.
+  const previous = loadPrevious();
+  const carriedRepos = [];
+  if (previous && previous.daily) {
+    const liveFullNames = new Set(repos.map((r) => `${r.owner}/${r.name}`));
+    const prevRepos = [
+      ...(previous.repos_scanned || []),
+      ...(previous.archived_repos || []),
+    ];
+    const startStr = toDateStr(startDate);
+    const endStr = toDateStr(endDate);
+
+    for (const fullName of prevRepos) {
+      if (liveFullNames.has(fullName)) continue;
+      const name = fullName.split('/').pop();
+      if (byRepo[name]) continue;
+
+      let carried = 0;
+      for (const [date, day] of Object.entries(previous.daily)) {
+        if (date < startStr || date > endStr) continue;
+        const repoDay = day.by_repo && day.by_repo[name];
+        if (!repoDay || repoDay.commits === 0) continue;
+
+        if (!daily[date]) {
+          daily[date] = { commits: 0, additions: 0, deletions: 0, by_repo: {} };
+        }
+        daily[date].commits += repoDay.commits;
+        daily[date].additions += repoDay.additions;
+        daily[date].deletions += repoDay.deletions;
+        daily[date].by_repo[name] = { ...repoDay };
+
+        if (!byRepo[name]) byRepo[name] = { commits: 0, additions: 0, deletions: 0 };
+        byRepo[name].commits += repoDay.commits;
+        byRepo[name].additions += repoDay.additions;
+        byRepo[name].deletions += repoDay.deletions;
+
+        totalCommits += repoDay.commits;
+        totalAdditions += repoDay.additions;
+        totalDeletions += repoDay.deletions;
+        carried += repoDay.commits;
+      }
+
+      if (carried > 0) {
+        carriedRepos.push(fullName);
+        console.log(`  ${fullName}: inaccessible — carried forward ${carried} commits from previous run`);
+      }
+    }
+  }
+
   // Calculate streaks and active days
   let activeDays = 0;
   let longestStreak = 0;
@@ -245,7 +310,8 @@ async function main() {
     generated_at: new Date().toISOString(),
     username: USERNAME,
     date_range: { start: toDateStr(startDate), end: toDateStr(endDate) },
-    repos_scanned: reposWithActivity,
+    repos_scanned: [...reposWithActivity, ...carriedRepos],
+    archived_repos: carriedRepos,
     summary: {
       total_commits: totalCommits,
       total_additions: totalAdditions,
@@ -257,15 +323,16 @@ async function main() {
     by_repo: byRepo,
   };
 
-  const outDir = path.join(__dirname, '..', 'data');
-  if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
-  const outPath = path.join(outDir, 'github-stats.json');
-  fs.writeFileSync(outPath, JSON.stringify(output, null, 2));
+  fs.mkdirSync(path.dirname(OUT_PATH), { recursive: true });
+  fs.writeFileSync(OUT_PATH, JSON.stringify(output, null, 2));
 
-  console.log(`\nWrote ${outPath}`);
+  console.log(`\nWrote ${OUT_PATH}`);
   console.log(
     `Repos with activity: ${reposWithActivity.length} (${reposWithActivity.join(', ')})`
   );
+  if (carriedRepos.length) {
+    console.log(`Carried forward (inaccessible): ${carriedRepos.join(', ')}`);
+  }
   console.log(
     `Summary: ${totalCommits} commits, +${totalAdditions}/-${totalDeletions}, ${activeDays} active days, ${longestStreak}-day streak`
   );

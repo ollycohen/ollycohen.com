@@ -151,7 +151,7 @@ curl -s -X PATCH "$BASE/blog_posts?id=eq.<uuid>" "${HDR[@]}" \
   -d '{"featured":true}'
 ```
 
-Tables: `about`, `adventures`, `adventure_sections`, `adventure_media`, `andes_sections`, `andes_stats`, `andes_faqs`, `blog_posts`, `engineering_sections`, `fundraisers`, `press_items`, `sponsors`, `stats`.
+Tables: `about`, `adventures`, `adventure_sections`, `adventure_media`, `andes_sections`, `andes_stats`, `andes_faqs`, `blog_posts`, `engineering_sections`, `fundraisers`, `press_items`, `sponsor_cta`, `sponsors`, `stats`.
 
 For schema/DDL changes (CREATE TABLE, ALTER, etc.), write a migration to `supabase/<name>.sql` and run it directly.
 

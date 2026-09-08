@@ -42,12 +42,12 @@
         <p id="sponsorsLoading" style="color: var(--c-text-muted); font-family: var(--f-mono); font-size: 0.85rem;">Loading sponsors…</p>
       </div>
 
-      <div style="margin-top: var(--space-xl); padding: var(--space-lg); background: var(--c-bg-card); border: 1px solid var(--c-border); border-radius: var(--radius-lg);">
-        <h3 style="font-family: var(--f-display); font-size: 1.4rem; margin-bottom: var(--space-sm);">Partner with the Andes Adventure</h3>
-        <p style="color: var(--c-text-muted); margin-bottom: var(--space-md); max-width: 600px;">Starting late May 2026. A documented journey through remote Andes on foot. Align your brand with one of the nicest endurance projects on the planet.</p>
+      <div id="sponsorCta" hidden style="margin-top: var(--space-xl); padding: var(--space-lg); background: var(--c-bg-card); border: 1px solid var(--c-border); border-radius: var(--radius-lg);">
+        <h3 id="sponsorCtaHeading" style="font-family: var(--f-display); font-size: 1.4rem; margin-bottom: var(--space-sm);"></h3>
+        <p id="sponsorCtaBody" style="color: var(--c-text-muted); margin-bottom: var(--space-md); max-width: 600px;"></p>
         <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
-          <a href="mailto:olly.k.cohen@gmail.com?subject=Andes%20Adventure%20Sponsorship" class="btn btn--primary">Get in Touch →</a>
-          <span style="color: var(--c-text-muted); font-size: 0.9rem;">olly.k.cohen@gmail.com</span>
+          <a id="sponsorCtaBtn" href="#" class="btn btn--primary"></a>
+          <span id="sponsorCtaEmail" style="color: var(--c-text-muted); font-size: 0.9rem;"></span>
         </div>
       </div>
 
@@ -74,13 +74,33 @@
 
       try {
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        const { data: sponsors, error } = await supabase
-          .from('sponsors')
-          .select('name, url, description, logo_url, cover_url')
-          .eq('active', true)
-          .order('sort_order');
+        const [{ data: sponsors, error }, ctaRes] = await Promise.all([
+          supabase
+            .from('sponsors')
+            .select('name, url, description, logo_url, cover_url')
+            .eq('active', true)
+            .order('sort_order'),
+          supabase
+            .from('sponsor_cta')
+            .select('heading, body, button_label, email, email_subject')
+            .order('sort_order')
+            .limit(1)
+            .maybeSingle()
+        ]);
 
         if (error) throw error;
+
+        // "Partner with…" call-to-action box (content lives in sponsor_cta)
+        const cta = ctaRes && ctaRes.data;
+        if (cta) {
+          document.getElementById('sponsorCtaHeading').textContent = cta.heading;
+          document.getElementById('sponsorCtaBody').textContent = cta.body;
+          const btn = document.getElementById('sponsorCtaBtn');
+          btn.textContent = cta.button_label;
+          btn.href = 'mailto:' + cta.email + '?subject=' + encodeURIComponent(cta.email_subject);
+          document.getElementById('sponsorCtaEmail').textContent = cta.email;
+          document.getElementById('sponsorCta').hidden = false;
+        }
         if (loading) loading.remove();
 
         sponsors.forEach(s => {

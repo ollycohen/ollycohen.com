@@ -63,7 +63,7 @@ ollycohen.com/
 ### HTML
 - Every page includes the same `<nav>` and `<footer>` (no templating — just duplicated, keep in sync)
 - All pages link CSS as `/css/style.css` and JS as `/js/main.js` (absolute paths, works with GitHub Pages)
-- Blog entries in `pages/blog.html` use `data-cat` attributes for JS filtering: `tech`, `north-america`, `africa`, `asia`, `personal`
+- Blog entries in `pages/blog.html` use `data-cat` attributes for JS filtering: `tech`, `north-america`, `africa`, `asia`, `south-america`, `personal`
 - External links (Substack, Instagram, sponsors) use `target="_blank"`
 
 ### CSS
@@ -164,7 +164,7 @@ curl -s -X POST "$BASE/blog_posts" "${HDR[@]}" \
   -H "Content-Type: application/json" -H "Prefer: return=representation" \
   -d '{"title":"...","url":"https://irunearth.substack.com/p/...","category":"tech","tag":"Tech","date":"2026-04-10"}'
 ```
-Valid categories: `tech`, `north-america`, `africa`, `asia`, `personal`. Set `featured: true` if it should appear in the homepage blog preview.
+Valid categories: `tech`, `north-america`, `africa`, `asia`, `south-america`, `personal`. Set `featured: true` if it should appear in the homepage blog preview.
 
 ### Add a new press/media item
 Insert a row into `press_items`.

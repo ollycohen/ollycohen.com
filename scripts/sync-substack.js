@@ -5,7 +5,8 @@
 //
 // Uses RSS feeds (not the JSON API) because Cloudflare blocks the API from
 // datacenter IPs. Each TAG_MAP entry fetches its own tag-specific RSS feed.
-// Adventure posts (north-america, africa, asia) are managed manually.
+// Adventure posts (north-america, africa, asia, south-america) are managed manually
+// unless a matching Substack tag exists in TAG_MAP.
 
 'use strict';
 
@@ -37,7 +38,8 @@ const TAG_MAP = {
 
   // Adventure regions — keyed by Substack tags Olly actually uses.
   // Add more state/country tags as they appear on new posts.
-  'washington': { category: 'north-america', tag: 'North America' },
+  'washington':    { category: 'north-america', tag: 'North America' },
+  'south-america': { category: 'south-america', tag: 'South America' },
 };
 const DEFAULT_MAPPING = { category: 'personal', tag: 'Personal' };
 

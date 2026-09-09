@@ -25,6 +25,6 @@ create policy "Auth write sponsor_cta"  on sponsor_cta for all   using (auth.rol
 
 insert into sponsor_cta (heading, body, email_subject) values (
   'Partner with 1000 Miles Every Continent',
-  'A documented journey of 1,000 continuous miles on foot on every continent. Align your brand with one of the nicest endurance projects on the planet.',
+  'A documented journey of 1,000 continuous miles on foot on every continent. Align your brand with one of the finest endurance projects on the planet.',
   '1000 Miles Every Continent Sponsorship'
 );

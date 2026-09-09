@@ -1311,7 +1311,6 @@ a:focus-visible, .btn:focus-visible {
    ADVENTURE DETAIL PAGE
    ======================== */
 .adventure-cover {
-  max-width: 400px;
   margin: 0;
 }
 .adventure-cover img {
@@ -1320,6 +1319,18 @@ a:focus-visible, .btn:focus-visible {
   display: block;
   border-radius: var(--radius);
   border: 1px solid var(--c-border);
+}
+
+/* Overview: text beside the cover photo on wide screens, stacked on mobile */
+.adventure-overview {
+  display: grid;
+  gap: var(--space-lg);
+  align-items: start;
+}
+@media (min-width: 900px) {
+  .adventure-overview {
+    grid-template-columns: 3fr 2fr;
+  }
 }
 
 /* Adventure page: single column, one section per block */
@@ -1339,6 +1350,7 @@ a:focus-visible, .btn:focus-visible {
 
 .adventure-text {
   max-width: 720px;
+  min-width: 0;
 }
 .adventure-text p {
   color: var(--c-text-muted);

@@ -1348,9 +1348,11 @@ a:focus-visible, .btn:focus-visible {
   margin-bottom: var(--space-md);
 }
 
+.adventure-overview__main {
+  min-width: 0;
+}
 .adventure-text {
   max-width: 720px;
-  min-width: 0;
 }
 .adventure-text p {
   color: var(--c-text-muted);

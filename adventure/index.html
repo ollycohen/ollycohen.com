@@ -35,27 +35,48 @@
     </div>
   </header>
 
-  <!-- Text sections + Map (cover image renders at the top of the container) -->
-  <section class="page-content" id="adventureContent" style="padding-bottom: var(--space-xl); display: none;">
+  <!-- Cover image -->
+  <section class="page-content adventure-section" id="coverSection" style="display: none;">
     <div class="container">
-      <figure class="adventure-cover" id="adventureCover" style="display: none;">
+      <figure class="adventure-cover" id="adventureCover">
         <img id="adventureCoverImg" alt="" loading="eager">
       </figure>
-      <div class="adventure-layout">
-        <div class="adventure-layout__text" id="adventureText"></div>
-        <div id="adventureMapContainer" style="display: none;">
-          <h2 style="font-family: var(--f-display); font-size: 1.5rem; margin-bottom: var(--space-md);">Route Map</h2>
-          <div class="adventure-maps" id="adventureMaps"></div>
-        </div>
-      </div>
     </div>
   </section>
 
-  <!-- Gallery -->
-  <section class="section" id="gallerySection" style="display: none;">
+  <!-- 1. Route map -->
+  <section class="page-content adventure-section" id="mapSection" style="display: none;">
+    <div class="container">
+      <span class="section__label">Route</span>
+      <h2 class="adventure-section__heading">Route Map</h2>
+      <div class="adventure-maps" id="adventureMaps"></div>
+    </div>
+  </section>
+
+  <!-- 2. Overview -->
+  <section class="page-content adventure-section" id="overviewSection" style="display: none;">
+    <div class="container">
+      <span class="section__label">Overview</span>
+      <h2 class="adventure-section__heading" id="overviewHeading">The Run</h2>
+      <div class="adventure-text" id="adventureText"></div>
+    </div>
+  </section>
+
+  <!-- 3. Blog posts for this adventure -->
+  <section class="page-content adventure-section" id="blogSection" style="display: none;">
+    <div class="container">
+      <span class="section__label">Blog</span>
+      <h2 class="adventure-section__heading" id="blogHeading">Posts</h2>
+      <div class="blog-table" id="blogList"></div>
+      <p id="substackLink" style="margin-top: var(--space-lg); text-align: center;"></p>
+    </div>
+  </section>
+
+  <!-- 4. Gallery -->
+  <section class="page-content adventure-section" id="gallerySection" style="display: none;">
     <div class="container">
       <span class="section__label">Gallery</span>
-      <h2 class="section__heading" id="galleryHeading">Photos & Videos</h2>
+      <h2 class="adventure-section__heading" id="galleryHeading">Photos & Videos</h2>
       <div class="gallery__grid" id="galleryGrid"></div>
     </div>
   </section>
@@ -142,31 +163,67 @@
       if (coverItem) {
         document.getElementById('adventureCoverImg').src = coverItem.thumbnail_path;
         document.getElementById('adventureCoverImg').alt = adv.continent + ' — ' + adv.title;
-        document.getElementById('adventureCover').style.display = '';
+        document.getElementById('coverSection').style.display = '';
       }
 
-      // Sections + Maps
-      var sections = sectRes.data || [];
+      // Route map(s)
       var maps = mapsRes.data || [];
       // Fallback: if adventure_maps table has no rows, use map_url from adventures
       if (maps.length === 0 && adv.map_url) {
         maps = [{ label: 'Route Map', map_url: adv.map_url }];
       }
-      var hasContent = sections.length > 0 || maps.length > 0 || coverItem;
+      if (maps.length > 0) {
+        document.getElementById('mapSection').style.display = '';
+        var mapsGrid = document.getElementById('adventureMaps');
+        var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        function fmtDateRange(startStr, endStr) {
+          // Both YYYY-MM-DD strings from a Postgres `date` column.
+          if (!startStr || !endStr) return '';
+          var s = startStr.split('-'), e = endStr.split('-');
+          var sY = parseInt(s[0], 10), sM = MONTHS[parseInt(s[1], 10) - 1], sD = parseInt(s[2], 10);
+          var eY = parseInt(e[0], 10), eM = MONTHS[parseInt(e[1], 10) - 1], eD = parseInt(e[2], 10);
+          if (sY === eY) {
+            return sM + ' ' + sD + ' — ' + eM + ' ' + eD + ', ' + eY;
+          }
+          return sM + ' ' + sD + ', ' + sY + ' — ' + eM + ' ' + eD + ', ' + eY;
+        }
+        maps.forEach(function (m) {
+          var wrapper = document.createElement('div');
+          if (maps.length > 1) {
+            var label = document.createElement('p');
+            label.className = 'adventure-maps__label';
+            label.textContent = m.label;
+            wrapper.appendChild(label);
+          }
+          var dateText = fmtDateRange(m.start_date, m.end_date);
+          if (dateText) {
+            var dateEl = document.createElement('p');
+            dateEl.className = 'adventure-maps__date';
+            dateEl.textContent = dateText;
+            wrapper.appendChild(dateEl);
+          }
+          var iframe = document.createElement('iframe');
+          iframe.src = m.map_url;
+          iframe.width = '100%';
+          iframe.setAttribute('loading', 'lazy');
+          wrapper.appendChild(iframe);
+          mapsGrid.appendChild(wrapper);
+        });
+      }
 
-      if (hasContent) {
-        document.getElementById('adventureContent').style.display = '';
-
-        // Text sections
+      // Overview (text sections). Falls back to the adventure's description
+      // when no adventure_sections rows exist yet.
+      var sections = sectRes.data || [];
+      if (sections.length === 0 && adv.description) {
+        sections = [{ paragraphs: [adv.description] }];
+      }
+      if (sections.length > 0) {
+        document.getElementById('overviewSection').style.display = '';
         var textEl = document.getElementById('adventureText');
         sections.forEach(function (sec) {
           if (sec.heading) {
-            var h = document.createElement('h2');
-            h.style.fontFamily = 'var(--f-display)';
-            h.style.fontSize = '1.5rem';
-            h.style.marginBottom = 'var(--space-sm)';
-            h.style.marginTop = 'var(--space-md)';
-            h.style.color = 'var(--c-text)';
+            var h = document.createElement('h3');
+            h.className = 'adventure-text__heading';
             h.textContent = sec.heading;
             textEl.appendChild(h);
           }
@@ -180,6 +237,7 @@
             var a = document.createElement('a');
             a.href = sec.link_url;
             a.target = '_blank';
+            a.rel = 'noopener noreferrer';
             a.className = 'btn btn--primary';
             a.style.marginTop = 'var(--space-sm)';
             a.style.display = 'inline-block';
@@ -187,46 +245,50 @@
             textEl.appendChild(a);
           }
         });
+      }
 
-        // Maps
-        if (maps.length > 0) {
-          document.getElementById('adventureMapContainer').style.display = '';
-          var mapsGrid = document.getElementById('adventureMaps');
-          var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-          function fmtDateRange(startStr, endStr) {
-            // Both YYYY-MM-DD strings from a Postgres `date` column.
-            if (!startStr || !endStr) return '';
-            var s = startStr.split('-'), e = endStr.split('-');
-            var sY = parseInt(s[0], 10), sM = MONTHS[parseInt(s[1], 10) - 1], sD = parseInt(s[2], 10);
-            var eY = parseInt(e[0], 10), eM = MONTHS[parseInt(e[1], 10) - 1], eD = parseInt(e[2], 10);
-            if (sY === eY) {
-              return sM + ' ' + sD + ' — ' + eM + ' ' + eD + ', ' + eY;
-            }
-            return sM + ' ' + sD + ', ' + sY + ' — ' + eM + ' ' + eD + ', ' + eY;
-          }
-          maps.forEach(function (m) {
-            var wrapper = document.createElement('div');
-            if (maps.length > 1) {
-              var label = document.createElement('p');
-              label.className = 'adventure-maps__label';
-              label.textContent = m.label;
-              wrapper.appendChild(label);
-            }
-            var dateText = fmtDateRange(m.start_date, m.end_date);
-            if (dateText) {
-              var dateEl = document.createElement('p');
-              dateEl.className = 'adventure-maps__date';
-              dateEl.textContent = dateText;
-              wrapper.appendChild(dateEl);
-            }
-            var iframe = document.createElement('iframe');
-            iframe.src = m.map_url;
-            iframe.width = '100%';
-            iframe.height = '600';
-            iframe.setAttribute('loading', 'lazy');
-            wrapper.appendChild(iframe);
-            mapsGrid.appendChild(wrapper);
+      // Blog posts — same category the Blog page uses for this continent
+      // ("South America" → "south-america"), which is also the Substack tag.
+      var blogCategory = (adv.continent || '').toLowerCase().replace(/\s+/g, '-');
+      if (blogCategory) {
+        var postsRes = await sb.from('blog_posts')
+          .select('title,url,date')
+          .eq('category', blogCategory)
+          .order('date', { ascending: false });
+        var posts = (postsRes && !postsRes.error && postsRes.data) || [];
+        if (posts.length > 0) {
+          document.getElementById('blogSection').style.display = '';
+          document.getElementById('blogHeading').textContent = adv.continent + ' Posts';
+          var SHORT_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+          var list = document.getElementById('blogList');
+          posts.forEach(function (post) {
+            var row = document.createElement('a');
+            row.href = post.url;
+            row.target = '_blank';
+            row.rel = 'noopener noreferrer';
+            row.className = 'blog-table__row';
+
+            var parts = (post.date || '').split('-');
+            var dateSpan = document.createElement('span');
+            dateSpan.className = 'blog-table__date';
+            dateSpan.textContent = parts.length === 3 ? SHORT_MONTHS[parseInt(parts[1], 10) - 1] + ' ' + parts[0] : '';
+
+            var titleSpan = document.createElement('span');
+            titleSpan.className = 'blog-table__title';
+            titleSpan.textContent = post.title;
+
+            row.appendChild(dateSpan);
+            row.appendChild(titleSpan);
+            list.appendChild(row);
           });
+
+          var sub = document.createElement('a');
+          sub.href = 'https://irunearth.substack.com/t/' + blogCategory;
+          sub.target = '_blank';
+          sub.rel = 'noopener noreferrer';
+          sub.className = 'btn btn--primary';
+          sub.textContent = 'Read all ' + adv.continent + ' posts on Substack →';
+          document.getElementById('substackLink').appendChild(sub);
         }
       }
 

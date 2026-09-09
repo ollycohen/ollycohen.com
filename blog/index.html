@@ -30,43 +30,6 @@
       background: rgba(125,184,125,0.08);
     }
 
-    /* Blog table */
-    .blog-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    .blog-table__row {
-      display: flex;
-      align-items: baseline;
-      gap: var(--space-md);
-      border-bottom: 1px solid var(--c-border);
-      text-decoration: none;
-      color: inherit;
-      padding: 0.85rem 0;
-      cursor: pointer;
-      transition: background var(--transition);
-    }
-    .blog-table__row:first-child {
-      border-top: 1px solid var(--c-border);
-    }
-    .blog-table__row[data-hidden="true"] { display: none; }
-    .blog-table__date {
-      font-family: var(--f-mono);
-      font-size: 0.8rem;
-      color: var(--c-text-muted);
-      white-space: nowrap;
-      width: 90px;
-      flex-shrink: 0;
-    }
-    .blog-table__title {
-      color: var(--c-text);
-      font-family: var(--f-body);
-      font-size: 1rem;
-      transition: color var(--transition);
-    }
-    .blog-table__row:hover .blog-table__title {
-      color: var(--c-accent);
-    }
   </style>
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">

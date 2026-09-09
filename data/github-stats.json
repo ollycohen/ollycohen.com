@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-09-08T23:03:25.599Z",
+  "generated_at": "2026-09-09T11:34:36.673Z",
   "username": "OllyCohen",
   "date_range": {
-    "start": "2025-09-08",
-    "end": "2026-09-08"
+    "start": "2025-09-09",
+    "end": "2026-09-09"
   },
   "repos_scanned": [
     "ollycohen/ollycohen.com",
@@ -24,22 +24,34 @@
     "apm-apps/apm-steam-web"
   ],
   "summary": {
-    "total_commits": 1020,
-    "total_additions": 210525,
-    "total_deletions": 47177,
+    "total_commits": 1024,
+    "total_additions": 210763,
+    "total_deletions": 47332,
     "active_days": 128,
     "longest_streak": 6
   },
   "daily": {
-    "2026-09-08": {
-      "commits": 3,
-      "additions": 2337,
-      "deletions": 334,
+    "2026-09-09": {
+      "commits": 4,
+      "additions": 224,
+      "deletions": 146,
       "by_repo": {
         "ollycohen.com": {
-          "commits": 3,
-          "additions": 2337,
-          "deletions": 334
+          "commits": 4,
+          "additions": 224,
+          "deletions": 146
+        }
+      }
+    },
+    "2026-09-08": {
+      "commits": 4,
+      "additions": 2398,
+      "deletions": 345,
+      "by_repo": {
+        "ollycohen.com": {
+          "commits": 4,
+          "additions": 2398,
+          "deletions": 345
         }
       }
     },
@@ -1884,18 +1896,6 @@
         }
       }
     },
-    "2025-09-08": {
-      "commits": 1,
-      "additions": 47,
-      "deletions": 2,
-      "by_repo": {
-        "apm-steam-mobile": {
-          "commits": 1,
-          "additions": 47,
-          "deletions": 2
-        }
-      }
-    },
     "2026-05-10": {
       "commits": 11,
       "additions": 989,
@@ -2280,9 +2280,9 @@
   },
   "by_repo": {
     "ollycohen.com": {
-      "commits": 64,
-      "additions": 17265,
-      "deletions": 4640
+      "commits": 69,
+      "additions": 17550,
+      "deletions": 4797
     },
     "andes-checklist": {
       "commits": 27,
@@ -2300,9 +2300,9 @@
       "deletions": 0
     },
     "apm-steam-mobile": {
-      "commits": 407,
-      "additions": 102184,
-      "deletions": 17482
+      "commits": 406,
+      "additions": 102137,
+      "deletions": 17480
     },
     "apm-steam-claude-config": {
       "commits": 113,

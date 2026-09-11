@@ -2,6 +2,8 @@
 // Fetches posts from Substack RSS feeds and upserts them into Supabase blog_posts.
 //
 // Usage: SUPABASE_SERVICE_KEY=<key> node scripts/sync-substack.js
+//        SYNC_FORCE_PROXY=1 to test the GitHub Actions (Cloudflare-blocked) path locally.
+//        SYNC_DRY_RUN=1 to print the resolved posts without writing to Supabase.
 //
 // Uses RSS feeds (not the JSON API) because Cloudflare blocks the API from
 // datacenter IPs. Each TAG_MAP entry fetches its own tag-specific RSS feed.
@@ -151,37 +153,99 @@ function parseRssItems(xml) {
   return items;
 }
 
-// ── Fetch one feed (direct first, rss2json fallback on CF block) ─────────────
+// ── Fetch one feed (direct first, proxy fallbacks on CF block) ──────────────
 // When run locally from Olly's Mac, the direct path works (home IP isn't
 // blocked). When run on GitHub Actions, Cloudflare issues a "managed challenge"
 // to every datacenter IP and we get HTTP 403. In that case we transparently
-// fall back to the free rss2json.com API, which fetches on our behalf from a
-// non-blocked IP and returns already-parsed JSON (so we skip our XML parser).
-async function fetchFeedItems(feedUrl) {
-  try {
-    const xml = await httpsGet(feedUrl);
-    return { items: parseRssItems(xml), via: 'direct' };
-  } catch (err) {
-    if (!/HTTP 403/.test(err.message)) throw err;
-    console.log(`  Direct fetch 403'd (Cloudflare); falling back to rss2json.com`);
-    const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`;
-    const body = await httpsGet(proxyUrl);
-    let parsed;
-    try { parsed = JSON.parse(body); }
-    catch (e) { throw new Error(`rss2json returned non-JSON: ${body.slice(0, 300)}`); }
-    if (parsed.status !== 'ok') {
-      throw new Error(`rss2json status=${parsed.status}: ${parsed.message || '(no message)'}`);
-    }
-    // rss2json items are already parsed; normalize to the same shape
-    // parseRssItems produces (title/link/pubDate/description).
-    const items = (parsed.items || []).map((it) => ({
-      title: it.title,
-      link: it.link,
-      pubDate: it.pubDate, // "YYYY-MM-DD HH:MM:SS" — new Date() handles it
-      description: it.description || null,
-    }));
-    return { items, via: 'rss2json' };
+// fall back to free feed-proxy services, which fetch on our behalf from a
+// non-blocked IP and return already-parsed JSON (so we skip our XML parser).
+//
+// Fallback chain (each step only runs if the previous one failed):
+//   1. rss2json.com with the exact feed URL
+//   2. rss2json.com with a `_=<timestamp>` cache-buster. rss2json caches
+//      responses per URL, and a transient upstream failure gets cached as a
+//      persistent "Cannot download this RSS feed" error for that exact URL
+//      (this took the daily sync down on 2026-09-11 for the ?tag=ai feed).
+//      A fresh query string is a fresh cache key, so this bypasses the
+//      poisoned entry. Substack ignores the extra param.
+//   3. feed2json.org — an independent service, in case rss2json is down.
+//
+// Set SYNC_FORCE_PROXY=1 to skip the direct fetch and exercise the proxy
+// chain from a machine that isn't blocked (i.e. to test the Actions path).
+const FORCE_PROXY = process.env.SYNC_FORCE_PROXY === '1';
+
+function withCacheBuster(feedUrl) {
+  const u = new URL(feedUrl);
+  u.searchParams.set('_', String(Date.now()));
+  return u.toString();
+}
+
+async function fetchViaRss2json(feedUrl) {
+  const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`;
+  const body = await httpsGet(proxyUrl);
+  let parsed;
+  try { parsed = JSON.parse(body); }
+  catch (e) { throw new Error(`rss2json returned non-JSON: ${body.slice(0, 300)}`); }
+  if (parsed.status !== 'ok') {
+    throw new Error(`rss2json status=${parsed.status}: ${parsed.message || '(no message)'}`);
   }
+  // rss2json items are already parsed; normalize to the same shape
+  // parseRssItems produces (title/link/pubDate/description).
+  return (parsed.items || []).map((it) => ({
+    title: it.title,
+    link: it.link,
+    pubDate: it.pubDate, // "YYYY-MM-DD HH:MM:SS" — new Date() handles it
+    description: it.description || null,
+  }));
+}
+
+async function fetchViaFeed2json(feedUrl) {
+  const proxyUrl = `https://feed2json.org/convert?url=${encodeURIComponent(feedUrl)}`;
+  const body = await httpsGet(proxyUrl);
+  let parsed;
+  try { parsed = JSON.parse(body); }
+  catch (e) { throw new Error(`feed2json returned non-JSON: ${body.slice(0, 300)}`); }
+  if (!Array.isArray(parsed.items)) {
+    throw new Error(`feed2json returned no items array: ${body.slice(0, 300)}`);
+  }
+  // JSON Feed format: url/title/date_published/summary.
+  return parsed.items.map((it) => ({
+    title: it.title,
+    link: it.url,
+    pubDate: it.date_published, // ISO 8601
+    description: it.summary || it.content_html || null,
+  }));
+}
+
+async function fetchFeedItems(feedUrl) {
+  if (!FORCE_PROXY) {
+    try {
+      const xml = await httpsGet(feedUrl);
+      return { items: parseRssItems(xml), via: 'direct' };
+    } catch (err) {
+      if (!/HTTP 403/.test(err.message)) throw err;
+      console.log(`  Direct fetch 403'd (Cloudflare); falling back to feed proxies`);
+    }
+  } else {
+    console.log(`  SYNC_FORCE_PROXY set; skipping direct fetch`);
+  }
+
+  const attempts = [
+    { via: 'rss2json',             run: () => fetchViaRss2json(feedUrl) },
+    { via: 'rss2json+cachebuster', run: () => fetchViaRss2json(withCacheBuster(feedUrl)) },
+    { via: 'feed2json',            run: () => fetchViaFeed2json(feedUrl) },
+  ];
+  const errors = [];
+  for (const attempt of attempts) {
+    try {
+      const items = await attempt.run();
+      return { items, via: attempt.via };
+    } catch (err) {
+      console.log(`  ${attempt.via} failed: ${err.message.split('\n')[0]}`);
+      errors.push(`${attempt.via}: ${err.message.split('\n')[0]}`);
+    }
+  }
+  throw new Error(`All feed proxies failed for ${feedUrl}\n  ${errors.join('\n  ')}`);
 }
 
 // ── Fetch posts from RSS feeds ───────────────────────────────────────────────
@@ -266,7 +330,16 @@ async function insertNewPosts(posts) {
 // ── Main ─────────────────────────────────────────────────────────────────────
 async function main() {
   const posts = await fetchPostsFromRss();
+  if (process.env.SYNC_DRY_RUN === '1') {
+    console.log('SYNC_DRY_RUN set; not writing to Supabase. Posts that would be synced:');
+    for (const p of posts) console.log(`  ${p.date}  [${p.category}]  ${p.title}`);
+    return;
+  }
   await insertNewPosts(posts);
 }
 
-main().catch(err => { console.error('ERROR:', err.message); process.exit(1); });
+if (require.main === module) {
+  main().catch(err => { console.error('ERROR:', err.message); process.exit(1); });
+}
+
+module.exports = { fetchFeedItems, fetchViaRss2json, fetchViaFeed2json, withCacheBuster, parseRssItems };

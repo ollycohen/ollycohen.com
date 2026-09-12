@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-09-11T11:33:07.724Z",
+  "generated_at": "2026-09-12T10:57:20.836Z",
   "username": "OllyCohen",
   "date_range": {
-    "start": "2025-09-11",
-    "end": "2026-09-11"
+    "start": "2025-09-12",
+    "end": "2026-09-12"
   },
   "repos_scanned": [
     "ollycohen/ollycohen.com",
@@ -24,13 +24,25 @@
     "apm-apps/apm-steam-web"
   ],
   "summary": {
-    "total_commits": 1021,
-    "total_additions": 210622,
-    "total_deletions": 47297,
+    "total_commits": 1018,
+    "total_additions": 210601,
+    "total_deletions": 47296,
     "active_days": 127,
     "longest_streak": 6
   },
   "daily": {
+    "2026-09-11": {
+      "commits": 1,
+      "additions": 99,
+      "deletions": 26,
+      "by_repo": {
+        "ollycohen.com": {
+          "commits": 1,
+          "additions": 99,
+          "deletions": 26
+        }
+      }
+    },
     "2026-09-09": {
       "commits": 4,
       "additions": 224,
@@ -1862,23 +1874,6 @@
         }
       }
     },
-    "2025-09-11": {
-      "commits": 4,
-      "additions": 120,
-      "deletions": 27,
-      "by_repo": {
-        "apm-steam-mobile": {
-          "commits": 3,
-          "additions": 63,
-          "deletions": 10
-        },
-        "apm-steam-api": {
-          "commits": 1,
-          "additions": 57,
-          "deletions": 17
-        }
-      }
-    },
     "2026-05-10": {
       "commits": 11,
       "additions": 989,
@@ -2263,9 +2258,9 @@
   },
   "by_repo": {
     "ollycohen.com": {
-      "commits": 69,
-      "additions": 17550,
-      "deletions": 4797
+      "commits": 70,
+      "additions": 17649,
+      "deletions": 4823
     },
     "andes-checklist": {
       "commits": 27,
@@ -2283,9 +2278,9 @@
       "deletions": 0
     },
     "apm-steam-mobile": {
-      "commits": 404,
-      "additions": 102125,
-      "deletions": 17466
+      "commits": 401,
+      "additions": 102062,
+      "deletions": 17456
     },
     "apm-steam-claude-config": {
       "commits": 113,
@@ -2293,9 +2288,9 @@
       "deletions": 1621
     },
     "apm-steam-api": {
-      "commits": 145,
-      "additions": 15733,
-      "deletions": 2820
+      "commits": 144,
+      "additions": 15676,
+      "deletions": 2803
     },
     "apm-steam-azure-functions": {
       "commits": 137,

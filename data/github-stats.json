@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-11-05T14:47:54.572Z",
+  "generated_at": "2026-11-06T14:25:33.002Z",
   "username": "OllyCohen",
   "date_range": {
-    "start": "2025-11-05",
-    "end": "2026-11-05"
+    "start": "2025-11-06",
+    "end": "2026-11-06"
   },
   "repos_scanned": [
     "ollycohen/ollycohen.com",
@@ -24,10 +24,10 @@
     "apm-apps/apm-steam-web"
   ],
   "summary": {
-    "total_commits": 950,
-    "total_additions": 193417,
-    "total_deletions": 32283,
-    "active_days": 103,
+    "total_commits": 947,
+    "total_additions": 193414,
+    "total_deletions": 32280,
+    "active_days": 102,
     "longest_streak": 6
   },
   "daily": {
@@ -1939,18 +1939,6 @@
           "deletions": 52
         }
       }
-    },
-    "2025-11-05": {
-      "commits": 3,
-      "additions": 3,
-      "deletions": 3,
-      "by_repo": {
-        "apm-steam-azure-functions": {
-          "commits": 3,
-          "additions": 3,
-          "deletions": 3
-        }
-      }
     }
   },
   "by_repo": {
@@ -1990,9 +1978,9 @@
       "deletions": 2751
     },
     "apm-steam-azure-functions": {
-      "commits": 118,
-      "additions": 18913,
-      "deletions": 1863
+      "commits": 115,
+      "additions": 18910,
+      "deletions": 1860
     },
     "apm-steam-web": {
       "commits": 111,

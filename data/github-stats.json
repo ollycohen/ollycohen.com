@@ -1,15 +1,14 @@
 {
-  "generated_at": "2026-11-16T16:06:09.161Z",
+  "generated_at": "2026-11-17T16:15:11.135Z",
   "username": "OllyCohen",
   "date_range": {
-    "start": "2025-11-16",
-    "end": "2026-11-16"
+    "start": "2025-11-17",
+    "end": "2026-11-17"
   },
   "repos_scanned": [
     "ollycohen/ollycohen.com",
     "ollycohen/andes-checklist",
     "ollycohen/olly-claude-config",
-    "ollycohen/bigAltaTrainingPlan",
     "apm-apps/apm-steam-mobile",
     "apm-apps/apm-steam-claude-config",
     "apm-apps/apm-steam-api",
@@ -24,10 +23,10 @@
     "apm-apps/apm-steam-web"
   ],
   "summary": {
-    "total_commits": 926,
-    "total_additions": 192211,
+    "total_commits": 925,
+    "total_additions": 189714,
     "total_deletions": 31955,
-    "active_days": 98,
+    "active_days": 97,
     "longest_streak": 6
   },
   "daily": {
@@ -471,18 +470,6 @@
           "commits": 9,
           "additions": 239,
           "deletions": 209
-        }
-      }
-    },
-    "2025-11-16": {
-      "commits": 1,
-      "additions": 2497,
-      "deletions": 0,
-      "by_repo": {
-        "bigAltaTrainingPlan": {
-          "commits": 1,
-          "additions": 2497,
-          "deletions": 0
         }
       }
     },
@@ -1892,11 +1879,6 @@
     "olly-claude-config": {
       "commits": 2,
       "additions": 59,
-      "deletions": 0
-    },
-    "bigAltaTrainingPlan": {
-      "commits": 1,
-      "additions": 2497,
       "deletions": 0
     },
     "apm-steam-mobile": {
